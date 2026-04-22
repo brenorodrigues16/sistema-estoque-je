@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papeloes Estoque - dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-box-open"></i> PAPELÕES ESTOQUE
+            </div>
+            <nav>
+    <ul>
+        <li class="menu-item" onclick="window.location.href='index.html'">
+            <i class="fas fa-th-large"></i> Dashboard
+        </li>
+        <li class="menu-item" onclick="window.location.href='chapas.html'">
+            <i class="fas fa-layer-group"></i> Chapas
+        </li>
+        <li class="menu-item" onclick="window.location.href='caixas.html'">
+            <i class="fas fa-boxes"></i> Caixas Prontas
+        </li>
+        <li class="menu-item" onclick="window.location.href='producao.html'">
+            <i class="fas fa-industry"></i> Produção
+        </li>
+        <li class="menu-item" onclick="window.location.href='movimentacoes.html'">
+            <i class="fas fa-exchange-alt"></i> Movimentações
+        </li>
+    </ul>
+           </nav>
+            
+            <div class="user-info">
+                <div class="avatar">U</div>
+                <div>
+                    <p class="username">Usuário</p>
+                    <p class="role">Administrador</p>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="top-bar">
+                <span>DASHBOARD</span>
+                <span class="date-now">22/04/2026</span>
+            </header>
+
+            <section class="cards-grid">
+                <div class="card blue" onclick="window.location.href='caixas.html'" style="cursor:pointer;">
+                     <i class="fas fa-box"></i>
+                        <div class="card-info">
+                       <h3>1.250</h3>
+                     <p>CAIXAS EM ESTOQUE</p>
+                   </div>
+                </div>
+                <div class="card blue">
+                    <i class="fas fa-box"></i>
+                    <div class="card-info">
+                        <h3>1.250 unidades</h3>
+                        <p>CAIXAS PRONTAS</p>
+                    </div>
+                </div>
+                <div class="card green">
+                    <i class="fas fa-layer-group"></i>
+                    <div class="card-info">
+                        <h3>800 unidades</h3>
+                        <p>CHAPAS EM ESTOQUE</p>
+                    </div>
+                </div>
+                <div class="card orange">
+                    <i class="fas fa-industry"></i>
+                    <div class="card-info">
+                        <h3>120 unidades</h3>
+                        <p>PRODUZIDAS HOJE</p>
+                    </div>
+                </div>
+                <div class="card red">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="card-info">
+                        <h3>2 itens</h3>
+                        <p>ESTOQUE BAIXO</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="tables-grid">
+                <div class="table-container">
+                    <h4>CHAPAS EM ESTOQUE</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>TIPO DE CHAPA</th>
+                                <th>COMPRIMENTO</th>
+                                <th>LARGURA</th>
+                                <th>QTD</th>
+                                <th>AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Chapa A</td><td>2750 mm</td><td>1850 mm</td><td>320 un</td><td class="actions"><button>+</button><button>-</button></td></tr>
+                            <tr><td>Chapa B</td><td>2750 mm</td><td>1850 mm</td><td>180 un</td><td class="actions"><button>+</button><button>-</button></td></tr>
+                        </tbody>
+                    </table>
+                    <a href="#" class="view-all">VER TODAS</a>
+                </div>
+
+                <div class="table-container">
+                    <h4>CAIXAS PRONTAS</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>CÓDIGO</th>
+                                <th>MEDIDAS</th>
+                                <th>QTD</th>
+                                <th>AÇÕES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>CX001</td><td>600x400x400</td><td>350 un</td><td><i class="fas fa-edit"></i></td></tr>
+                            <tr><td>CX002</td><td>500x350x300</td><td>250 un</td><td><i class="fas fa-edit"></i></td></tr>
+                        </tbody>
+                    </table>
+                    <a href="#" class="view-all">VER TODAS</a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+    window.onload = async () => {
+        const resp = await fetch('http://localhost:3000/dados');
+        const dados = await resp.json();
+
+        // Soma o total de caixas e chapas
+        const totalCaixas = dados.caixas.reduce((acc, c) => acc + parseInt(c.qtd), 0);
+        const totalChapas = dados.chapas.reduce((acc, c) => acc + parseInt(c.qtd), 0);
+
+        // Atualiza os valores nos IDs que criamos antes
+        document.querySelector('.card.blue h3').innerText = totalCaixas;
+        document.querySelector('.card.green h3').innerText = totalChapas;
+    };
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papelões Estoque - Caixas Prontas</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-box-open"></i> PAPELÕES ESTOQUE
+            </div>
+            <nav>
+    <ul>
+        <li class="menu-item" onclick="window.location.href='index.html'">
+            <i class="fas fa-th-large"></i> Dashboard
+        </li>
+        <li class="menu-item" onclick="window.location.href='chapas.html'">
+            <i class="fas fa-layer-group"></i> Chapas
+        </li>
+        <li class="menu-item" onclick="window.location.href='caixas.html'">
+            <i class="fas fa-boxes"></i> Caixas Prontas
+        </li>
+        <li class="menu-item" onclick="window.location.href='producao.html'">
+            <i class="fas fa-industry"></i> Produção
+        </li>
+        <li class="menu-item" onclick="window.location.href='movimentacoes.html'">
+            <i class="fas fa-exchange-alt"></i> Movimentações
+        </li>
+    </ul>
+            </nav>
+            <div class="user-info">
+                <div class="avatar">U</div>
+                <div>
+                    <p class="username">Usuário</p>
+                    <p class="role">Administrador</p>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="top-bar">
+                <span>GERENCIAMENTO DE CAIXAS PRONTAS</span>
+                <span class="date-now">27/05/2025</span>
+            </header>
+
+            <section class="filters">
+                <input type="text" placeholder="Buscar por código (Ex: CX001)..." style="flex: 2;">
+                <select>
+                    <option>Todas as Categorias</option>
+                    <option>Onda B</option>
+                    <option>Onda BC</option>
+                </select>
+                <button class="btn-add" style="background-color: var(--accent-green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-plus"></i> Adicionar Novo
+                </button>
+            </section>
+
+            <div class="table-container">
+                <h4 style="margin-bottom: 15px; color: var(--sidebar-color);">CONTROLE DE CAIXAS PRONTAS</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>CÓDIGO DA CAIXA</th>
+                            <th>MEDIDAS</th>
+                            <th>QUANTIDADE</th>
+                            <th>DATA DE FABRICAÇÃO</th>
+                            <th>AÇÕES / ATUALIZAR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>CX001</strong></td>
+                            <td>600 x 400 x 400</td>
+                            <td>350 un</td>
+                            <td>27/05/2025</td>
+                            <td class="actions">
+                                <button title="Aumentar">+</button>
+                                <button title="Diminuir">-</button>
+                                <button title="Editar"><i class="fas fa-edit"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>CX002</strong></td>
+                            <td>500 x 350 x 300</td>
+                            <td>250 un</td>
+                            <td>26/05/2025</td>
+                            <td class="actions">
+                                <button>+</button>
+                                <button>-</button>
+                                <button><i class="fas fa-edit"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+<script>
+    async function carregarCaixas() {
+        const resp = await fetch('http://localhost:3000/dados');
+        const dados = await resp.json();
+        const tabela = document.querySelector('tbody');
+        tabela.innerHTML = dados.caixas.map(caixa => `
+            <tr>
+                <td><strong>${caixa.codigo}</strong></td>
+                <td>${caixa.medida}</td>
+                <td>${caixa.qtd} un</td>
+                <td>22/04/2026</td>
+                <td class="actions">
+                    <button>+</button><button>-</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    document.querySelector('.btn-add').addEventListener('click', async () => {
+        const codigo = prompt("Código da Caixa (ex: CX-SHOP):");
+        const medida = prompt("Medida (ex: 20x20x10):");
+        const qtd = prompt("Quantidade em estoque:");
+
+        if (codigo && medida && qtd) {
+            await fetch('http://localhost:3000/add-caixa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ codigo, medida, qtd })
+            });
+            carregarCaixas();
+        }
+    });
+
+    window.onload = carregarCaixas;
+</script>
+
+</body>
+</html>

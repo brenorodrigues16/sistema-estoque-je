@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papelões Estoque - Controle de Chapas</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-box-open"></i> PAPELÕES ESTOQUE
+            </div>
+            <nav>
+    <ul>
+        <li class="menu-item" onclick="window.location.href='index.html'">
+            <i class="fas fa-th-large"></i> Dashboard
+        </li>
+        <li class="menu-item" onclick="window.location.href='chapas.html'">
+            <i class="fas fa-layer-group"></i> Chapas
+        </li>
+        <li class="menu-item" onclick="window.location.href='caixas.html'">
+            <i class="fas fa-boxes"></i> Caixas Prontas
+        </li>
+        <li class="menu-item" onclick="window.location.href='producao.html'">
+            <i class="fas fa-industry"></i> Produção
+        </li>
+        <li class="menu-item" onclick="window.location.href='movimentacoes.html'">
+            <i class="fas fa-exchange-alt"></i> Movimentações
+        </li>
+    </ul>
+            </nav>
+            <div class="user-info">
+                <div class="avatar">U</div>
+                <div>
+                    <p class="username">Usuário</p>
+                    <p class="role">Administrador</p>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="top-bar">
+                <span>CONTROLE DE MATÉRIA-PRIMA (CHAPAS)</span>
+                <span class="date-now">27/05/2025</span>
+            </header>
+
+            <section class="filters">
+                <input type="text" placeholder="Buscar tipo de chapa..." style="flex: 2;">
+                <select>
+                    <option>Todas as Ondas</option>
+                    <option>Onda Simples</option>
+                    <option>Onda Dupla</option>
+                </select>
+                <button class="btn-add" style="background-color: var(--accent-blue); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-plus"></i> Nova Chapa
+                </button>
+            </section>
+
+            <div class="table-container">
+                <h4 style="margin-bottom: 15px; color: var(--sidebar-color);">ESTOQUE DE CHAPAS</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>TIPO DE CHAPA</th>
+                            <th>COMPRIMENTO</th>
+                            <th>LARGURA</th>
+                            <th>QUANTIDADE</th>
+                            <th>AÇÕES (ENTRADA / SAÍDA)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Chapa Onda B</strong></td>
+                            <td>2750 mm</td>
+                            <td>1850 mm</td>
+                            <td>320 un</td>
+                            <td class="actions">
+                                <button style="background-color: #27ae60; color: white;" title="Adicionar ao Estoque">Adicionar</button>
+                                <button style="background-color: #e67e22; color: white;" title="Registrar Uso">Usar</button>
+                                <button title="Editar"><i class="fas fa-edit"></i></button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Chapa Onda BC</strong></td>
+                            <td>3000 mm</td>
+                            <td>2000 mm</td>
+                            <td>150 un</td>
+                            <td class="actions">
+                                <button style="background-color: #27ae60; color: white;">Adicionar</button>
+                                <button style="background-color: #e67e22; color: white;">Usar</button>
+                                <button title="Editar"><i class="fas fa-edit"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+   <script>
+    async function ajustarEstoque(tipo, valor) {
+    // Aqui estamos simulando um ajuste rápido no banco
+    const confirmacao = confirm(`Deseja ajustar o estoque de ${tipo} em ${valor} unidades?`);
+    if (confirmacao) {
+        // Você pode criar uma rota no server.js depois para isso, 
+        // por enquanto vamos apenas avisar que o clique funcionou
+        alert("Função de ajuste rápido clicada! Em breve faremos a rota no back-end.");
+    }
+}
+    async function carregarChapas() {
+        const resp = await fetch('http://localhost:3000/dados');
+        const dados = await resp.json();
+        const tabela = document.querySelector('tbody');
+        tabela.innerHTML = dados.chapas.map(chapa => `
+            <tr>
+                <td><strong>${chapa.tipo.toUpperCase()}</strong></td>
+                <td>${chapa.comp} mm</td>
+                <td>${chapa.larg} mm</td>
+                <td>${chapa.qtd} un</td>
+                <td class="actions">
+                    <button onclick="ajustarEstoque('${chapa.tipo}', 10)" style="background:#27ae60; color:white;">+10</button>
+                    <button onclick="ajustarEstoque('${chapa.tipo}', -10)" style="background:#e67e22; color:white;">-10</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Função do botão "Nova Chapa"
+    document.querySelector('.btn-add').addEventListener('click', async () => {
+        const tipo = prompt("Tipo da Chapa (ex: Onda C):");
+        const comp = prompt("Comprimento (mm):");
+        const larg = prompt("Largura (mm):");
+        const qtd = prompt("Quantidade inicial:");
+
+        if (tipo && comp && larg && qtd) {
+            await fetch('http://localhost:3000/add-chapa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tipo, comp, larg, qtd })
+            });
+            carregarChapas();
+        }
+    });
+
+    window.onload = carregarChapas;
+</script>
+
+</body>
+</html>

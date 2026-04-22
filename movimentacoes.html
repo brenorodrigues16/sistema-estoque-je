@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Estoque - Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="logo"><i class="fas fa-box-open"></i> PAPELÕES ESTOQUE</div>
+            <nav>
+    <ul>
+        <li class="menu-item" onclick="window.location.href='index.html'">
+            <i class="fas fa-th-large"></i> Dashboard
+        </li>
+        <li class="menu-item" onclick="window.location.href='chapas.html'">
+            <i class="fas fa-layer-group"></i> Chapas
+        </li>
+        <li class="menu-item" onclick="window.location.href='caixas.html'">
+            <i class="fas fa-boxes"></i> Caixas Prontas
+        </li>
+        <li class="menu-item" onclick="window.location.href='producao.html'">
+            <i class="fas fa-industry"></i> Produção
+        </li>
+        <li class="menu-item" onclick="window.location.href='movimentacoes.html'">
+            <i class="fas fa-exchange-alt"></i> Movimentações
+        </li>
+    </ul>
+            </nav>
+        </aside>
+
+        <main class="content">
+            <header class="top-bar">
+                <span>VISÃO GERAL DO SISTEMA</span>
+                <strong id="data-atual" style="color: #4a90e2;"></strong>
+            </header>
+
+            <section class="cards-grid">
+                <div class="card blue"><i class="fas fa-box"></i><div class="card-info"><h3>1.250</h3><p>ESTOQUE ATUAL</p></div></div>
+                <div class="card green"><i class="fas fa-check-circle"></i><div class="card-info"><h3>98%</h3><p>EFICIÊNCIA</p></div></div>
+                <div class="card orange"><i class="fas fa-clock"></i><div class="card-info"><h3>12h</h3><p>ÚLTIMA ATUALIZ.</p></div></div>
+                <div class="card red"><i class="fas fa-exclamation-circle"></i><div class="card-info"><h3>Crítico</h3><p>NÍVEL CHAPA B</p></div></div>
+            </section>
+
+            <section class="stats-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="chart-placeholder" style="background: white; padding: 20px; border-radius: 8px;">
+                    <h4><i class="fas fa-chart-line"></i> Produção Semanal</h4>
+                    <div style="margin: 15px 0;">
+                        <p>Onda B: 85%</p>
+                        <div style="background:#eee; height:10px; border-radius:5px;"><div style="width:85%; background:#4a90e2; height:100%; border-radius:5px;"></div></div>
+                    </div>
+                </div>
+                <div class="chart-placeholder" style="background: white; padding: 20px; border-radius: 8px;">
+                    <h4><i class="fas fa-bell"></i> Avisos Rápidos</h4>
+                    <p>• Reposição de Chapa B necessária.</p>
+                    <p>• Manutenção sábado.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Data Automática
+        const data = new Date();
+        const opcoes = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('data-atual').innerText = data.toLocaleDateString('pt-BR', opcoes);
+    </script>
+
+    <script>
+    window.onload = async () => {
+        try {
+            const resp = await fetch('http://localhost:3000/dados');
+            const dados = await resp.json();
+            const tabelaCorpo = document.querySelector('tbody');
+            
+            tabelaCorpo.innerHTML = "";
+
+            // Inverte a ordem para que a movimentação mais recente apareça primeiro
+            dados.movimentacoes.reverse().forEach(mov => {
+                const classeTipo = mov.tipo.includes("Entrada") ? "badge-entrada" : "badge-saida";
+                const linha = `
+                    <tr>
+                        <td>${mov.data}</td>
+                        <td>${mov.produto}</td>
+                        <td><span class="badge ${classeTipo}">${mov.tipo}</span></td>
+                        <td>${mov.qtd} un</td>
+                        <td><strong>Verificar</strong></td>
+                    </tr>`;
+                tabelaCorpo.innerHTML += linha;
+            });
+        } catch (erro) {
+            console.error("Erro ao buscar movimentações:", erro);
+        }
+    };
+</script>
+</body>
+</html>
