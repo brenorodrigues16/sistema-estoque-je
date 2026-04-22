@@ -49,7 +49,7 @@
             </header>
 
             <section class="filters">
-                <input type="text" placeholder="Buscar por código (Ex: CX001)..." style="flex: 2;">
+                <input type="text" placeholder="Buscar por código (Ex: CX001)..." style="flex: 2;" id="input-busca">
                 <select>
                     <option>Todas as Categorias</option>
                     <option>Onda B</option>
@@ -102,6 +102,35 @@
     </div>
 
 <script>
+const inputBusca = document.getElementById('input-busca');
+
+inputBusca.addEventListener('input', async () => {
+    const termo = inputBusca.value;
+    
+    // Se o campo estiver vazio, carrega tudo de novo
+    if (termo.length === 0) {
+        carregarCaixas(); 
+        return;
+    }
+
+    // Busca no servidor apenas o que combina com o termo
+    const resp = await fetch(`http://localhost:3000/buscar-caixas?termo=${termo}`);
+    const resultados = await resp.json();
+    
+    const tabela = document.querySelector('tbody');
+    tabela.innerHTML = resultados.map(caixa => `
+        <tr>
+            <td><strong>${caixa.codigo}</strong></td>
+            <td>${caixa.medida}</td>
+            <td>${caixa.qtd} un</td>
+            <td>22/04/2026</td>
+            <td class="actions">
+                <button>+</button><button>-</button>
+            </td>
+        </tr>
+    `).join('');
+});
+
     async function carregarCaixas() {
         const resp = await fetch('http://localhost:3000/dados');
         const dados = await resp.json();

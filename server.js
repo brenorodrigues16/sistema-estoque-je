@@ -95,6 +95,35 @@ app.post('/add-caixa', (req, res) => {
         });
 });
 
+// ROTA PARA BUSCAR CAIXAS ESPECÍFICAS
+app.get('/buscar-caixas', (req, res) => {
+    const termo = req.query.termo;
+    const query = `SELECT * FROM caixas WHERE codigo LIKE ? OR medida LIKE ?`;
+    
+    db.all(query, [`%${termo}%`, `%${termo}%`], (err, rows) => {
+        if (err) return res.status(500).send(err);
+        res.json(rows);
+    });
+});
+
+// ROTA PARA EXCLUIR CHAPA
+app.delete('/excluir-chapa/:id', (req, res) => {
+    const id = req.params.id;
+    db.run(`DELETE FROM chapas WHERE id = ?`, [id], (err) => {
+        if (err) return res.status(500).json({ message: "Erro ao excluir." });
+        res.json({ message: "Chapa excluída com sucesso!" });
+    });
+});
+
+// ROTA PARA EXCLUIR CAIXA
+app.delete('/excluir-caixa/:id', (req, res) => {
+    const id = req.params.id;
+    db.run(`DELETE FROM caixas WHERE id = ?`, [id], (err) => {
+        if (err) return res.status(500).json({ message: "Erro ao excluir." });
+        res.json({ message: "Caixa excluída com sucesso!" });
+    });
+});
+
 app.listen(3000, () => {
     console.log("-----------------------------------------");
     console.log("SERVIDOR ATIVO EM: http://localhost:3000");

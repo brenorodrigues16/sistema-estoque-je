@@ -111,24 +111,39 @@
         alert("Função de ajuste rápido clicada! Em breve faremos a rota no back-end.");
     }
 }
-    async function carregarChapas() {
-        const resp = await fetch('http://localhost:3000/dados');
-        const dados = await resp.json();
-        const tabela = document.querySelector('tbody');
-        tabela.innerHTML = dados.chapas.map(chapa => `
+   async function carregarChapas() {
+    const resp = await fetch('http://localhost:3000/dados');
+    const dados = await resp.json();
+    const tabela = document.querySelector('tbody');
+    
+    tabela.innerHTML = dados.chapas.map(chapa => {
+        // Lógica do Alerta de Estoque Baixo (Ex: menos de 50 un)
+        const estoqueBaixo = chapa.qtd < 50 ? 'style="color: #e74c3c; font-weight: bold;"' : '';
+        const aviso = chapa.qtd < 50 ? ' <i class="fas fa-exclamation-triangle" title="Estoque Baixo!"></i>' : '';
+
+        return `
             <tr>
                 <td><strong>${chapa.tipo.toUpperCase()}</strong></td>
                 <td>${chapa.comp} mm</td>
                 <td>${chapa.larg} mm</td>
-                <td>${chapa.qtd} un</td>
+                <td ${estoqueBaixo}>${chapa.qtd} un${aviso}</td>
                 <td class="actions">
-                    <button onclick="ajustarEstoque('${chapa.tipo}', 10)" style="background:#27ae60; color:white;">+10</button>
-                    <button onclick="ajustarEstoque('${chapa.tipo}', -10)" style="background:#e67e22; color:white;">-10</button>
+                    <button onclick="excluirItem('chapa', ${chapa.id})" style="background:#c0392b; color:white;">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </td>
             </tr>
-        `).join('');
-    }
+        `;
+    }).join('');
+}
 
+// Função para excluir
+async function excluirItem(tipo, id) {
+    if (confirm(`Tem certeza que deseja excluir esta ${tipo}?`)) {
+        await fetch(`http://localhost:3000/excluir-${tipo}/${id}`, { method: 'DELETE' });
+        location.reload(); // Recarrega a página para atualizar a lista
+    }
+}
     // Função do botão "Nova Chapa"
     document.querySelector('.btn-add').addEventListener('click', async () => {
         const tipo = prompt("Tipo da Chapa (ex: Onda C):");
