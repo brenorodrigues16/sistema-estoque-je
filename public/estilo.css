@@ -10,7 +10,7 @@
 
 }
 
-/*Linhas e Colunas da Tabela*/
+/* Linhas e Colunas da Tabela */
 .table tr, .table td {
     border: 1px solid black;
     padding: 5px;

@@ -24,6 +24,14 @@
           "input[type=month]"
         ]
       }
+    ],
+    "compat-api/css": [
+      "default",
+      {
+        "ignore": [
+          "-webkit-overflow-scrolling"
+        ]
+      }
     ]
   }
 }

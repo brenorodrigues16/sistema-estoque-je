@@ -267,7 +267,6 @@ td {
 .table-container {
     width: 100%;
     overflow-x: auto; /* Cria barra de rolagem horizontal só na tabela se precisar */
-    -webkit-overflow-scrolling: touch;
 }
 
 /* Deixar os botões mais arredondados e elegantes */
