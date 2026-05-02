@@ -13,7 +13,7 @@
     <div class="main-container">
         <aside class="sidebar">
             <div class="logo">
-                <i class="fas fa-box-open"></i> PAPELÕES ESTOQUE
+                <i class="fas fa-box-open"></i> J&E Embalagens LTDA
             </div>
             <nav>
     <ul>
@@ -38,16 +38,14 @@
                 <div class="avatar">U</div>
                 <div>
                     <p class="username">Usuário</p>
-                    <p class="role">Administrador</p>
                 </div>
             </div>
         </aside>
 
         <main class="content">
-            <header class="top-bar">
-                <span>GERENCIAMENTO DE CAIXAS PRONTAS</span>
-                <span class="date-now">27/05/2025</span>
-            </header>
+        <header class="top-bar">
+            <span>ESTOQUE DE CAIXAS PRONTAS</span> <span class="date-now" id="data-atual"></span> 
+        </header>
 
             <section class="filters">
                 <input type="text" placeholder="Buscar por código (Ex: CX001)..." style="flex: 2;" id="input-busca">
@@ -55,9 +53,11 @@
                     <option>Todas as Categorias</option>
                     <option>Onda B</option>
                     <option>Onda BC</option>
+                    <option>Onda C</option>
+                    <option>Onda BB</option>
                 </select>
                 <button class="btn-add" style="background-color: var(--accent-green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                    <i class="fas fa-plus"></i> Adicionar Novo
+                    <i class="fas fa-plus"></i> Adicionar Nova Caixa
                 </button>
             </section>
 
@@ -116,7 +116,6 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// AQUI ESTÁ O SEGREDO: 
 // Esta linha diz ao Node que tudo o que for HTML, CSS e JS de tela está na pasta 'public'
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -125,7 +124,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ... (Suas outras rotas /dados, /produzir, etc, continuam iguais abaixo daqui)
+// ... (Outras rotas /dados, /produzir, etc, continuam iguais abaixo daqui)
 
 Swal.fire({
   title: 'Tem certeza?',
@@ -137,7 +136,7 @@ Swal.fire({
   confirmButtonText: 'Sim, excluir!'
 }).then((result) => {
   if (result.isConfirmed) {
-      // Aqui vai o seu código de fetch para excluir
+      // código de fetch para excluir
   }
 })
 
@@ -204,6 +203,28 @@ inputBusca.addEventListener('input', async () => {
     });
 
     window.onload = carregarCaixas;
+</script>
+
+<script>
+    function configurarData() {
+        const elementoData = document.getElementById('data-atual');
+        if (elementoData) {
+            const data = new Date();
+            const opcoes = { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            };
+            
+            // Gera: quinta-feira, 23 de abril de 2026
+            let dataFormatada = data.toLocaleDateString('pt-BR', opcoes);
+            elementoData.innerText = dataFormatada;
+        }
+    }
+
+    // Chama a função assim que a página terminar de carregar
+    window.addEventListener('load', configurarData);
 </script>
 
 </body>

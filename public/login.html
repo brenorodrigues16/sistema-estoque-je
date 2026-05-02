@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>J&E Embalagens LTDA - Acesso</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: sans-serif; background: #2c3e50; display: flex; height: 100vh; align-items: center; justify-content: center; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 12px; width: 350px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .toggle { margin-top: 15px; font-size: 0.85rem; color: #666; cursor: pointer; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="card" id="login-box">
+        <h2>J&E Embalagens LTDA</h2>
+        <form id="form-login">
+            <input type="text" id="user" placeholder="Usuário" required>
+            <input type="password" id="pass" placeholder="Senha" required>
+            <button type="submit">ENTRAR</button>
+        </form>
+        <div class="toggle" onclick="toggleForm()">Não tem usuario? Solicite acesso clicando aqui.</div>
+    </div>
+
+    <div class="card" id="register-box" style="display:none;">
+        <h2>Solicitar Acesso</h2>
+        <form id="form-register">
+            <input type="text" id="reg-nome" placeholder="Nome Completo" required>
+            <input type="text" id="reg-user" placeholder="Usuário desejado" required>
+            <input type="password" id="reg-pass" placeholder="Senha" required>
+            <button type="submit" style="background: #27ae60;">ENVIAR SOLICITAÇÃO DE ACESSO</button>
+        </form>
+        <div class="toggle" onclick="toggleForm()">Já tenho conta? Entrar</div>
+    </div>
+
+    <script>
+        function toggleForm() {
+            const login = document.getElementById('login-box');
+            const reg = document.getElementById('register-box');
+            login.style.display = login.style.display === 'none' ? 'block' : 'none';
+            reg.style.display = reg.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // LOGIN
+        document.getElementById('form-login').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resp = await fetch('/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ usuario: document.getElementById('user').value, senha: document.getElementById('pass').value })
+            });
+            const dados = await resp.json();
+            if (resp.ok) {
+                localStorage.setItem('logado', 'true');
+                localStorage.setItem('usuario', dados.nome);
+                localStorage.setItem('cargo', dados.cargo);
+                window.location.href = 'index.html';
+            } else {
+                Swal.fire('Erro', dados.message, 'error');
+            }
+        });
+
+        // REGISTRO
+        document.getElementById('form-register').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resp = await fetch('/registrar', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ 
+                    nome: document.getElementById('reg-nome').value, 
+                    usuario: document.getElementById('reg-user').value, 
+                    senha: document.getElementById('reg-pass').value 
+                })
+            });
+            const dados = await resp.json();
+            Swal.fire('Recebido', dados.message, resp.ok ? 'success' : 'error').then(() => { if(resp.ok) toggleForm(); });
+        });
+    </script>
+</body>
+</html>

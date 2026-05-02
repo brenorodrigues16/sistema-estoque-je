@@ -13,7 +13,7 @@
     <div class="main-container">
         <aside class="sidebar">
             <div class="logo">
-                <i class="fas fa-box-open"></i> PAPELÕES ESTOQUE
+                <i class="fas fa-box-open"></i> J&E Embalagens LTDA
             </div>
             <nav>
     <ul>
@@ -44,10 +44,9 @@
         </aside>
 
         <main class="content">
-            <header class="top-bar">
-                <span>CONTROLE DE MATÉRIA-PRIMA (CHAPAS)</span>
-                <span class="date-now">27/05/2025</span>
-            </header>
+        <header class="top-bar">
+            <span>ESTOQUE DE CHAPAS</span> <span class="date-now" id="data-atual"></span> 
+        </header>
 
             <section class="filters">
                 <input type="text" placeholder="Buscar tipo de chapa..." style="flex: 2;">
@@ -56,7 +55,7 @@
                     <option>Onda Simples</option>
                     <option>Onda Dupla</option>
                 </select>
-                <button class="btn-add" style="background-color: var(--accent-blue); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                <button class="btn-add" style="background-color: var(--accent-green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
                     <i class="fas fa-plus"></i> Nova Chapa
                 </button>
             </section>
@@ -202,6 +201,28 @@ async function excluirItem(tipo, id) {
     });
 
     window.onload = carregarChapas;
+</script>
+
+<script>
+    function configurarData() {
+        const elementoData = document.getElementById('data-atual');
+        if (elementoData) {
+            const data = new Date();
+            const opcoes = { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            };
+            
+            // Gera: quinta-feira, 23 de abril de 2026
+            let dataFormatada = data.toLocaleDateString('pt-BR', opcoes);
+            elementoData.innerText = dataFormatada;
+        }
+    }
+
+    // Chama a função assim que a página terminar de carregar
+    window.addEventListener('load', configurarData);
 </script>
 
 </body>

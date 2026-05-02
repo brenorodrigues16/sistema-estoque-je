@@ -32,6 +32,7 @@
           "-webkit-overflow-scrolling"
         ]
       }
-    ]
+    ],
+    "meta-viewport": "off"
   }
 }

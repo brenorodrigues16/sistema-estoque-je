@@ -281,3 +281,17 @@ button:hover {
     transform: translateY(-2px); /* Efeito de flutuar ao passar o mouse */
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
+
+.date-now {
+    color: #4a90e2 !important; /* Azul vibrante para destacar a data */
+    font-weight: 800 !important; /* Deixa a data em negrito para chamar mais atenção */
+    text-transform: lowercase; /* Deixa tudo em minúsculas para um visual mais moderno */
+    font-size: 1.1rem;
+}
+
+/* Ajuste para o conteúdo principal */
+.content {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding: 30px;
+}

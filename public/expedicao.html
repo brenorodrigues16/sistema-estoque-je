@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>J&E - Expedição (Conferência Paloma)</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .card-pedido { background: white; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #3498db; display: flex; justify-content: space-between; align-items: center; }
+        .btn-conferir { background: #f39c12; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <main class="content">
+            <header class="top-bar"><span>CONFERÊNCIA DE EXPEDIÇÃO - PALOMA</span></header>
+            
+            <div id="lista-pedidos">
+                </div>
+        </main>
+    </div>
+
+    <script>
+
+// TRAVA DE SEGURANÇA J&E
+if (localStorage.getItem('logado') !== 'true') {
+    window.location.href = 'login.html';
+}
+
+// Botão Sair (Coloque isso na função do seu botão de Sair)
+function logout() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+}
+
+        async function carregarPedidos() {
+            const resp = await fetch('http://localhost:3000/pedidos-pendentes');
+            const pedidos = await resp.json();
+            const container = document.getElementById('lista-pedidos');
+            
+            container.innerHTML = pedidos.map(p => `
+                <div class="card-pedido">
+                    <div>
+                        <strong>Cliente: ${p.cliente}</strong><br>
+                        <span>Onda: ${p.tipo_onda} | Medida: ${p.medida}</span><br>
+                        <span>Programado: ${p.qtd_programada} un</span>
+                    </div>
+                    <button class="btn-conferir" onclick="confirmarChegada(${p.id}, ${p.qtd_programada})">
+                        Conferir Quantidade
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function confirmarChegada(id, qtdOriginal) {
+            const { value: qtdReal } = await Swal.fire({
+                title: 'Conferência de Carga',
+                input: 'number',
+                inputLabel: `Quantidade real produzida (Programado: ${qtdOriginal})`,
+                inputValue: qtdOriginal,
+                showCancelButton: true
+            });
+
+            if (qtdReal) {
+                await fetch(`http://localhost:3000/conferir-pedido`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ id, qtdReal })
+                });
+                Swal.fire('Sucesso!', 'Pedido enviado ao estoque e Kauan notificado.', 'success');
+                carregarPedidos();
+            }
+        }
+        carregarPedidos();
+
+        // Verifica se o usuário está logado ao carregar a página
+if (localStorage.getItem('logado') !== 'true') {
+    window.location.href = 'login.html';
+}
+
+// Função para Sair do Sistema
+function logout() {
+    localStorage.clear();
+    window.location.href = 'login.html';
+}
+    </script>
+</body>
+</html>

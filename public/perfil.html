@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil - J&E</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="/public/styleperfil.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        label { display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #4d4d4d; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #32be45; color: rgb(255, 255, 255); border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="perfil-box">
+        <div class="usuario">
+            <span id="nome-usuario">
+        </div>
+        <h2>Minhas Configurações</h2>
+        <form id="form-perfil">
+            <div class="campo">
+                <label>E-mail de Recuperação</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="campo">
+                <label>Nova Senha</label>
+                <input type="password" id="senha" required>
+            </div>
+            <div class="campo">
+                <label>Tema</label>
+                <select id="tema">
+                    <option value="claro">Claro</option>
+                    <option value="escuro">Escuro</option>
+                </select>
+            </div>
+            <button type="submit">SALVAR ALTERAÇÕES</button>
+        </form>
+        <button onclick="window.location.href='index.html'" style="background:#354464; color:#FFFFFF; margin-top:10px;">Voltar</button>
+    </span>
+    </div>
+
+    <script>
+        document.getElementById('email').value = localStorage.getItem('usuarioEmail') || '';
+        document.getElementById('tema').value = localStorage.getItem('tema') || 'claro';
+
+        document.getElementById('form-perfil').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resp = await fetch('/atualizar-perfil', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    usuario: localStorage.getItem('usuarioID'),
+                    novoEmail: document.getElementById('email').value,
+                    novaSenha: document.getElementById('senha').value,
+                    novoTema: document.getElementById('tema').value
+                })
+            });
+            if(resp.ok) {
+                localStorage.setItem('tema', document.getElementById('tema').value);
+                Swal.fire('Pronto!', 'Dados atualizados!', 'success').then(() => window.location.href='index.html');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Papeloes Estoque - dashboard</title>
+    <title>Sistema Estoque - Dashboard</title>
     <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -12,28 +13,31 @@
     <div class="main-container">
         <aside class="sidebar">
             <div class="logo">
-                <i class="fas fa-box-open"></i> PAPELÕES ESTOQUE
+                <i class="fas fa-box-open"></i> J&E Embalagens LTDA
             </div>
             <nav>
-    <ul>
-        <li class="menu-item" onclick="window.location.href='index.html'">
-            <i class="fas fa-th-large"></i> Dashboard
-        </li>
-        <li class="menu-item" onclick="window.location.href='chapas.html'">
-            <i class="fas fa-layer-group"></i> Chapas
-        </li>
-        <li class="menu-item" onclick="window.location.href='caixas.html'">
-            <i class="fas fa-boxes"></i> Caixas Prontas
-        </li>
-        <li class="menu-item" onclick="window.location.href='producao.html'">
-            <i class="fas fa-industry"></i> Produção
-        </li>
-        <li class="menu-item" onclick="window.location.href='movimentacoes.html'">
-            <i class="fas fa-exchange-alt"></i> Movimentações
-        </li>
-    </ul>
-           </nav>
-            
+                <ul>
+                    <li class="menu-item active" onclick="window.location.href='index.html'">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='chapas.html'">
+                        <i class="fas fa-layer-group"></i> Chapas
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='caixas.html'">
+                        <i class="fas fa-boxes"></i> Caixas Prontas
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='producao.html'">
+                        <i class="fas fa-industry"></i> Produção
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='movimentacoes.html'">
+                        <i class="fas fa-exchange-alt"></i> Movimentações
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='perfil.html'">
+                        <i class="fas fa-user"></i> Perfil
+                    </li>
+                </ul>
+            </nav>
+
             <div class="user-info">
                 <div class="avatar">U</div>
                 <div>
@@ -45,157 +49,57 @@
 
         <main class="content">
             <header class="top-bar">
-                <span>DASHBOARD</span>
-                <span class="date-now">22/04/2026</span>
+                <span>DASHBOARD</span> 
+                <span class="date-now" id="data-atual"></span> 
             </header>
 
             <section class="cards-grid">
-                <div class="card blue" onclick="window.location.href='caixas.html'" style="cursor:pointer;">
-                     <i class="fas fa-box"></i>
-                        <div class="card-info">
-                       <h3>1.250</h3>
-                     <p>CAIXAS EM ESTOQUE</p>
-                   </div>
-                </div>
-                <div class="card blue">
-                    <i class="fas fa-box"></i>
-                    <div class="card-info">
-                        <h3>1.250 unidades</h3>
-                        <p>CAIXAS PRONTAS</p>
-                    </div>
-                </div>
-                <div class="card green">
-                    <i class="fas fa-layer-group"></i>
-                    <div class="card-info">
-                        <h3>800 unidades</h3>
-                        <p>CHAPAS EM ESTOQUE</p>
-                    </div>
-                </div>
-                <div class="card orange">
-                    <i class="fas fa-industry"></i>
-                    <div class="card-info">
-                        <h3>120 unidades</h3>
-                        <p>PRODUZIDAS HOJE</p>
-                    </div>
-                </div>
-                <div class="card red">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div class="card-info">
-                        <h3>2 itens</h3>
-                        <p>ESTOQUE BAIXO</p>
-                    </div>
-                </div>
+                <div class="card blue"><i class="fas fa-box"></i><div class="card-info"><h3>1.250</h3><p>ESTOQUE ATUAL.</p></div></div>
+                <div class="card orange"><i class="fas fa-clock"></i><div class="card-info"><h3>12h</h3><p>ÚLTIMA ATUALIZAÇÃO.</p></div></div>
             </section>
 
-            <section class="tables-grid">
-                <div class="table-container">
-                    <h4>CHAPAS EM ESTOQUE</h4>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>TIPO DE CHAPA</th>
-                                <th>COMPRIMENTO</th>
-                                <th>LARGURA</th>
-                                <th>QTD</th>
-                                <th>AÇÕES</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Chapa A</td><td>2750 mm</td><td>1850 mm</td><td>320 un</td><td class="actions"><button>+</button><button>-</button></td></tr>
-                            <tr><td>Chapa B</td><td>2750 mm</td><td>1850 mm</td><td>180 un</td><td class="actions"><button>+</button><button>-</button></td></tr>
-                        </tbody>
-                    </table>
-                    <a href="#" class="view-all">VER TODAS</a>
+            <section class="stats-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                <div class="chart-placeholder" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <h4 style="margin-bottom: 20px;"><i class="fas fa-chart-line"></i> Produção Semanal</h4>
+                    <div style="margin: 15px 0;">
+                        <p>Onda B: 85%</p>
+                        <div style="background:#eee; height:10px; border-radius:5px;"><div style="width:85%; background:#4a90e2; height:100%; border-radius:5px;"></div></div>
+                        <P>Onda C: 50%</P>
+                        <div style="background:#eee; height:10px; border-radius:5px;"><div style="width:50%; background:#4a90e2; height:100%; border-radius:5px;"></div></div>
+                    </div>
                 </div>
-
-                <div class="table-container">
-                    <h4>CAIXAS PRONTAS</h4>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>CÓDIGO</th>
-                                <th>MEDIDAS</th>
-                                <th>QTD</th>
-                                <th>AÇÕES</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>CX001</td><td>600x400x400</td><td>350 un</td><td><i class="fas fa-edit"></i></td></tr>
-                            <tr><td>CX002</td><td>500x350x300</td><td>250 un</td><td><i class="fas fa-edit"></i></td></tr>
-                        </tbody>
-                    </table>
-                    <a href="#" class="view-all">VER TODAS</a>
+                <div class="chart-placeholder" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <h4 style="margin-bottom: 20px;"><i class="fas fa-bell"></i> Avisos Rápidos</h4>
+                    <p style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">• Reposição de Chapa B necessária.</p>
                 </div>
             </section>
         </main>
     </div>
 
     <script>
+        // ALGORITMO DA DATA (Igual à foto: azul, negrito e por extenso)
+        function formatarData() {
+            const elementoData = document.getElementById('data-atual');
+            const data = new Date();
+            const opcoes = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            
+            // "quinta-feira, 23 de abril de 2026"
+            let dataFormatada = data.toLocaleDateString('pt-BR', opcoes);
+            elementoData.innerText = dataFormatada;
+        }
 
-        const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const path = require('path'); // Novo: para lidar com caminhos de pastas
-
-const app = express();
-
-// CONFIGURAÇÕES ESSENCIAIS
-app.use(cors());
-app.use(bodyParser.json());
-
-// AQUI ESTÁ O SEGREDO: 
-// Esta linha diz ao Node que tudo o que for HTML, CSS e JS de tela está na pasta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Rota para abrir o Dashboard automaticamente ao acessar http://localhost:3000
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// ... (Suas outras rotas /dados, /produzir, etc, continuam iguais abaixo daqui)
-
-Swal.fire({
-  title: 'Tem certeza?',
-  text: "Você não poderá reverter isso!",
-  icon: 'warning',
-  showCancelButton: true,
-  confirmButtonColor: '#c0392b',
-  cancelButtonColor: '#95a5a6',
-  confirmButtonText: 'Sim, excluir!'
-}).then((result) => {
-  if (result.isConfirmed) {
-      // Aqui vai o seu código de fetch para excluir
-  }
-})
-
-
-// Dentro do window.onload, após pegar os 'dados':
-const itensCriticos = dados.chapas.filter(c => c.qtd < 50).length;
-
-if (itensCriticos > 0) {
-    const alertaGeral = document.createElement('div');
-    alertaGeral.innerHTML = `
-        <div style="background: #ffeb3b; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #fbc02d; color: #856404;">
-            <i class="fas fa-exclamation-circle"></i> <strong>Atenção:</strong> Você tem ${itensCriticos} tipos de chapas com estoque baixo!
-        </div>
-    `;
-    document.querySelector('.content').prepend(alertaGeral); // Coloca o aviso no topo
-}
-
-    window.onload = async () => {
-        const resp = await fetch('http://localhost:3000/dados');
-        const dados = await resp.json();
-
-        // Soma o total de caixas e chapas
-        const totalCaixas = dados.caixas.reduce((acc, c) => acc + parseInt(c.qtd), 0);
-        const totalChapas = dados.chapas.reduce((acc, c) => acc + parseInt(c.qtd), 0);
-
-        // Atualiza os valores nos IDs que criamos antes
-        document.querySelector('.card.blue h3').innerText = totalCaixas;
-        document.querySelector('.card.green h3').innerText = totalChapas;
-    };
+        // Carregamento de dados do Banco
+        window.onload = async () => {
+            formatarData();
+            
+            try {
+                const resp = await fetch('http://localhost:3000/dados');
+                const dados = await resp.json();
+                // Aqui você pode preencher os cards com dados reais se quiser
+            } catch (erro) {
+                console.error("Erro ao buscar dados:", erro);
+            }
+        };
     </script>
-    
 </body>
 </html>

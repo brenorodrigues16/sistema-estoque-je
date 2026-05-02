@@ -31,7 +31,7 @@
 
     <div class="main-container">
         <aside class="sidebar">
-            <div class="logo"><i class="fas fa-box-open"></i> PAPELÕES ESTOQUE</div>
+            <div class="logo"><i class="fas fa-box-open"></i> J&E Embalagens LTDA</div>
             <nav>
                 <ul>
                     <li class="menu-item" onclick="window.location.href='index.html'">
@@ -51,13 +51,21 @@
                     </li>
                 </ul>
             </nav>
+        
+            <div class="user-info">
+                <div class="avatar">U</div>
+                <div>
+                    <p class="username">Usuário</p>
+                    <p class="role">Administrador</p>
+                </div>
+            </div>
         </aside>
 
         <main class="content">
-            <header class="top-bar">
-                <span>CENTRAL DE PRODUÇÃO</span>
-                <strong style="color: #4a90e2;">22/04/2026</strong>
-            </header>
+        <header class="top-bar">
+            <span>CENTRAL DE PRODUÇAO</span> <span class="date-now" id="data-atual"></span> 
+        </header>
+
 
             <div class="producao-container">
                 <section class="form-card">
@@ -111,6 +119,14 @@
     </div>
 
     <script>
+        // Data Automática
+        const data = new Date();
+        const opcoes = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('data-atual').innerText = data.toLocaleDateString('pt-BR', opcoes);
+    </script>
+
+
+    <script>
         document.getElementById('form-producao').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -118,7 +134,7 @@
             const medidaCaixa = document.getElementById('medida-caixa').value;
             const quantidade = document.getElementById('quantidade').value;
 
-            // 1. AVISO DE CONFIRMAÇÃO (O QUE VOCÊ PEDIU)
+            // 1. AVISO DE CONFIRMAÇÃO 
             const confirmacao = await Swal.fire({
                 title: 'Confirmar Produção?',
                 html: `Você está prestes a produzir:<br><b>${quantidade} caixas</b> na medida <b>${medidaCaixa}</b><br>usando chapa <b>${tipoChapa}</b>.`,
@@ -169,6 +185,28 @@
             }
         });
     </script>
+
+    <script>
+    function configurarData() {
+        const elementoData = document.getElementById('data-atual');
+        if (elementoData) {
+            const data = new Date();
+            const opcoes = { 
+                weekday: 'long', 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            };
+            
+            // Gera: quinta-feira, 23 de abril de 2026
+            let dataFormatada = data.toLocaleDateString('pt-BR', opcoes);
+            elementoData.innerText = dataFormatada;
+        }
+    }
+
+    // Chama a função assim que a página terminar de carregar
+    window.addEventListener('load', configurarData);
+</script>
 
 </body>
 </html>

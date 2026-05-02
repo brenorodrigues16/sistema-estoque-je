@@ -1,0 +1,6 @@
+<script>
+        // Data Automática
+        const data = new Date();
+        const opcoes = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('data-atual').innerText = data.toLocaleDateString('pt-BR', opcoes);
+    </script>
