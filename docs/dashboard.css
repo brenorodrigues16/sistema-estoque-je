@@ -295,3 +295,21 @@ button:hover {
     min-height: 100vh;
     padding: 30px;
 }
+
+/* Ajustes para Celular (Responsividade) */
+@media (max-width: 768px) {
+    .main-container { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; padding: 10px; }
+    .producao-container { grid-template-columns: 1fr; }
+    .table-container { overflow-x: auto; }
+    th, td { padding: 8px; font-size: 12px; }
+}
+
+/* Modo Escuro (Acionado pelo Tema) */
+[data-theme='dark'] {
+    --bg-color: #1a1d23;
+    --card-bg: #2c313c;
+    --text-color: #ffffff;
+}
+[data-theme='dark'] body { background-color: var(--bg-color); color: var(--text-color); }
+[data-theme='dark'] .form-card, [data-theme='dark'] .table-container { background: var(--card-bg); color: white; }
