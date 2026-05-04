@@ -67,7 +67,7 @@ function logout() {
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ id, qtdReal })
                 });
-                Swal.fire('Sucesso!', 'Pedido enviado ao estoque e Kauan notificado.', 'success');
+                Swal.fire('Sucesso!', 'Pedido enviado ao estoque e notificado.', 'success');
                 carregarPedidos();
             }
         }

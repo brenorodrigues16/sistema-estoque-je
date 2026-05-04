@@ -43,3 +43,13 @@ app.get('/dados', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor J&E rodando na porta ${PORT}`));
+
+const path = require('path');
+
+// Esta linha diz ao servidor onde estão seus arquivos HTML (assumindo que estão na pasta raiz ou 'public')
+app.use(express.static(__dirname)); 
+
+// Esta linha faz o link abrir o index.html automaticamente
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});

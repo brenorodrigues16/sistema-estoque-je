@@ -151,7 +151,7 @@ Swal.fire({
     }
 }
    async function carregarChapas() {
-    const resp = await fetch('http://localhost:3000/dados');
+    const resp = await fetch('[https://sistema-estoque-je.onrender.com/dados](https://sistema-estoque-je.onrender.com/dados)');
     const dados = await resp.json();
     const tabela = document.querySelector('tbody');
     
