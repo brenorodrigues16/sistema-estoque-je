@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Produção - J&E Embalagens</title>
-    <link rel="stylesheet" href="dashboard.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../dashboard.css"> <!-- O '../' busca o CSS que está fora da pasta -->
 </head>
 <body>
     <div class="main-container">
@@ -20,24 +19,21 @@
         </aside>
 
         <main class="content">
-            <header>
-                <h1>Registrar Produção Diária</h1>
-            </header>
-
+            <header><h1>Registrar Produção Diária</h1></header>
             <section class="form-container">
                 <div class="form-card">
                     <form id="formProducao">
                         <div class="input-group">
-                            <label for="tipoChapa">Tipo de Chapa Utilizada</label>
-                            <input type="text" id="tipoChapa" placeholder="Ex: Onda B" required>
+                            <label for="tipoChapa">Tipo de Chapa</label>
+                            <input type="text" id="tipoChapa" required>
                         </div>
                         <div class="input-group">
-                            <label for="medidaCaixa">Medida da Caixa Produzida</label>
-                            <input type="text" id="medidaCaixa" placeholder="Ex: 20x15x10" required>
+                            <label for="medidaCaixa">Medida da Caixa</label>
+                            <input type="text" id="medidaCaixa" required>
                         </div>
                         <div class="input-group">
-                            <label for="quantidade">Quantidade Produzida</label>
-                            <input type="number" id="quantidade" placeholder="0" required>
+                            <label for="quantidade">Quantidade</label>
+                            <input type="number" id="quantidade" required>
                         </div>
                         <button type="submit" class="btn-primary">Finalizar Produção</button>
                     </form>
@@ -49,7 +45,6 @@
     <script>
         document.getElementById('formProducao').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const dados = {
                 tipoChapa: document.getElementById('tipoChapa').value,
                 medidaCaixa: document.getElementById('medidaCaixa').value,
@@ -57,7 +52,7 @@
             };
 
             try {
-                // ATUALIZADO: Usando o link do Render para registrar a produção
+                // Link do seu Render atualizado
                 const response = await fetch('https://sistema-estoque-je.onrender.com/produzir', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -65,14 +60,11 @@
                 });
 
                 if (response.ok) {
-                    alert('Produção registrada! O estoque de chapas foi atualizado.');
+                    alert('Sucesso! Estoque atualizado no Render.');
                     e.target.reset();
-                } else {
-                    alert('Erro ao registrar produção. Verifique os dados.');
                 }
             } catch (error) {
-                console.error('Erro:', error);
-                alert('Servidor fora do ar ou erro de conexão.');
+                alert('Erro na conexão com o servidor do Render.');
             }
         });
     </script>
