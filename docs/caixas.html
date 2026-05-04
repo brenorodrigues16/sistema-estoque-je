@@ -1,333 +1,60 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Papelões Estoque - Caixas Prontas</title>
+    <title>Estoque de Caixas - J&E Embalagens</title>
     <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-
     <div class="main-container">
         <aside class="sidebar">
-            <div class="logo">
-                <i class="fas fa-box-open"></i> J&E Embalagens LTDA
-            </div>
+            <div class="logo">J&E Embalagens</div>
             <nav>
-    <ul>
-        <li class="menu-item" onclick="window.location.href='index.html'">
-            <i class="fas fa-th-large"></i> Dashboard
-        </li>
-        <li class="menu-item" onclick="window.location.href='chapas.html'">
-            <i class="fas fa-layer-group"></i> Chapas
-        </li>
-        <li class="menu-item" onclick="window.location.href='caixas.html'">
-            <i class="fas fa-boxes"></i> Caixas Prontas
-        </li>
-        <li class="menu-item" onclick="window.location.href='producao.html'">
-            <i class="fas fa-industry"></i> Produção
-        </li>
-        <li class="menu-item" onclick="window.location.href='movimentacoes.html'">
-            <i class="fas fa-exchange-alt"></i> Movimentações
-        </li>
-    </ul>
+                <a href="index.html">Painel Principal</a>
+                <a href="chapas.html">Estoque de Chapas</a>
+                <a href="caixas.html" class="active">Estoque de Caixas</a>
+                <a href="producao.html">Lançar Produção</a>
             </nav>
-            <div class="user-info">
-                <div class="avatar">U</div>
-                <div>
-                    <p class="username">Usuário</p>
-                </div>
-            </div>
         </aside>
 
         <main class="content">
-        <header class="top-bar">
-            <span>ESTOQUE DE CAIXAS PRONTAS</span> <span class="date-now" id="data-atual"></span> 
-        </header>
-
-            <section class="filters">
-                <input type="text" placeholder="Buscar por código (Ex: CX001)..." style="flex: 2;" id="input-busca">
-                <select>
-                    <option>Todas as Categorias</option>
-                    <option>Onda B</option>
-                    <option>Onda BC</option>
-                    <option>Onda C</option>
-                    <option>Onda BB</option>
-                </select>
-                <button onclick="novoRegistro()" style="background-color: var(--accent-green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                    <i class="fas fa-plus"></i> Adicionar Nova Caixa
-                </button>
-            </section>
-
+            <header><h1>Estoque de Caixas Prontas</h1></header>
             <div class="table-container">
-                <h4 style="margin-bottom: 15px; color: var(--sidebar-color);">CONTROLE DE CAIXAS PRONTAS</h4>
                 <table>
                     <thead>
                         <tr>
-                            <th>CÓDIGO DA CAIXA</th>
-                            <th>MEDIDAS</th>
-                            <th>QUANTIDADE</th>
-                            <th>DATA DE FABRICAÇÃO</th>
-                            <th>AÇÕES / ATUALIZAR</th>
+                            <th>Código/Medida</th>
+                            <th>Quantidade em Estoque</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-corpo-caixas">
-                            <td class="actions">
-                                <button onclick="alterarQtd('CX001', 1)" title="Aumentar">+</button>
-                                <button onclick="alterarQtd('CX001', -1)" title="Diminuir">-</button>
-                                <button onclick="editarCaixa('CX001')" title="Editar"><i class="fas fa-edit"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>CX002</strong></td>
-                            <td>500 x 350 x 300</td>
-                            <td>250 un</td>
-                            <td>26/05/2025</td>
-                            <td class="actions">
-                                <button onclick="alterarQtd('CX002', 1)" title="Aumentar">+</button>
-                                <button onclick="alterarQtd('CX002', -1)" title="Diminuir">-</button>
-                                <button><i class="fas fa-edit"></i></button>
-                            </td>
-                        </tr>
+                    <tbody id="tabelaCaixas">
+                        <!-- Dados carregados via API -->
                     </tbody>
                 </table>
             </div>
         </main>
     </div>
 
-<script>
-
-const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const path = require('path'); // Novo: para lidar com caminhos de pastas
-
-const app = express();
-
-// CONFIGURAÇÕES ESSENCIAIS
-app.use(cors());
-app.use(bodyParser.json());
-
-// Esta linha diz ao Node que tudo o que for HTML, CSS e JS de tela está na pasta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Rota para abrir o Dashboard automaticamente ao acessar http://localhost:3000
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// ... (Outras rotas /dados, /produzir, etc, continuam iguais abaixo daqui)
-
-Swal.fire({
-  title: 'Tem certeza?',
-  text: "Você não poderá reverter isso!",
-  icon: 'warning',
-  showCancelButton: true,
-  confirmButtonColor: '#c0392b',
-  cancelButtonColor: '#95a5a6',
-  confirmButtonText: 'Sim, excluir!'
-}).then((result) => {
-  if (result.isConfirmed) {
-      // código de fetch para excluir
-  }
-})
-
-
-const inputBusca = document.getElementById('input-busca');
-
-inputBusca.addEventListener('input', async () => {
-    const termo = inputBusca.value;
-    
-    // Se o campo estiver vazio, carrega tudo de novo
-    if (termo.length === 0) {
-        carregarCaixas(); 
-        return;
-    }
-
-    // Busca no servidor apenas o que combina com o termo
-    const resp = await fetch(`http://localhost:3000/buscar-caixas?termo=${termo}`);
-    const resultados = await resp.json();
-    
-    const tabela = document.querySelector('tbody');
-    tabela.innerHTML = resultados.map(caixa => `
-        <tr>
-            <td><strong>${caixa.codigo}</strong></td>
-            <td>${caixa.medida}</td>
-            <td>${caixa.qtd} un</td>
-            <td>22/04/2026</td>
-            <td class="actions">
-                <button onclick="alterarQtd('${caixa.codigo}', 1)" title="Aumentar">+</button>
-                <button onclick="alterarQtd('${caixa.codigo}', -1)" title="Diminuir">-</button>
-                <button onclick="editarCaixa('${caixa.codigo}')" title="Editar"><i class="fas fa-edit"></i></button>
-            </td>
-        </tr>
-    `).join('');
-});
-
-    async function carregarCaixas() {
-        const resp = await fetch('http://localhost:3000/dados');
-        const dados = await resp.json();
-        const tabela = document.querySelector('tbody');
-        tabela.innerHTML = dados.caixas.map(caixa => `
-            <tr>
-                <td><strong>${caixa.codigo}</strong></td>
-                <td>${caixa.medida}</td>
-                <td>${caixa.qtd} un</td>
-                <td>22/04/2026</td>
-                <td class="actions">
-                    <button>+</button><button>-</button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    document.querySelector('.btn-add').addEventListener('click', async () => {
-        const codigo = prompt("Código da Caixa (ex: CX-SHOP):");
-        const medida = prompt("Medida (ex: 20x20x10):");
-        const qtd = prompt("Quantidade em estoque:");
-
-        if (codigo && medida && qtd) {
-            await fetch('http://localhost:3000/add-caixa', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ codigo, medida, qtd })
-            });
-            carregarCaixas();
-        }
-    });
-
-    window.onload = carregarCaixas;
-</script>
-
-<script>
-    function configurarData() {
-        const elementoData = document.getElementById('data-atual');
-        if (elementoData) {
-            const data = new Date();
-            const opcoes = { 
-                weekday: 'long', 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
-            };
-            
-            // Gera: quinta-feira, 23 de abril de 2026
-            let dataFormatada = data.toLocaleDateString('pt-BR', opcoes);
-            elementoData.innerText = dataFormatada;
-        }
-    }
-
-    // Chama a função assim que a página terminar de carregar
-    window.addEventListener('load', configurarData);
-
-  // 1. Função para Somar ou Subtrair Quantidade
-function alterarQtd(codigo, valor) {
-    // Busca a linha específica pelo ID
-    const linha = document.getElementById(`linha-${codigo}`);
-    const campoQtd = linha.querySelector('.qtd-coluna');
-    
-    // Extrai apenas o número do texto (ex: "350 un" vira 350)
-    let qtdAtual = parseInt(campoQtd.innerText);
-    let novaQtd = qtdAtual + valor;
-
-    // Impede que a quantidade seja menor que zero
-    if (novaQtd < 0) {
-        Swal.fire('Erro', 'A quantidade não pode ser negativa!', 'error');
-        return;
-    }
-
-    // Atualiza visualmente na tabela
-    campoQtd.innerText = `${novaQtd} un`;
-
-    // OPCIONAL: Enviar para o banco de dados via Fetch
-    // atualizarNoServidor(codigo, novaQtd);
-}
-
-// 2. Função para Editar (Abre um alerta para digitar novo valor)
-async function editarCaixa(codigo) {
-    const { value: novaQtd } = await Swal.fire({
-        title: `Editar Estoque - ${codigo}`,
-        input: 'number',
-        inputLabel: 'Digite a nova quantidade total:',
-        inputValue: '',
-        showCancelButton: true,
-        inputValidator: (value) => {
-            if (!value || value < 0) {
-                return 'Por favor, insira um valor válido!';
+    <script>
+        async function carregarCaixas() {
+            try {
+                // ATUALIZADO: Buscando dados de caixas do Render
+                const response = await fetch('https://sistema-estoque-je.onrender.com/dados');
+                const data = await response.json();
+                
+                const tabela = document.getElementById('tabelaCaixas');
+                tabela.innerHTML = data.caixas.map(caixa => `
+                    <tr>
+                        <td>${caixa.medidas}</td>
+                        <td>${caixa.quantidade} UN</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Erro ao carregar caixas:', error);
             }
         }
-    });
-
-    if (novaQtd) {
-        const linha = document.getElementById(`linha-${codigo}`);
-        linha.querySelector('.qtd-coluna').innerText = `${novaQtd} un`;
-        Swal.fire('Sucesso!', 'Estoque atualizado.', 'success');
-    }
-}
-
-// 3. Botão "Adicionar Nova Caixa" (Simulação)
-function novoRegistro() {
-    Swal.fire({
-        title: 'Nova Caixa',
-        html: `
-            <input id="swal-input1" class="swal2-input" placeholder="Código (ex: CX003)">
-            <input id="swal-input2" class="swal2-input" placeholder="Medidas">
-            <input id="swal-input3" class="swal2-input" type="number" placeholder="Quantidade">
-        `,
-        focusConfirm: false,
-        preConfirm: () => {
-            // Aqui você coletaria os dados e daria um append na tabela
-            Swal.fire('Enviado!', 'Funcionalidade de inserção pronta para conectar ao banco.', 'info');
-        }
-    });
-}
-
-// Função para buscar os dados do servidor e desenhar na tela
-async function carregarTabela() {
-    try {
-        const resposta = await fetch('http://localhost:3000/caixas'); // Ajuste para sua rota real
-        const caixas = await resposta.json();
-
-        const corpoTabela = document.getElementById('tabela-corpo-caixas');
-        corpoTabela.innerHTML = ''; // Limpa antes de carregar
-
-        caixas.forEach(caixa => {
-            const linha = `
-                <tr id="linha-${caixa.codigo}">
-                    <td style="font-weight: bold;">${caixa.codigo}</td>
-                    <td>${caixa.medidas}</td>
-                    <td class="qtd-coluna">${caixa.quantidade} un</td>
-                    <td>${caixa.data_fabricacao}</td>
-                    <td>
-                        <button onclick="alterarQtd('${caixa.codigo}', 1)" class="btn-acao">+</button>
-                        <button onclick="alterarQtd('${caixa.codigo}', -1)" class="btn-acao">-</button>
-                        <button onclick="editarCaixa('${caixa.codigo}')" class="btn-acao"><i class="fas fa-edit"></i></button>
-                    </td>
-                </tr>
-            `;
-            corpoTabela.innerHTML += linha;
-        });
-    } catch (error) {
-        console.error("Erro ao carregar tabela:", error);
-    }
-}
-
-// Executa assim que a página abre
-window.onload = () => {
-    carregarTabela();
-    // Coloque aqui também o código da data que você já tem
-};
-
-// Dentro da sua função de salvar nova caixa:
-if (resposta.ok) {
-    Swal.fire('Sucesso!', 'Caixa adicionada.', 'success');
-    carregarTabela(); // <--- Isso faz a mágica de aparecer na hora sem dar F5
-}
-
-</script>
-
+        carregarCaixas();
+    </script>
 </body>
 </html>
