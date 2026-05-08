@@ -1,55 +1,81 @@
 const express = require('express');
+const { Pool } = require('pg');
 const cors = require('cors');
-const mysql = require('mysql2');
-const app = express();
+require('dotenv').config();
 
+const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Conexão com Banco de Dados (Configurado para o Render/Nuvem)
-const db = mysql.createPool(process.env.DATABASE_URL || {
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'sistema_estoque'
+const db = new Pool({
+  connectionString: process.env.DATABASE_URL,
 });
 
-// ROTA: Lançar Produção (Baixa chapa e aumenta caixa)
-app.post('/produzir', (req, res) => {
-    const { tipoChapa, medidaCaixa, quantidade } = req.body;
-    
-    // 1. Diminui as chapas do estoque
-    const sqlChapa = "UPDATE chapas SET qtd = qtd - ? WHERE tipo = ?";
-    db.query(sqlChapa, [quantidade, tipoChapa], (err) => {
-        if (err) return res.status(500).json({ message: "Erro ao baixar chapa" });
-
-        // 2. Aumenta ou cria a caixa no estoque
-        const sqlCaixa = "INSERT INTO caixas (codigo, medidas, quantidade) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE quantidade = quantidade + ?";
-        db.query(sqlCaixa, [medidaCaixa, medidaCaixa, quantidade, quantidade], (err) => {
-            if (err) return res.status(500).json({ message: "Erro ao atualizar caixas" });
-            res.json({ message: "Produção finalizada com sucesso!", detalhes: `${quantidade} caixas adicionadas.` });
+// --- ROTAS DO DASHBOARD ---
+app.get('/dados', async (req, res) => {
+    try {
+        const totalRes = await db.query('SELECT SUM(quantidade) as total FROM chapas');
+        const agrupadoRes = await db.query(`
+            SELECT UPPER(TRIM(onda)) as onda, SUM(quantidade) as quantidade 
+            FROM chapas 
+            GROUP BY UPPER(TRIM(onda))
+            ORDER BY quantidade DESC
+        `);
+        res.json({ 
+            estoqueTotal: totalRes.rows[0].total || 0,
+            chapas: agrupadoRes.rows 
         });
-    });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// ROTAS DE BUSCA
-app.get('/dados', (req, res) => {
-    db.query('SELECT * FROM chapas', (err, chapas) => {
-        db.query('SELECT * FROM caixas', (err, caixas) => {
-            res.json({ chapas, caixas });
-        });
-    });
+// --- ROTAS DE FORNECEDORES (A que as páginas estão pedindo!) ---
+app.get('/fornecedores', async (req, res) => {
+    try {
+        const result = await db.query('SELECT nome FROM fornecedores ORDER BY nome ASC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor J&E rodando na porta ${PORT}`));
+// --- ROTAS DE CHAPAS ---
+app.get('/chapas-detalhes', async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM chapas ORDER BY onda ASC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
-const path = require('path');
+app.post('/add-chapa', async (req, res) => {
+    const { onda, comprimento, largura, quantidade, fornecedor } = req.body;
+    try {
+        await db.query(
+            'INSERT INTO chapas (onda, comprimento, largura, quantidade, fornecedor) VALUES ($1, $2, $3, $4, $5)',
+            [onda.trim().toUpperCase(), comprimento || 0, largura || 0, quantidade || 0, fornecedor || 'Geral']
+        );
+        res.json({ message: "Sucesso!" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
-// Esta linha diz ao servidor onde estão seus arquivos HTML (assumindo que estão na pasta raiz ou 'public')
-app.use(express.static(__dirname)); 
+app.post('/ajustar-estoque', async (req, res) => {
+    const { id, novaQuantidade, novoComprimento, novaLargura, novoFornecedor } = req.body;
+    try {
+        await db.query(
+            'UPDATE chapas SET quantidade = $1, comprimento = $2, largura = $3, fornecedor = $4 WHERE id = $5',
+            [novaQuantidade, novoComprimento, novaLargura, novoFornecedor, id]
+        );
+        res.json({ message: "Dados atualizados!" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
-// Esta linha faz o link abrir o index.html automaticamente
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+app.listen(3000, () => {
+    console.log("✅ Servidor J&E rodando na porta 3000");
 });

@@ -3,4 +3,21 @@
         const data = new Date();
         const opcoes = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('data-atual').innerText = data.toLocaleDateString('pt-BR', opcoes);
-    </script>
+       // Esta função vai buscar os dados reais no servidor
+        async function carregarDadosDoBanco() {
+        try {
+        //  Bate na porta do servidor pedindo os dados
+        const resposta = await fetch('/api/dashboard-stats');
+        const dados = await resposta.json();
+
+        // Pega o valor do estoque e coloca no <span> que tem o id="estoque-valor"
+        document.getElementById('estoque-valor').innerText = dados.estoqueTotal;
+
+        } catch (erro) {
+        console.error("Ainda não consegui buscar os dados:", erro);
+        }
+        }
+
+        // 3. Manda o site rodar essa função assim que a página abrir
+        carregarDadosDoBanco();
+</script>

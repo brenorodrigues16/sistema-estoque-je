@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Papelões Estoque - Controle de Chapas</title>
     <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet"
- href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
@@ -17,26 +16,26 @@
                 <i class="fas fa-box-open"></i> J&E Embalagens LTDA
             </div>
             <nav>
-    <ul>
-        <li class="menu-item" onclick="window.location.href='index.html'">
-            <i class="fas fa-th-large"></i> Dashboard
-        </li>
-        <li class="menu-item" onclick="window.location.href='chapas.html'">
-            <i class="fas fa-layer-group"></i> Chapas
-        </li>
-        <li class="menu-item" onclick="window.location.href='caixas.html'">
-            <i class="fas fa-boxes"></i> Caixas Prontas
-        </li>
-        <li class="menu-item" onclick="window.location.href='producao.html'">
-            <i class="fas fa-industry"></i> Produção
-        </li>
-        <li class="menu-item" onclick="window.location.href='movimentacoes.html'">
-            <i class="fas fa-exchange-alt"></i> Movimentações
-        </li>
-        <li class="menu-item" onclick="window.location.href='perfil.html'">
-            <i class="fas fa-user"></i> Perfil
-        </li>
-    </ul>
+                <ul>
+                    <li class="menu-item" onclick="window.location.href='index.html'">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </li>
+                    <li class="menu-item active" onclick="window.location.href='chapas.html'">
+                        <i class="fas fa-layer-group"></i> Chapas
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='caixas.html'">
+                        <i class="fas fa-boxes"></i> Caixas Prontas
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='producao.html'">
+                        <i class="fas fa-industry"></i> Produção
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='movimentacoes.html'">
+                        <i class="fas fa-exchange-alt"></i> Movimentações
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='perfil.html'">
+                        <i class="fas fa-user"></i> Perfil
+                    </li>
+                </ul>
             </nav>
             <div class="user-info">
                 <div class="avatar">U</div>
@@ -48,9 +47,10 @@
         </aside>
 
         <main class="content">
-        <header class="top-bar">
-            <span>ESTOQUE DE CHAPAS</span> <span class="date-now" id="data-atual"></span> 
-        </header>
+            <header class="top-bar">
+                <span>ESTOQUE DE CHAPAS</span>
+                <span class="date-now" id="data-atual"></span> 
+            </header>
 
             <section class="filters">
                 <input type="text" placeholder="Buscar tipo de chapa..." style="flex: 2;">
@@ -69,165 +69,148 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>TIPO DE CHAPA</th>
+                            <th>TIPO DE CHAPA / FORNECEDOR</th>
                             <th>COMPRIMENTO</th>
                             <th>LARGURA</th>
                             <th>QUANTIDADE</th>
-                            <th>AÇÕES (ENTRADA / SAÍDA)</th>
+                            <th>AÇÕES</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Chapa Onda B</strong></td>
-                            <td>2750 mm</td>
-                            <td>1850 mm</td>
-                            <td>320 un</td>
-                            <td class="actions">
-                                <button style="background-color: #27ae60; color: white;" title="Adicionar ao Estoque">Adicionar</button>
-                                <button style="background-color: #e67e22; color: white;" title="Registrar Uso">Usar</button>
-                                <button title="Editar"><i class="fas fa-edit"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>Chapa Onda BC</strong></td>
-                            <td>3000 mm</td>
-                            <td>2000 mm</td>
-                            <td>150 un</td>
-                            <td class="actions">
-                                <button style="background-color: #27ae60; color: white;">Adicionar</button>
-                                <button style="background-color: #e67e22; color: white;">Usar</button>
-                                <button title="Editar"><i class="fas fa-edit"></i></button>
-                            </td>
-                        </tr>
+                    <tbody id="tabela-chapas">
                     </tbody>
                 </table>
             </div>
         </main>
     </div>
 
-   <script>
+    <script>
+    async function carregarChapas() {
+        try {
+            const resp = await fetch('http://localhost:3000/chapas-detalhes');
+            if (!resp.ok) throw new Error('Erro ao buscar chapas');
+            const chapas = await resp.json();
+            const tabelaCorpo = document.getElementById('tabela-chapas');
+            
+            tabelaCorpo.innerHTML = '';
 
-const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const path = require('path'); // Novo: para lidar com caminhos de pastastp://localhost:3000
-app.get('/', (req, res) => {
+            chapas.forEach(chapa => {
+                const comp = chapa.comprimento ?? 0;
+                const larg = chapa.largura ?? 0;
+                const fornecedor = chapa.fornecedor || 'Não informado';
+                
+                const estoqueZerado = chapa.quantidade <= 0;
+                const corTexto = estoqueZerado ? 'color: #e74c3c;' : '';
 
-const app = express();
-
-// CONFIGURAÇÕES ESSENCIAIS
-app.use(cors());
-app.use(bodyParser.json());
-
-// AQUI ESTÁ O SEGREDO: 
-// Esta linha diz ao Node que tudo o que for HTML, CSS e JS de tela está na pasta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Rota para abrir o Dashboard automaticamente ao acessar ht
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// ... (Suas outras rotas /dados, /produzir, etc, continuam iguais abaixo daqui)
-
-Swal.fire({
-  title: 'Tem certeza?',
-  text: "Você não poderá reverter isso!",
-  icon: 'warning',
-  showCancelButton: true,
-  confirmButtonColor: '#c0392b',
-  cancelButtonColor: '#95a5a6',
-  confirmButtonText: 'Sim, excluir!'
-}).then((result) => {
-  if (result.isConfirmed) {
-      // Aqui vai o seu código de fetch para excluir
-  }
-})
-
-
-    async function ajustarEstoque(tipo, valor) {
-    // Aqui estamos simulando um ajuste rápido no banco
-    const confirmacao = confirm(`Deseja ajustar o estoque de ${tipo} em ${valor} unidades?`);
-    if (confirmacao) {
-        // Você pode criar uma rota no server.js depois para isso, 
-        // por enquanto vamos apenas avisar que o clique funcionou
-        alert("Função de ajuste rápido clicada! Em breve faremos a rota no back-end.");
+                const linha = `
+                    <tr style="${estoqueZerado ? 'background-color: #fff5f5;' : ''}">
+                        <td style="${corTexto}">
+                            <strong>${chapa.onda}</strong><br>
+                            <small style="color: #666; font-style: italic;">${fornecedor}</small>
+                        </td>
+                        <td>${comp} mm</td>
+                        <td>${larg} mm</td>
+                        <td style="${corTexto}"><strong>${chapa.quantidade}</strong> un</td>
+                        <td class="actions">
+                            <button onclick="abrirAjuste('${chapa.onda}', ${chapa.quantidade}, ${chapa.id}, ${comp}, ${larg}, '${fornecedor}')" 
+                                    style="background:#27ae60; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">
+                                Editar
+                            </button>
+                        </td>
+                    </tr>`;
+                tabelaCorpo.innerHTML += linha;
+            });
+        } catch (erro) {
+            console.error("Erro ao carregar tabela:", erro);
+        }
     }
-}
-   async function carregarChapas() {
-    const resp = await fetch('[https://sistema-estoque-je.onrender.com/dados](https://sistema-estoque-je.onrender.com/dados)');
-    const dados = await resp.json();
-    const tabela = document.querySelector('tbody');
-    
-    tabela.innerHTML = dados.chapas.map(chapa => {
-        // Lógica do Alerta de Estoque Baixo (Ex: menos de 50 un)
-        const estoqueBaixo = chapa.qtd < 50 ? 'style="color: #e74c3c; font-weight: bold;"' : '';
-        const aviso = chapa.qtd < 50 ? ' <i class="fas fa-exclamation-triangle" title="Estoque Baixo!"></i>' : '';
 
-        return `
-            <tr>
-                <td><strong>${chapa.tipo.toUpperCase()}</strong></td>
-                <td>${chapa.comp} mm</td>
-                <td>${chapa.larg} mm</td>
-                <td ${estoqueBaixo}>${chapa.qtd} un${aviso}</td>
-                <td class="actions">
-                    <button onclick="excluirItem('chapa', ${chapa.id})" style="background:#c0392b; color:white;">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
+    async function abrirAjuste(onda, qtdAtual, id, compAtual, largAtual, fornecedorAtual) {
+        const respF = await fetch('http://localhost:3000/fornecedores');
+        const fornecedores = await respF.json();
+        let opcoesHtml = fornecedores.map(f => 
+            `<option value="${f.nome}" ${f.nome === fornecedorAtual ? 'selected' : ''}>${f.nome}</option>`
+        ).join('');
 
-// Função para excluir
-async function excluirItem(tipo, id) {
-    if (confirm(`Tem certeza que deseja excluir esta ${tipo}?`)) {
-        await fetch(`http://localhost:3000/excluir-${tipo}/${id}`, { method: 'DELETE' });
-        location.reload(); // Recarrega a página para atualizar a lista
-    }
-}
-    // Função do botão "Nova Chapa"
-    document.querySelector('.btn-add').addEventListener('click', async () => {
-        const tipo = prompt("Tipo da Chapa (ex: Onda C):");
-        const comp = prompt("Comprimento (mm):");
-        const larg = prompt("Largura (mm):");
-        const qtd = prompt("Quantidade inicial:");
+        const { value: formValues } = await Swal.fire({
+            title: `Editar Chapa: ${onda}`,
+            html:
+                `<label style="display:block;margin-top:10px;text-align:left;margin-left:10%">Quantidade</label><input id="swal-input1" class="swal2-input" type="number" value="${qtdAtual}">` +
+                `<label style="display:block;margin-top:10px;text-align:left;margin-left:10%">Comprimento (mm)</label><input id="swal-input2" class="swal2-input" type="number" value="${compAtual}">` +
+                `<label style="display:block;margin-top:10px;text-align:left;margin-left:10%">Largura (mm)</label><input id="swal-input3" class="swal2-input" type="number" value="${largAtual}">` +
+                `<label style="display:block;margin-top:10px;text-align:left;margin-left:10%">Fornecedor</label>` +
+                `<select id="swal-input4" class="swal2-input" style="width: 78%; display: block; margin: 10px auto;">${opcoesHtml}</select>`,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Salvar',
+            cancelButtonText: 'Cancelar',
+            preConfirm: () => {
+                return {
+                    novaQuantidade: Number(document.getElementById('swal-input1').value),
+                    novoComprimento: Number(document.getElementById('swal-input2').value),
+                    novaLargura: Number(document.getElementById('swal-input3').value),
+                    novoFornecedor: document.getElementById('swal-input4').value
+                }
+            }
+        });
 
-        if (tipo && comp && larg && qtd) {
-            await fetch('http://localhost:3000/add-chapa', {
+        if (formValues) {
+            await fetch('http://localhost:3000/ajustar-estoque', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ tipo, comp, larg, qtd })
+                body: JSON.stringify({ id: id, ...formValues })
             });
             carregarChapas();
         }
-    });
+    }
 
-    window.onload = carregarChapas;
-</script>
+    document.querySelector('.btn-add').onclick = async () => {
+        const resp = await fetch('http://localhost:3000/fornecedores');
+        const fornecedores = await resp.json();
+        let opcoesHtml = fornecedores.map(f => `<option value="${f.nome}">${f.nome}</option>`).join('');
 
-<script>
+        const { value: formValues } = await Swal.fire({
+            title: 'Nova Chapa',
+            html:
+                '<input id="swal-onda" class="swal2-input" placeholder="Onda (A, B, BC...)">' +
+                '<select id="swal-forn" class="swal2-input" style="width: 78%; display: block; margin: 10px auto;">' +
+                    '<option value="" disabled selected>Selecione o Fornecedor</option>' +
+                    opcoesHtml +
+                '</select>' +
+                '<input id="swal-comp" class="swal2-input" type="number" placeholder="Comprimento">' +
+                '<input id="swal-larg" class="swal2-input" type="number" placeholder="Largura">' +
+                '<input id="swal-qtd" class="swal2-input" type="number" placeholder="Quantidade">',
+            preConfirm: () => {
+                const forn = document.getElementById('swal-forn').value;
+                if (!forn) { Swal.showValidationMessage('Selecione um fornecedor!'); return false; }
+                return {
+                    onda: document.getElementById('swal-onda').value,
+                    fornecedor: forn,
+                    comprimento: Number(document.getElementById('swal-comp').value),
+                    largura: Number(document.getElementById('swal-larg').value),
+                    quantidade: Number(document.getElementById('swal-qtd').value)
+                }
+            }
+        });
+
+        if (formValues) {
+            await fetch('http://localhost:3000/add-chapa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formValues)
+            });
+            carregarChapas();
+        }
+    };
+
     function configurarData() {
         const elementoData = document.getElementById('data-atual');
         if (elementoData) {
             const data = new Date();
-            const opcoes = { 
-                weekday: 'long', 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
-            };
-            
-            // Gera: quinta-feira, 23 de abril de 2026
-            let dataFormatada = data.toLocaleDateString('pt-BR', opcoes);
-            elementoData.innerText = dataFormatada;
+            elementoData.innerText = data.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         }
     }
 
-    // Chama a função assim que a página terminar de carregar
-    window.addEventListener('load', configurarData);
-</script>
-
+    window.onload = () => { carregarChapas(); configurarData(); };
+    </script>
 </body>
 </html>

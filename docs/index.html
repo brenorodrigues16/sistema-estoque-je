@@ -10,7 +10,6 @@
 </head>
 <body>
 
-    
     <div class="main-container">
         <aside class="sidebar">
             <div class="logo">
@@ -55,52 +54,119 @@
             </header>
 
             <section class="cards-grid">
-                <div class="card blue"><i class="fas fa-box"></i><div class="card-info"><h3>1.250</h3><p>ESTOQUE ATUAL.</p></div></div>
-                <div class="card orange"><i class="fas fa-clock"></i><div class="card-info"><h3>12h</h3><p>ÚLTIMA ATUALIZAÇÃO.</p></div></div>
+                <div class="card blue">
+                    <i class="fas fa-box"></i>
+                    <div class="card-info">
+                        <h3><span id="estoque-valor">0</span></h3>
+                        <p>QUANTIDADE DE CHAPAS ESTOQUE ATUAL (LITERAL)</p>
+                    </div>
+                </div>
+                <div class="card orange">
+                    <i class="fas fa-clock"></i>
+                    <div class="card-info">
+                        <h3><span id="hora-atualizacao">--:--</span></h3>
+                        <p>ÚLTIMA ATUALIZAÇÃO.</p>
+                    </div>
+                </div>
             </section>
 
             <section class="stats-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
                 <div class="chart-placeholder" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                    <h4 style="margin-bottom: 20px;"><i class="fas fa-chart-line"></i> Produção Semanal</h4>
-                    <div style="margin: 15px 0;">
-                        <p>Onda B: 85%</p>
-                        <div style="background:#eee; height:10px; border-radius:5px;"><div style="width:85%; background:#4a90e2; height:100%; border-radius:5px;"></div></div>
-                        <P>Onda C: 50%</P>
-                        <div style="background:#eee; height:10px; border-radius:5px;"><div style="width:50%; background:#4a90e2; height:100%; border-radius:5px;"></div></div>
-                    </div>
+                    <h4 style="margin-bottom: 20px;"><i class="fas fa-chart-line"></i> Estoque atual</h4>
+                    <div id="container-progresso"></div>
                 </div>
+                
                 <div class="chart-placeholder" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                     <h4 style="margin-bottom: 20px;"><i class="fas fa-bell"></i> Avisos Rápidos</h4>
-                    <p style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">• Reposição de Chapa B necessária.</p>
+                    <div id="container-avisos">
+                        <p style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #666;">Carregando avisos...</p>
+                    </div>
                 </div>
             </section>
         </main>
     </div>
 
     <script>
-        // ALGORITMO DA DATA (Igual à foto: azul, negrito e por extenso)
-        function formatarData() {
+        // 1. FORMATAÇÃO DE DATA E HORA
+        function atualizarRelogio() {
             const elementoData = document.getElementById('data-atual');
-            const data = new Date();
-            const opcoes = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const elementoHora = document.getElementById('hora-atualizacao');
             
-            // "quinta-feira, 23 de abril de 2026"
-            let dataFormatada = data.toLocaleDateString('pt-BR', opcoes);
-            elementoData.innerText = dataFormatada;
+            const agora = new Date();
+            
+            // Data por extenso
+            const opcoesData = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            elementoData.innerText = agora.toLocaleDateString('pt-BR', opcoesData);
+            
+            // Hora da atualização
+            elementoHora.innerText = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         }
 
-        // Carregamento de dados do Banco
-        window.onload = async () => {
-            formatarData();
-            
+        // 2. BUSCA DADOS E GERA O VISUAL DINÂMICO
+        async function carregarDashboard() {
             try {
-                const resp = await fetch('http://localhost:3000/dados');
-                const dados = await resp.json();
-                // Aqui você pode preencher os cards com dados reais se quiser
+                const resposta = await fetch('http://localhost:3000/dados');
+                const dados = await resposta.json();
+
+                // Atualiza o Total Literal
+                document.getElementById('estoque-valor').innerText = `${(dados.estoqueTotal ?? 0).toLocaleString()} un`;
+
+                const container = document.getElementById('container-progresso');
+                const containerAvisos = document.getElementById('container-avisos');
+                
+                container.innerHTML = '';
+                containerAvisos.innerHTML = '';
+
+                const chapas = Array.isArray(dados.chapas) ? dados.chapas : [];
+                const limitePadrao = 100000;
+
+                if (chapas.length > 0) {
+                    chapas.forEach(chapa => {
+                        // Cálculo da Porcentagem
+                        const porcentagem = (chapa.quantidade / limitePadrao) * 100;
+                        
+                        // Gerar as Barras de Progresso
+                        // Ache essa parte no seu script do index.html:
+                const layoutBarra = `
+                     <div class="progress-item" style="margin-bottom: 20px;">
+                       <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <strong>${chapa.onda ?? 'Chapa'}</strong>
+                       <span>${(chapa.quantidade ?? 0).toLocaleString()} un</span>
+                       </div>
+                    <div style="background: #eee; height: 12px; border-radius: 10px; width: 100%; overflow: hidden;">
+                        <div style="background: #3498db; width: ${porcentagem}%; height: 100%; transition: width 0.8s ease-in-out;"></div>
+                  </div>
+                </div>
+                `;
+                
+                        container.innerHTML += layoutBarra;
+
+                        // Gerar Avisos Automáticos se estiver baixo (ex: menos de 500 un)
+                        if (chapa.quantidade <= 500) {
+                            const avisoItem = `<p style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #e74c3c; font-weight: bold;">
+                                • Reposição de ${chapa.onda} necessária (${chapa.quantidade} un restantes).
+                            </p>`;
+                            containerAvisos.innerHTML += avisoItem;
+                        }
+                    });
+
+                    if (containerAvisos.innerHTML === '') {
+                        containerAvisos.innerHTML = '<p style="color: #27ae60;">• Tudo em dia! Estoque saudável.</p>';
+                    }
+
+                } else {
+                    container.innerHTML = '<p style="color:#666;">Nenhuma chapa encontrada no banco.</p>';
+                }
+
+                atualizarRelogio();
+
             } catch (erro) {
-                console.error("Erro ao buscar dados:", erro);
+                console.error('Erro ao carregar dashboard:', erro);
             }
-        };
+        }
+
+        // EXECUÇÃO AO CARREGAR
+        window.onload = carregarDashboard;
     </script>
 </body>
 </html>

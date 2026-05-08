@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Perfil - J&E</title>
     <link rel="stylesheet" href="dashboard.css">
-    <link rel="stylesheet" href="/public/styleperfil.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         label { display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; }
@@ -13,6 +13,50 @@
     </style>
 </head>
 <body>
+
+<div class="main-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-box-open"></i> J&E Embalagens LTDA
+            </div>
+            <nav>
+                <ul>
+                    <li class="menu-item" onclick="window.location.href='index.html'">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='chapas.html'">
+                        <i class="fas fa-layer-group"></i> Chapas
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='caixas.html'">
+                        <i class="fas fa-boxes"></i> Caixas Prontas
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='producao.html'">
+                        <i class="fas fa-industry"></i> Produção
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='movimentacoes.html'">
+                        <i class="fas fa-exchange-alt"></i> Movimentações
+                    </li>
+                    <li class="menu-item active" onclick="window.location.href='perfil.html'">
+                        <i class="fas fa-user"></i> Perfil
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="user-info">
+                <div class="avatar">U</div>
+                <div>
+                    <p class="username">Usuário</p>
+                    <p class="role">Administrador</p>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="top-bar">
+                <span>CONFIGURAÇÕES</span> 
+                <span class="date-now" id="data-atual"></span> 
+            </header>
+
     <div class="perfil-box">
         <div class="usuario">
             <span id="nome-usuario">
@@ -25,22 +69,36 @@
             </div>
             <div class="campo">
                 <label>Nova Senha</label>
-                <input type="password" id="senha" required>
+                  <input type="password" id="senha" required>
+                    <label>Confirmar Nova Senha</label>
+                  <input type="password" id="confirmar-senha" required>
             </div>
+
             <div class="campo">
                 <label>Tema</label>
-                <select id="tema">
-                    <option value="claro">Claro</option>
-                    <option value="escuro">Escuro</option>
+                <select id="tema" data-theme="dark">
+                    <option value="claro">Tema Claro</option>
+                    <option value="escuro">Tema Escuro</option>
                 </select>
             </div>
+            <br><br>
             <button type="submit">SALVAR ALTERAÇÕES</button>
         </form>
-        <button onclick="window.location.href='index.html'" style="background:#354464; color:#FFFFFF; margin-top:10px;">Voltar</button>
-    </span>
+        <button onclick="window.location.href='index.html'" style="background:#354464; color:#FFFFFF; margin-top:10px;">Voltar ao Inicio</button>
+    
+        </main>
+        </span>
     </div>
 
     <script>
+    // 1. ALGORITMO DA DATA
+    function formatarData() {
+        const elementoData = document.getElementById('data-atual');
+        const data = new Date();
+        const opcoes = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+        elementoData.innerText = data.toLocaleDateString('pt-BR', opcoes);
+    }
+
         document.getElementById('email').value = localStorage.getItem('usuarioEmail') || '';
         document.getElementById('tema').value = localStorage.getItem('tema') || 'claro';
 
@@ -53,6 +111,7 @@
                     usuario: localStorage.getItem('usuarioID'),
                     novoEmail: document.getElementById('email').value,
                     novaSenha: document.getElementById('senha').value,
+                    confirmarSenha: document.getElementById('confirmar-senha').value,
                     novoTema: document.getElementById('tema').value
                 })
             });
