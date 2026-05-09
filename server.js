@@ -30,6 +30,27 @@ app.get('/dados', async (req, res) => {
     }
 });
 
+// Rota para listar todos os fornecedores (com o novo campo contato)
+app.get('/fornecedores-completo', async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM fornecedores ORDER BY nome ASC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Rota para adicionar um novo fornecedor
+app.post('/add-fornecedor', async (req, res) => {
+    const { nome, contato } = req.body;
+    try {
+        await db.query('INSERT INTO fornecedores (nome, contato) VALUES ($1, $2)', [nome, contato]);
+        res.json({ message: "Fornecedor cadastrado com sucesso!" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // --- ROTAS DE FORNECEDORES (A que as páginas estão pedindo!) ---
 app.get('/fornecedores', async (req, res) => {
     try {

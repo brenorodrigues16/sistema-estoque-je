@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Estoque - Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-box-open"></i> J&E Embalagens LTDA
+            </div>
+            <nav>
+                <ul>
+                    <li class="menu-item active" onclick="window.location.href='index.html'">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='chapas.html'">
+                        <i class="fas fa-layer-group"></i> Chapas
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='caixas.html'">
+                        <i class="fas fa-boxes"></i> Caixas Prontas
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='producao.html'">
+                        <i class="fas fa-industry"></i> Produção
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='movimentacoes.html'">
+                        <i class="fas fa-exchange-alt"></i> Movimentações
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='perfil.html'">
+                        <i class="fas fa-user"></i> Perfil
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="user-info">
+                <div class="avatar">U</div>
+                <div>
+                    <p class="username">Usuário</p>
+                    <p class="role">Administrador</p>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+    <header class="top-bar">
+        <span>GESTÃO DE FORNECEDORES</span>
+    </header>
+
+    <section class="filters">
+        <button class="btn-add" id="novo-fornecedor" style="background-color: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+            <i class="fas fa-plus"></i> Novo Fornecedor
+        </button>
+    </section>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>NOME DO FORNECEDOR</th>
+                    <th>CONTATO</th>
+                    <th>AÇÕES</th>
+                </tr>
+            </thead>
+            <tbody id="corpo-fornecedores">
+                </tbody>
+        </table>
+    </div>
+</main>
+
+    <script>
+        // 1. FORMATAÇÃO DE DATA E HORA
+        function atualizarRelogio() {
+            const elementoData = document.getElementById('data-atual');
+            const elementoHora = document.getElementById('hora-atualizacao');
+            
+            const agora = new Date();
+            
+            // Data por extenso
+            const opcoesData = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            elementoData.innerText = agora.toLocaleDateString('pt-BR', opcoesData);
+            
+            // Hora da atualização
+            elementoHora.innerText = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // 2. BUSCA DADOS E GERA O VISUAL DINÂMICO
+        async function carregarDashboard() {
+            try {
+                const resposta = await fetch('http://localhost:3000/dados');
+                const dados = await resposta.json();
+
+                // Atualiza o Total Literal
+                document.getElementById('estoque-valor').innerText = `${(dados.estoqueTotal ?? 0).toLocaleString()} un`;
+
+                const container = document.getElementById('container-progresso');
+                const containerAvisos = document.getElementById('container-avisos');
+                
+                container.innerHTML = '';
+                containerAvisos.innerHTML = '';
+
+                const chapas = Array.isArray(dados.chapas) ? dados.chapas : [];
+                const limitePadrao = 100000;
+
+                if (chapas.length > 0) {
+                    chapas.forEach(chapa => {
+                        // Cálculo da Porcentagem
+                        const porcentagem = (chapa.quantidade / limitePadrao) * 100;
+                        
+                        // Gerar as Barras de Progresso
+                        // Ache essa parte no seu script do index.html:
+                const layoutBarra = `
+                     <div class="progress-item" style="margin-bottom: 20px;">
+                       <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <strong>${chapa.onda ?? 'Chapa'}</strong>
+                       <span>${(chapa.quantidade ?? 0).toLocaleString()} un</span>
+                       </div>
+                    <div style="background: #eee; height: 12px; border-radius: 10px; width: 100%; overflow: hidden;">
+                        <div style="background: #3498db; width: ${porcentagem}%; height: 100%; transition: width 0.8s ease-in-out;"></div>
+                  </div>
+                </div>
+                `;
+                
+                        container.innerHTML += layoutBarra;
+
+                        // Gerar Avisos Automáticos se estiver baixo (ex: menos de 500 un)
+                        if (chapa.quantidade <= 500) {
+                            const avisoItem = `<p style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #e74c3c; font-weight: bold;">
+                                • Reposição de ${chapa.onda} necessária (${chapa.quantidade} un restantes).
+                            </p>`;
+                            containerAvisos.innerHTML += avisoItem;
+                        }
+                    });
+
+                    if (containerAvisos.innerHTML === '') {
+                        containerAvisos.innerHTML = '<p style="color: #27ae60;">• Tudo em dia! Estoque saudável.</p>';
+                    }
+
+                } else {
+                    container.innerHTML = '<p style="color:#666;">Nenhuma chapa encontrada no banco.</p>';
+                }
+
+                atualizarRelogio();
+
+            } catch (erro) {
+                console.error('Erro ao carregar dashboard:', erro);
+            }
+        }
+
+        // EXECUÇÃO AO CARREGAR
+        window.onload = carregarDashboard;
+    </script>
+
+<script>
+    async function carregarFornecedores() {
+        const resp = await fetch('http://localhost:3000/fornecedores-completo');
+        const fornecedores = await resp.json();
+        const tabela = document.getElementById('corpo-fornecedores');
+        tabela.innerHTML = '';
+
+        fornecedores.forEach(f => {
+            tabela.innerHTML += `
+                <tr>
+                    <td><strong>${f.nome}</strong></td>
+                    <td>${f.contato || 'Sem contato'}</td>
+                    <td>
+                        <button style="background: #e74c3c; color: white; border: none; padding: 5px; border-radius: 3px;">Excluir</button>
+                    </td>
+                </tr>`;
+        });
+    }
+
+    document.getElementById('novo-fornecedor').onclick = async () => {
+        const { value: formValues } = await Swal.fire({
+            title: 'Cadastrar Fornecedor',
+            html:
+                '<input id="swal-nome" class="swal2-input" placeholder="Nome do Fornecedor">' +
+                '<input id="swal-contato" class="swal2-input" placeholder="Telefone ou E-mail">',
+            preConfirm: () => ({
+                nome: document.getElementById('swal-nome').value,
+                contato: document.getElementById('swal-contato').value
+            })
+        });
+
+        if (formValues) {
+            await fetch('http://localhost:3000/add-fornecedor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formValues)
+            });
+            carregarFornecedores();
+        }
+    };
+
+    window.onload = carregarFornecedores;
+</script>
+
+</body>
+</html>
