@@ -34,7 +34,7 @@ function logout() {
 }
 
         async function carregarPedidos() {
-            const resp = await fetch('http://localhost:3000/pedidos-pendentes');
+            const resp = await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/pedidos-pendentes');
             const pedidos = await resp.json();
             const container = document.getElementById('lista-pedidos');
             
@@ -62,7 +62,7 @@ function logout() {
             });
 
             if (qtdReal) {
-                await fetch(`http://localhost:3000/conferir-pedido`, {
+                await fetch(`[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/conferir-pedido`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ id, qtdReal })

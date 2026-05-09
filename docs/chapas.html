@@ -86,7 +86,7 @@
     <script>
     async function carregarChapas() {
         try {
-            const resp = await fetch('http://localhost:3000/chapas-detalhes');
+            const resp = await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/chapas-detalhes');
             if (!resp.ok) throw new Error('Erro ao buscar chapas');
             const chapas = await resp.json();
             const tabelaCorpo = document.getElementById('tabela-chapas');
@@ -125,7 +125,7 @@
     }
 
     async function abrirAjuste(onda, qtdAtual, id, compAtual, largAtual, fornecedorAtual) {
-        const respF = await fetch('http://localhost:3000/fornecedores');
+        const respF = await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/fornecedores');
         const fornecedores = await respF.json();
         let opcoesHtml = fornecedores.map(f => 
             `<option value="${f.nome}" ${f.nome === fornecedorAtual ? 'selected' : ''}>${f.nome}</option>`
@@ -154,7 +154,7 @@
         });
 
         if (formValues) {
-            await fetch('http://localhost:3000/ajustar-estoque', {
+            await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/ajustar-estoque', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: id, ...formValues })
@@ -164,7 +164,7 @@
     }
 
     document.querySelector('.btn-add').onclick = async () => {
-        const resp = await fetch('http://localhost:3000/fornecedores');
+        const resp = await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/fornecedores');
         const fornecedores = await resp.json();
         let opcoesHtml = fornecedores.map(f => `<option value="${f.nome}">${f.nome}</option>`).join('');
 
@@ -193,7 +193,7 @@
         });
 
         if (formValues) {
-            await fetch('http://localhost:3000/add-chapa', {
+            await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/add-chapa', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formValues)

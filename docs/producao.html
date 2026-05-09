@@ -162,7 +162,7 @@
             const dados = { tipoChapa, medidaCaixa, quantidade };
 
             try {
-                const resposta = await fetch('http://localhost:3000/produzir', {
+                const resposta = await fetch('/produzir', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dados)
