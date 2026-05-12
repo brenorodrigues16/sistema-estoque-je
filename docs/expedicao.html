@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>J&E - Expedição </title>
     <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .card-pedido { background: white; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #3498db; display: flex; justify-content: space-between; align-items: center; }
@@ -11,6 +12,47 @@
     </style>
 </head>
 <body>
+    
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-box-open"></i> J&E Embalagens LTDA
+            </div>
+            <nav>
+                <ul>
+                    <li class="menu-item" onclick="window.location.href='index.html'">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='chapas.html'">
+                        <i class="fas fa-layer-group"></i> Chapas
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='caixas.html'">
+                        <i class="fas fa-boxes"></i> Caixas Prontas
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='producao.html'">
+                        <i class="fas fa-industry"></i> Produção
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='movimentacoes.html'">
+                        <i class="fas fa-exchange-alt"></i> Movimentações
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='perfil.html'">
+                        <i class="fas fa-user"></i> Perfil
+                    </li>
+                    <li class="menu-item active" onclick="window.location.href='expedicao.html'">
+                        <i class="fas fa-truck"></i> Expedição
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="user-info">
+                <div class="avatar">U</div>
+                <div>
+                    <p class="username">Usuário</p>
+                    <p class="role">Administrador</p>
+                </div>
+            </div>
+        </aside>
+    
     <div class="main-container">
         <main class="content">
             <header class="top-bar"><span>CONFERÊNCIA DE EXPEDIÇÃO - PALOMA</span></header>
@@ -22,11 +64,6 @@
 
     <script>
 
-// TRAVA DE SEGURANÇA J&E
-if (localStorage.getItem('logado') !== 'true') {
-    window.location.href = 'login.html';
-}
-
 // Botão Sair (Coloque isso na função do seu botão de Sair)
 function logout() {
     localStorage.clear();
@@ -34,7 +71,7 @@ function logout() {
 }
 
         async function carregarPedidos() {
-            const resp = await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/pedidos-pendentes');
+            const resp = await fetch('http://localhost:3000/pedidos-pendentes');
             const pedidos = await resp.json();
             const container = document.getElementById('lista-pedidos');
             
@@ -62,7 +99,7 @@ function logout() {
             });
 
             if (qtdReal) {
-                await fetch(`[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/conferir-pedido`, {
+                await fetch(`http://localhost:3000/conferir-pedido`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ id, qtdReal })
@@ -72,11 +109,6 @@ function logout() {
             }
         }
         carregarPedidos();
-
-        // Verifica se o usuário está logado ao carregar a página
-if (localStorage.getItem('logado') !== 'true') {
-    window.location.href = 'login.html';
-}
 
 // Função para Sair do Sistema
 function logout() {

@@ -35,6 +35,9 @@
                     <li class="menu-item" onclick="window.location.href='perfil.html'">
                         <i class="fas fa-user"></i> Perfil
                     </li>
+                    <li class="menu-item" onclick="window.location.href='expedicao.html'">
+                        <i class="fas fa-truck"></i> Expedição
+                    </li>
                 </ul>
             </nav>
 
@@ -48,23 +51,23 @@
         </aside>
 
         <main class="content">
-        <header class="top-bar">
-            <span>ESTOQUE DE CAIXAS PRONTAS</span> <span class="date-now" id="data-atual"></span> 
-        </header>
+            <header class="top-bar">
+                <span>ESTOQUE DE CAIXAS PRONTAS</span> 
+                <span class="date-now" id="data-atual"></span> 
+            </header>
 
-            <section class="filters">
-                <input type="text" placeholder="Buscar por código (Ex: CX001)..." style="flex: 2;" id="input-busca">
-                <select>
-                    <option>Todas as Categorias</option>
-                    <option>Onda B</option>
-                    <option>Onda BC</option>
-                    <option>Onda C</option>
-                    <option>Onda BB</option>
-                </select>
-                <button onclick="novoRegistro()" style="background-color: var(--accent-green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                    <i class="fas fa-plus"></i> Adicionar Nova Caixa
-                </button>
-            </section>
+            <div class="filtros-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    
+    <div class="busca-container" style="position: relative; flex-grow: 1; max-width: 400px;">
+        <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #888;"></i>
+        <input type="text" id="input-busca" placeholder="Buscar por cliente ou código..." style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 8px; border: 1px solid #ddd;">
+    </div>
+
+    <button onclick="novoRegistro()" class="btn-novo" style="background-color: var(--accent-green); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-plus"></i> Registrar Nova Caixa
+    </button>
+
+    </div>
 
             <div class="table-container">
                 <h4 style="margin-bottom: 15px; color: var(--sidebar-color);">CONTROLE DE CAIXAS PRONTAS</h4>
@@ -75,263 +78,255 @@
                             <th>MEDIDAS</th>
                             <th>QUANTIDADE</th>
                             <th>DATA DE FABRICAÇÃO</th>
-                            <th>AÇÕES / ATUALIZAR</th>
+                            <th>AÇÕES / ATUALIZAR / EDITAR</th>
                         </tr>
                     </thead>
                     <tbody id="tabela-corpo-caixas">
-                            <td class="actions">
-                                <button onclick="alterarQtd('CX001', 1)" title="Aumentar">+</button>
-                                <button onclick="alterarQtd('CX001', -1)" title="Diminuir">-</button>
-                                <button onclick="editarCaixa('CX001')" title="Editar"><i class="fas fa-edit"></i></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>CX002</strong></td>
-                            <td>500 x 350 x 300</td>
-                            <td>250 un</td>
-                            <td>26/05/2025</td>
-                            <td class="actions">
-                                <button onclick="alterarQtd('CX002', 1)" title="Aumentar">+</button>
-                                <button onclick="alterarQtd('CX002', -1)" title="Diminuir">-</button>
-                                <button><i class="fas fa-edit"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
         </main>
     </div>
 
-<script>
-
-const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const path = require('path'); // Novo: para lidar com caminhos de pastas
-
-const app = express();
-
-// CONFIGURAÇÕES ESSENCIAIS
-app.use(cors());
-app.use(bodyParser.json());
-
-// Esta linha diz ao Node que tudo o que for HTML, CSS e JS de tela está na pasta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Rota para abrir o Dashboard automaticamente ao acessar [https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// ... (Outras rotas /dados, /produzir, etc, continuam iguais abaixo daqui)
-
-Swal.fire({
-  title: 'Tem certeza?',
-  text: "Você não poderá reverter isso!",
-  icon: 'warning',
-  showCancelButton: true,
-  confirmButtonColor: '#c0392b',
-  cancelButtonColor: '#95a5a6',
-  confirmButtonText: 'Sim, excluir!'
-}).then((result) => {
-  if (result.isConfirmed) {
-      // código de fetch para excluir
-  }
-})
-
-
-const inputBusca = document.getElementById('input-busca');
-
-inputBusca.addEventListener('input', async () => {
-    const termo = inputBusca.value;
-    
-    // Se o campo estiver vazio, carrega tudo de novo
-    if (termo.length === 0) {
-        carregarCaixas(); 
-        return;
-    }
-
-    // Busca no servidor apenas o que combina com o termo
-    const resp = await fetch(`[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/buscar-caixas?termo=${termo}`);
-    const resultados = await resp.json();
-    
-    const tabela = document.querySelector('tbody');
-    tabela.innerHTML = resultados.map(caixa => `
-        <tr>
-            <td><strong>${caixa.codigo}</strong></td>
-            <td>${caixa.medida}</td>
-            <td>${caixa.qtd} un</td>
-            <td>22/04/2026</td>
-            <td class="actions">
-                <button onclick="alterarQtd('${caixa.codigo}', 1)" title="Aumentar">+</button>
-                <button onclick="alterarQtd('${caixa.codigo}', -1)" title="Diminuir">-</button>
-                <button onclick="editarCaixa('${caixa.codigo}')" title="Editar"><i class="fas fa-edit"></i></button>
-            </td>
-        </tr>
-    `).join('');
-});
-
-    async function carregarCaixas() {
-        const resp = await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/dados');
-        const dados = await resp.json();
-        const tabela = document.querySelector('tbody');
-        tabela.innerHTML = dados.caixas.map(caixa => `
-            <tr>
-                <td><strong>${caixa.codigo}</strong></td>
-                <td>${caixa.medida}</td>
-                <td>${caixa.qtd} un</td>
-                <td>22/04/2026</td>
-                <td class="actions">
-                    <button>+</button><button>-</button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    document.querySelector('.btn-add').addEventListener('click', async () => {
-        const codigo = prompt("Código da Caixa (ex: CX-SHOP):");
-        const medida = prompt("Medida (ex: 20x20x10):");
-        const qtd = prompt("Quantidade em estoque:");
-
-        if (codigo && medida && qtd) {
-            await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/add-caixa', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ codigo, medida, qtd })
-            });
-            carregarCaixas();
-        }
-    });
-
-    window.onload = carregarCaixas;
-</script>
-
-<script>
+    <script>
+    // --- CONFIGURAÇÃO DE DATA ---
     function configurarData() {
         const elementoData = document.getElementById('data-atual');
         if (elementoData) {
             const data = new Date();
-            const opcoes = { 
-                weekday: 'long', 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
-            };
-            
-            // Gera: quinta-feira, 23 de abril de 2026
-            let dataFormatada = data.toLocaleDateString('pt-BR', opcoes);
-            elementoData.innerText = dataFormatada;
+            elementoData.innerText = data.toLocaleDateString('pt-BR', { 
+                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
+            });
         }
     }
 
-    // Chama a função assim que a página terminar de carregar
-    window.addEventListener('load', configurarData);
+    // --- CARREGAR DADOS DO SERVIDOR ---
+    async function carregarTabela() {
+        try {
+            const resposta = await fetch('http://localhost:3000/caixas');
+            if (!resposta.ok) throw new Error('Erro ao buscar dados');
+            const caixas = await resposta.json();
 
-  // 1. Função para Somar ou Subtrair Quantidade
-function alterarQtd(codigo, valor) {
-    // Busca a linha específica pelo ID
-    const linha = document.getElementById(`linha-${codigo}`);
-    const campoQtd = linha.querySelector('.qtd-coluna');
-    
-    // Extrai apenas o número do texto (ex: "350 un" vira 350)
-    let qtdAtual = parseInt(campoQtd.innerText);
-    let novaQtd = qtdAtual + valor;
+            const corpoTabela = document.getElementById('tabela-corpo-caixas');
+            corpoTabela.innerHTML = ''; 
 
-    // Impede que a quantidade seja menor que zero
-    if (novaQtd < 0) {
-        Swal.fire('Erro', 'A quantidade não pode ser negativa!', 'error');
-        return;
+            caixas.forEach(caixa => {
+                let statusClass = caixa.quantidade <= 0 ? 'status-critico' : (caixa.quantidade < 50 ? 'status-alerta' : 'status-bom');
+                let statusTexto = caixa.quantidade <= 0 ? 'ZERADO' : (caixa.quantidade < 50 ? 'BAIXO ESTOQUE' : 'ESTOQUE BOM');
+
+                const linha = `
+                    <tr>
+                        <td>
+                            <div style="font-weight: bold; font-size: 1.1em; color: #333;">
+                                <i class="fas fa-user" style="font-size: 0.85em; color: #ffa500;"></i> ${caixa.cliente || 'Consumidor Final'}
+                            </div>
+                            <div style="font-size: 0.85em; color: #666; margin-top: 2px;">
+                                Ref: ${caixa.codigo}
+                            </div>
+                        </td>
+                        <td><span class="medida-tag">${caixa.medidas}</span></td>
+                        <td>
+                            <strong>${caixa.quantidade} un</strong>
+                            <span class="status-badge ${statusClass}">${statusTexto}</span>
+                        </td>
+                        <td>${caixa.data_fabricacao ? new Date(caixa.data_fabricacao).toLocaleDateString('pt-BR') : '---'}</td>
+                        <td class="actions">
+                            <button onclick="alterarQtd(${caixa.id}, 1)" class="btn-action-small btn-plus">+</button>
+                            <button onclick="alterarQtd(${caixa.id}, -1)" class="btn-action-small btn-minus">-</button>
+                            <button onclick="editarCaixa(${caixa.id}, '${caixa.cliente || caixa.codigo}')" class="btn-action-small btn-edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="editarDadosCompletos(${caixa.id}, '${caixa.cliente}', '${caixa.codigo}', '${caixa.medidas}')" class="btn-action-small" style="background: #6c757d; color: white;">
+                                <i class="fas fa-pen"></i>
+                                    </button>
+                            </button>
+                        </td>
+                    </tr>`;
+                corpoTabela.innerHTML += linha;
+            });
+        } catch (error) {
+            console.error("Erro ao carregar tabela:", error);
+        }
     }
 
-    // Atualiza visualmente na tabela
-    campoQtd.innerText = `${novaQtd} un`;
+    // --- ALTERAR QUANTIDADE RÁPIDO (+ e -) ---
+    async function alterarQtd(id, valor) {
+        try {
+            await fetch('http://localhost:3000/ajustar-estoque-caixa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, ajuste: valor, ehSubstituicao: false })
+            });
+            carregarTabela();
+        } catch (error) {
+            Swal.fire('Erro', 'Não foi possível atualizar o estoque', 'error');
+        }
+    }
 
-    // OPCIONAL: Enviar para o banco de dados via Fetch
-    // atualizarNoServidor(codigo, novaQtd);
+    // --- BOTÃO AZUL: EDITAR VALOR TOTAL ---
+    async function editarCaixa(id, nome) {
+    const { value: novoValor, isDismissed } = await Swal.fire({
+        title: `Ajustar estoque: ${nome}`,
+        input: 'number',
+        inputLabel: 'Digite a quantidade total exata no estoque',
+        showCancelButton: true,
+        confirmButtonText: 'Atualizar',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (isDismissed) return;
+
+    if (novoValor !== null && novoValor !== "") {
+        try {
+            await fetch('http://localhost:3000/ajustar-estoque-caixa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, ajuste: parseInt(novoValor), ehSubstituicao: true })
+            });
+            carregarTabela();
+        } catch (error) {
+            Swal.fire('Erro', 'Não foi possível editar.', 'error');
+        }
+    }
 }
 
-// 2. Função para Editar (Abre um alerta para digitar novo valor)
-async function editarCaixa(codigo) {
-    const { value: novaQtd } = await Swal.fire({
-        title: `Editar Estoque - ${codigo}`,
-        input: 'number',
-        inputLabel: 'Digite a nova quantidade total:',
-        inputValue: '',
+// --- BOTÃO DE EDIÇÃO COMPLETA (CLIENTE, CÓDIGO, MEDIDAS) ---
+async function editarDadosCompletos(id, clienteAtual, codigoAtual, medidasAtual) {
+    const { value: formValues } = await Swal.fire({
+        title: 'Editar Informações da Caixa',
+        html: `
+            <input id="edit-cliente" class="swal2-input" value="${clienteAtual}" placeholder="Cliente">
+            <input id="edit-codigo" class="swal2-input" value="${codigoAtual}" placeholder="Código">
+            <input id="edit-medida" class="swal2-input" value="${medidasAtual}" placeholder="Medidas">
+        `,
+        focusConfirm: false,
         showCancelButton: true,
-        inputValidator: (value) => {
-            if (!value || value < 0) {
-                return 'Por favor, insira um valor válido!';
+        preConfirm: () => {
+            return {
+                id: id,
+                cliente: document.getElementById('edit-cliente').value,
+                codigo: document.getElementById('edit-codigo').value.toUpperCase(),
+                medidas: document.getElementById('edit-medida').value
             }
         }
     });
 
-    if (novaQtd) {
-        const linha = document.getElementById(`linha-${codigo}`);
-        linha.querySelector('.qtd-coluna').innerText = `${novaQtd} un`;
-        Swal.fire('Sucesso!', 'Estoque atualizado.', 'success');
+    if (formValues) {
+        try {
+            await fetch('http://localhost:3000/editar-dados-caixa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formValues)
+            });
+            carregarTabela();
+            Swal.fire('Atualizado!', 'Os dados foram corrigidos.', 'success');
+        } catch (error) {
+            Swal.fire('Erro', 'Erro ao atualizar dados.', 'error');
+        }
     }
 }
 
-// 3. Botão "Adicionar Nova Caixa" (Simulação)
-function novoRegistro() {
-    Swal.fire({
-        title: 'Nova Caixa',
-        html: `
-            <input id="swal-input1" class="swal2-input" placeholder="Código (ex: CX003)">
-            <input id="swal-input2" class="swal2-input" placeholder="Medidas">
-            <input id="swal-input3" class="swal2-input" type="number" placeholder="Quantidade">
-        `,
-        focusConfirm: false,
-        preConfirm: () => {
-            // Aqui você coletaria os dados e daria um append na tabela
-            Swal.fire('Enviado!', 'Funcionalidade de inserção pronta para conectar ao banco.', 'info');
+    // --- BUSCA EM TEMPO REAL ---
+    document.getElementById('input-busca').addEventListener('input', async (e) => {
+        const termo = e.target.value.trim();
+
+        if (termo.length === 0) { 
+            carregarTabela(); 
+            return; 
+        }
+
+        try {
+            const resp = await fetch(`http://localhost:3000/buscar-caixas?termo=${termo}`);
+            const caixas = await resp.json();
+            const corpoTabela = document.getElementById('tabela-corpo-caixas');
+            corpoTabela.innerHTML = ''; 
+
+            caixas.forEach(caixa => {
+                let statusClass = caixa.quantidade <= 0 ? 'status-critico' : (caixa.quantidade < 50 ? 'status-alerta' : 'status-bom');
+                let statusTexto = caixa.quantidade <= 0 ? 'ZERADO' : (caixa.quantidade < 50 ? 'BAIXO ESTOQUE' : 'ESTOQUE BOM');
+
+                const linha = `
+                    <tr>
+                        <td>
+                            <div style="font-weight: bold; font-size: 1.1em; color: #333;">
+                                <i class="fas fa-user" style="font-size: 0.85em; color: #ffa500;"></i> ${caixa.cliente || 'Consumidor Final'}
+                            </div>
+                            <div style="font-size: 0.85em; color: #666; margin-top: 2px;">
+                                Ref: ${caixa.codigo}
+                            </div>
+                        </td>
+                        <td><span class="medida-tag">${caixa.medidas}</span></td>
+                        <td>
+                            <strong>${caixa.quantidade} un</strong>
+                            <span class="status-badge ${statusClass}">${statusTexto}</span>
+                        </td>
+                        <td>${caixa.data_fabricacao ? new Date(caixa.data_fabricacao).toLocaleDateString('pt-BR') : '---'}</td>
+                        <td class="actions">
+                            <button onclick="alterarQtd(${caixa.id}, 1)" class="btn-action-small btn-plus">+</button>
+                            <button onclick="alterarQtd(${caixa.id}, -1)" class="btn-action-small btn-minus">-</button>
+                            <button onclick="editarCaixa(${caixa.id}, '${caixa.cliente || caixa.codigo}')" class="btn-action-small btn-edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                corpoTabela.innerHTML += linha;
+            });
+        } catch (error) {
+            console.error("Erro na busca:", error);
         }
     });
-}
 
-// Função para buscar os dados do servidor e desenhar na tela
-async function carregarTabela() {
-    try {
-        const resposta = await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/caixas'); // Ajuste para sua rota real
-        const caixas = await resposta.json();
-
-        const corpoTabela = document.getElementById('tabela-corpo-caixas');
-        corpoTabela.innerHTML = ''; // Limpa antes de carregar
-
-        caixas.forEach(caixa => {
-            const linha = `
-                <tr id="linha-${caixa.codigo}">
-                    <td style="font-weight: bold;">${caixa.codigo}</td>
-                    <td>${caixa.medidas}</td>
-                    <td class="qtd-coluna">${caixa.quantidade} un</td>
-                    <td>${caixa.data_fabricacao}</td>
-                    <td>
-                        <button onclick="alterarQtd('${caixa.codigo}', 1)" class="btn-acao">+</button>
-                        <button onclick="alterarQtd('${caixa.codigo}', -1)" class="btn-acao">-</button>
-                        <button onclick="editarCaixa('${caixa.codigo}')" class="btn-acao"><i class="fas fa-edit"></i></button>
-                    </td>
-                </tr>
-            `;
-            corpoTabela.innerHTML += linha;
+    // --- ADICIONAR NOVA CAIXA ---
+    async function novoRegistro() {
+        const { value: formValues } = await Swal.fire({
+            title: 'Cadastrar Nova Caixa',
+            html: `
+                <div style="text-align: left; margin-bottom: 5px; font-weight: bold;">Cliente/Comprador:</div>
+                <input id="swal-cliente" class="swal2-input" placeholder="Ex: Nome do Cliente">
+                
+                <div style="text-align: left; margin-bottom: 5px; font-weight: bold; margin-top: 15px;">Código da Caixa:</div>
+                <input id="swal-codigo" class="swal2-input" value="CX - " placeholder="Ex: 001 ou NOME">
+                
+                <div style="text-align: left; margin-bottom: 5px; font-weight: bold; margin-top: 15px;">Medidas:</div>
+                <input id="swal-medida" class="swal2-input" placeholder="Ex: 30 x 500 x ...">
+                
+                <div style="text-align: left; margin-bottom: 5px; font-weight: bold; margin-top: 15px;">Quantidade Inicial:</div>
+                <input id="swal-qtd" class="swal2-input" type="number" value="0">
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Salvar nova Caixa',
+            preConfirm: () => {
+                return {
+                    cliente: document.getElementById('swal-cliente').value,
+                    codigo: document.getElementById('swal-codigo').value.toUpperCase(),
+                    medidas: document.getElementById('swal-medida').value,
+                    quantidade: document.getElementById('swal-qtd').value
+                }
+            }
         });
-    } catch (error) {
-        console.error("Erro ao carregar tabela:", error);
+
+        if (formValues) {
+            try {
+                const resposta = await fetch('http://localhost:3000/add-caixa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formValues)
+                });
+                if (resposta.ok) {
+                    Swal.fire('Sucesso!', 'Nova caixa adicionada!', 'success');
+                    carregarTabela();
+                }
+            } catch (error) {
+                Swal.fire('Erro', 'Erro ao conectar ao banco.', 'error');
+            }
+        }
     }
-}
 
-// Executa assim que a página abre
-window.onload = () => {
-    carregarTabela();
-    // Coloque aqui também o código da data que você já tem
-};
-
-// Dentro da sua função de salvar nova caixa:
-if (resposta.ok) {
-    Swal.fire('Sucesso!', 'Caixa adicionada.', 'success');
-    carregarTabela(); // <--- Isso faz a mágica de aparecer na hora sem dar F5
-}
-
+    window.onload = () => {
+        configurarData();
+        carregarTabela();
+    };
 </script>
 
 </body>

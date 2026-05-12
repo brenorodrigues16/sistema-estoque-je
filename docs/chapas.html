@@ -35,6 +35,9 @@
                     <li class="menu-item" onclick="window.location.href='perfil.html'">
                         <i class="fas fa-user"></i> Perfil
                     </li>
+                    <li class="menu-item" onclick="window.location.href='expedicao.html'">
+                        <i class="fas fa-truck"></i> Expedição
+                    </li>
                 </ul>
             </nav>
             <div class="user-info">
@@ -56,16 +59,17 @@
                 <input type="text" placeholder="Buscar tipo de chapa..." style="flex: 2;">
                 <select>
                     <option>Todas as Ondas</option>
-                    <option>Onda Simples</option>
-                    <option>Onda Dupla</option>
+                    <option>ONDA B</option>
+                    <option>ONDA BC</option>
+                    <option>ONDA C</option>
                 </select>
-                <button class="btn-add" style="background-color: var(--accent-green); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                <button class="btn-add" style="background-color: #27ae60; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
                     <i class="fas fa-plus"></i> Nova Chapa
                 </button>
             </section>
 
             <div class="table-container">
-                <h4 style="margin-bottom: 15px; color: var(--sidebar-color);">ESTOQUE DE CHAPAS</h4>
+                <h4 style="margin-bottom: 15px; color: #333;">ESTOQUE DE CHAPAS</h4>
                 <table>
                     <thead>
                         <tr>
@@ -86,7 +90,7 @@
     <script>
     async function carregarChapas() {
         try {
-            const resp = await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/chapas-detalhes');
+            const resp = await fetch('http://localhost:3000/chapas-detalhes');
             if (!resp.ok) throw new Error('Erro ao buscar chapas');
             const chapas = await resp.json();
             const tabelaCorpo = document.getElementById('tabela-chapas');
@@ -97,7 +101,6 @@
                 const comp = chapa.comprimento ?? 0;
                 const larg = chapa.largura ?? 0;
                 const fornecedor = chapa.fornecedor || 'Não informado';
-                
                 const estoqueZerado = chapa.quantidade <= 0;
                 const corTexto = estoqueZerado ? 'color: #e74c3c;' : '';
 
@@ -125,7 +128,7 @@
     }
 
     async function abrirAjuste(onda, qtdAtual, id, compAtual, largAtual, fornecedorAtual) {
-        const respF = await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/fornecedores');
+        const respF = await fetch('http://localhost:3000/fornecedores');
         const fornecedores = await respF.json();
         let opcoesHtml = fornecedores.map(f => 
             `<option value="${f.nome}" ${f.nome === fornecedorAtual ? 'selected' : ''}>${f.nome}</option>`
@@ -154,7 +157,7 @@
         });
 
         if (formValues) {
-            await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/ajustar-estoque', {
+            await fetch('http://localhost:3000/ajustar-estoque', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: id, ...formValues })
@@ -164,14 +167,14 @@
     }
 
     document.querySelector('.btn-add').onclick = async () => {
-        const resp = await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/fornecedores');
+        const resp = await fetch('http://localhost:3000/fornecedores');
         const fornecedores = await resp.json();
         let opcoesHtml = fornecedores.map(f => `<option value="${f.nome}">${f.nome}</option>`).join('');
 
         const { value: formValues } = await Swal.fire({
             title: 'Nova Chapa',
             html:
-                '<input id="swal-onda" class="swal2-input" placeholder="Onda (A, B, BC...)">' +
+                '<input id="swal-onda" class="swal2-input" placeholder="Onda (ex: B, BC, C)" style="text-transform: uppercase;">' +
                 '<select id="swal-forn" class="swal2-input" style="width: 78%; display: block; margin: 10px auto;">' +
                     '<option value="" disabled selected>Selecione o Fornecedor</option>' +
                     opcoesHtml +
@@ -181,9 +184,14 @@
                 '<input id="swal-qtd" class="swal2-input" type="number" placeholder="Quantidade">',
             preConfirm: () => {
                 const forn = document.getElementById('swal-forn').value;
+                const ondaOriginal = document.getElementById('swal-onda').value;
+
                 if (!forn) { Swal.showValidationMessage('Selecione um fornecedor!'); return false; }
+                if (!ondaOriginal) { Swal.showValidationMessage('Digite o tipo de onda!'); return false; }
+
                 return {
-                    onda: document.getElementById('swal-onda').value,
+                    // PADRONIZAÇÃO AQUI: Garante que salve como "ONDA B" se digitar "b" ou "B"
+                    onda: ondaOriginal.toUpperCase().trim().startsWith('ONDA') ? ondaOriginal.toUpperCase().trim() : 'ONDA ' + ondaOriginal.toUpperCase().trim(),
                     fornecedor: forn,
                     comprimento: Number(document.getElementById('swal-comp').value),
                     largura: Number(document.getElementById('swal-larg').value),
@@ -193,7 +201,7 @@
         });
 
         if (formValues) {
-            await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/add-chapa', {
+           await fetch('http://localhost:3000/add-chapa', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formValues)

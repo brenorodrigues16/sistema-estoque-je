@@ -35,6 +35,9 @@
                     <li class="menu-item" onclick="window.location.href='perfil.html'">
                         <i class="fas fa-user"></i> Perfil
                     </li>
+                    <li class="menu-item" onclick="window.location.href='expedicao.html'">
+                        <i class="fas fa-truck"></i> Expedição
+                    </li>
                 </ul>
             </nav>
 
@@ -105,7 +108,7 @@
         // 2. BUSCA DADOS E GERA O VISUAL DINÂMICO
         async function carregarDashboard() {
             try {
-                const resposta = await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/dados');
+                const resposta = await fetch('http://localhost:3000/dados');
                 const dados = await resposta.json();
 
                 // Atualiza o Total Literal

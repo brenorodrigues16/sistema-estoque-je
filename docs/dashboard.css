@@ -152,3 +152,92 @@ td { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
     .logo, .user-info { display: none; }
     .content { padding: 15px; }
 }
+
+/* Estilo das Tags de Medida (Cinza) */
+.medida-tag {
+    background: #e2e8f0;
+    padding: 4px 10px;
+    border-radius: 6px;
+    color: #4a5568;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+/* Selos de Status de Estoque */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-left: 10px;
+    display: inline-block;
+}
+
+.status-bom { background-color: #48bb78; color: white; }
+.status-alerta { background-color: #ecc94b; color: #744210; }
+.status-critico { background-color: #f56565; color: white; }
+
+/* Botões de Ação Modernos (dentro da tabela) */
+.btn-action-small {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-right: 5px;
+    color: white;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-plus { background-color: #48bb78; }  /* Verde */
+.btn-minus { background-color: #f56565; } /* Vermelho */
+.btn-edit { background-color: #4299e1; }  /* Azul */
+
+.btn-action-small:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+/* Ajuste fino na tabela */
+.table-container table tbody tr td {
+    padding: 15px 12px; /* Aumenta o espaço para não ficar apertado */
+    vertical-align: middle;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #27ae60;
+    text-align: center;
+}
+
+.stat-card .label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #bdc3c7;
+}
+
+.stat-card .value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.unidade-info {
+    font-size: 13px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 10px;
+    color: #ecf0f1;
+}

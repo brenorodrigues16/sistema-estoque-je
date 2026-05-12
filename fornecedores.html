@@ -92,7 +92,7 @@
         // 2. BUSCA DADOS E GERA O VISUAL DINÂMICO
         async function carregarDashboard() {
             try {
-                const resposta = await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/dados');
+                const resposta = await fetch('http://localhost:3000(https://daybreak-huff-unaired.ngrok-free.dev)/dados');
                 const dados = await resposta.json();
 
                 // Atualiza o Total Literal
@@ -158,7 +158,7 @@
 
 <script>
     async function carregarFornecedores() {
-        const resp = await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/fornecedores-completo');
+        const resp = await fetch('http://localhost:3000(https://daybreak-huff-unaired.ngrok-free.dev)/fornecedores-completo');
         const fornecedores = await resp.json();
         const tabela = document.getElementById('corpo-fornecedores');
         tabela.innerHTML = '';
@@ -188,7 +188,7 @@
         });
 
         if (formValues) {
-            await fetch('[https://daybreak-huff-unaired.ngrok-free.dev](https://daybreak-huff-unaired.ngrok-free.dev)/add-fornecedor', {
+            await fetch('http://localhost:3000(https://daybreak-huff-unaired.ngrok-free.dev)/add-fornecedor', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formValues)
