@@ -241,3 +241,62 @@ td { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
     padding-top: 10px;
     color: #ecf0f1;
 }
+
+/* Container que vai segurar a tabela */
+.tabela-container {
+    background: var(--card-white);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    max-height: 740px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.tabela-container h4 {
+    position: sticky;
+    top: -20px;
+    background: var(--card-white);
+    margin: 0;
+    padding-bottom: 15px;
+    z-index: 20;
+}
+
+.tabela-container table thead th {
+    position: sticky;
+    top: 19px;
+    background-color: #f8f9fa;
+    z-index: 15;
+    box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+}
+
+/* Estilizando a barra de rolagem para ficar elegante */
+.tabela-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.tabela-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.tabela-container::-webkit-scrollbar-thumb {
+    background: var(--accent-blue);
+    border-radius: 10px;
+}
+
+/* Garante que o cabeçalho da tabela fique fixo no topo enquanto você rola */
+table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 1;
+}
+[data-theme='dark'] .tabela-container table thead th {
+    background-color: #3e4451;
+}
+
+[data-theme='dark'] .tabela-container h4 { 
+    background: var(--card-dark); 
+}

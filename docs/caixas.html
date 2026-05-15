@@ -69,16 +69,17 @@
 
     </div>
 
-            <div class="table-container">
+            <div class="tabela-container">
                 <h4 style="margin-bottom: 15px; color: var(--sidebar-color);">CONTROLE DE CAIXAS PRONTAS</h4>
                 <table>
                     <thead>
                         <tr>
-                            <th>CÓDIGO DA CAIXA</th>
-                            <th>MEDIDAS</th>
+                            <th>Cliente</th>
+                            <th>Código/Referencia</th>
                             <th>QUANTIDADE</th>
                             <th>DATA DE FABRICAÇÃO</th>
-                            <th>AÇÕES / ATUALIZAR / EDITAR</th>
+                            <th>RESPONSAVEL</th>
+                            <th>EDITAR</th>
                         </tr>
                     </thead>
                     <tbody id="tabela-corpo-caixas">
@@ -89,243 +90,208 @@
     </div>
 
     <script>
-    // --- CONFIGURAÇÃO DE DATA ---
-    function configurarData() {
-        const elementoData = document.getElementById('data-atual');
-        if (elementoData) {
-            const data = new Date();
-            elementoData.innerText = data.toLocaleDateString('pt-BR', { 
-                weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' 
-            });
-        }
-    }
-
-    // --- CARREGAR DADOS DO SERVIDOR ---
-    async function carregarTabela() {
+    // 1. Função para carregar as caixas do banco
+    async function carregarCaixas() {
         try {
-            const resposta = await fetch('http://localhost:3000/caixas');
-            if (!resposta.ok) throw new Error('Erro ao buscar dados');
-            const caixas = await resposta.json();
-
-            const corpoTabela = document.getElementById('tabela-corpo-caixas');
-            corpoTabela.innerHTML = ''; 
+            const resp = await fetch('http://localhost:3000/api/caixas');
+            const caixas = await resp.json();
+            const tabelaCorpo = document.getElementById('tabela-corpo-caixas'); // Garanta que este ID existe no seu <tbody>
+            
+            tabelaCorpo.innerHTML = '';
 
             caixas.forEach(caixa => {
-                let statusClass = caixa.quantidade <= 0 ? 'status-critico' : (caixa.quantidade < 50 ? 'status-alerta' : 'status-bom');
-                let statusTexto = caixa.quantidade <= 0 ? 'ZERADO' : (caixa.quantidade < 50 ? 'BAIXO ESTOQUE' : 'ESTOQUE BOM');
-
+   
                 const linha = `
                     <tr>
-                        <td>
-                            <div style="font-weight: bold; font-size: 1.1em; color: #333;">
-                                <i class="fas fa-user" style="font-size: 0.85em; color: #ffa500;"></i> ${caixa.cliente || 'Consumidor Final'}
-                            </div>
-                            <div style="font-size: 0.85em; color: #666; margin-top: 2px;">
-                                Ref: ${caixa.codigo}
-                            </div>
-                        </td>
-                        <td><span class="medida-tag">${caixa.medidas}</span></td>
-                        <td>
-                            <strong>${caixa.quantidade} un</strong>
-                            <span class="status-badge ${statusClass}">${statusTexto}</span>
-                        </td>
-                        <td>${caixa.data_fabricacao ? new Date(caixa.data_fabricacao).toLocaleDateString('pt-BR') : '---'}</td>
-                        <td class="actions">
-                            <button onclick="alterarQtd(${caixa.id}, 1)" class="btn-action-small btn-plus">+</button>
-                            <button onclick="alterarQtd(${caixa.id}, -1)" class="btn-action-small btn-minus">-</button>
-                            <button onclick="editarCaixa(${caixa.id}, '${caixa.cliente || caixa.codigo}')" class="btn-action-small btn-edit">
+                        <td><strong>${caixa.cliente}</strong></td>
+                        <td>${caixa.codigo}</td>
+                        <td>${caixa.quantidade} un</td>
+                        <td>${new Date(caixa.data_fabricacao).toLocaleDateString('pt-BR')}</td>
+                        <td><strong>${caixa.responsavel}</strong></td>
+                        <td class="actions" style="display: flex; gap: 8px;">
+                            <button onclick="editarCaixa(${caixa.id}, '${caixa.cliente}', '${caixa.codigo}', ${caixa.quantidade}, '${caixa.data_fabricacao}', '${caixa.responsavel}')" 
+                                 style="background:#3498db; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button onclick="editarDadosCompletos(${caixa.id}, '${caixa.cliente}', '${caixa.codigo}', '${caixa.medidas}')" class="btn-action-small" style="background: #6c757d; color: white;">
-                                <i class="fas fa-pen"></i>
-                                    </button>
-                            </button>
-                        </td>
+                        
+                            </td>
                     </tr>`;
-                corpoTabela.innerHTML += linha;
+                tabelaCorpo.innerHTML += linha;
             });
-        } catch (error) {
-            console.error("Erro ao carregar tabela:", error);
+
+        } catch (erro) {
+            console.error("Erro ao carregar caixas:", erro);
         }
     }
 
-    // --- ALTERAR QUANTIDADE RÁPIDO (+ e -) ---
-    async function alterarQtd(id, valor) {
-        try {
-            await fetch('http://localhost:3000/ajustar-estoque-caixa', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, ajuste: valor, ehSubstituicao: false })
-            });
-            carregarTabela();
-        } catch (error) {
-            Swal.fire('Erro', 'Não foi possível atualizar o estoque', 'error');
-        }
-    }
-
-    // --- BOTÃO AZUL: EDITAR VALOR TOTAL ---
-    async function editarCaixa(id, nome) {
-    const { value: novoValor, isDismissed } = await Swal.fire({
-        title: `Ajustar estoque: ${nome}`,
-        input: 'number',
-        inputLabel: 'Digite a quantidade total exata no estoque',
-        showCancelButton: true,
-        confirmButtonText: 'Atualizar',
-        cancelButtonText: 'Cancelar'
-    });
-
-    if (isDismissed) return;
-
-    if (novoValor !== null && novoValor !== "") {
-        try {
-            await fetch('http://localhost:3000/ajustar-estoque-caixa', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, ajuste: parseInt(novoValor), ehSubstituicao: true })
-            });
-            carregarTabela();
-        } catch (error) {
-            Swal.fire('Erro', 'Não foi possível editar.', 'error');
-        }
-    }
-}
-
-// --- BOTÃO DE EDIÇÃO COMPLETA (CLIENTE, CÓDIGO, MEDIDAS) ---
-async function editarDadosCompletos(id, clienteAtual, codigoAtual, medidasAtual) {
+    // 2. Função para o botão "Registrar Nova Caixa"
+   async function novoRegistro() {
     const { value: formValues } = await Swal.fire({
-        title: 'Editar Informações da Caixa',
-        html: `
-            <input id="edit-cliente" class="swal2-input" value="${clienteAtual}" placeholder="Cliente">
-            <input id="edit-codigo" class="swal2-input" value="${codigoAtual}" placeholder="Código">
-            <input id="edit-medida" class="swal2-input" value="${medidasAtual}" placeholder="Medidas">
-        `,
+        title: 'Registrar Nova Caixa',
+        html:
+            `<label style="display:block; text-align:left; margin-left:40px;">Cliente:</label>` +
+            `<input id="swal-cliente" class="swal2-input" placeholder="Nome do cliente">` +
+            `<label style="display:block; text-align:left; margin-left:40px;">Código:</label>` +
+            `<input id="swal-codigo" class="swal2-input" placeholder="Código / Referência da caixa">` +
+            `<label style="display:block; text-align:left; margin-left:40px;">Quantidade:</label>` +
+            `<input id="swal-qtd" class="swal2-input" type="number" placeholder="Quantidade">` +
+            `<label style="display:block; text-align:left; margin-left:40px;">Data de Fabricação:</label>` +
+            `<input id="swal-data" class="swal2-input" type="date">` +
+            `<label style="display:block; text-align:left; margin-left:40px;">Responsável:</label>` +
+            `<input id="swal-responsavel" class="swal2-input" placeholder="Nome do responsável">`, // CORRIGIDO: removido o 'n' extra
         focusConfirm: false,
         showCancelButton: true,
+        confirmButtonText: 'Confirmar novo Registro',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#27ae60',
         preConfirm: () => {
+            // Verificação básica para não enviar campo vazio
+            const cliente = document.getElementById('swal-cliente').value;
+            const codigo = document.getElementById('swal-codigo').value;
+            const qtd = document.getElementById('swal-qtd').value;
+            const data = document.getElementById('swal-data').value;
+            const resp = document.getElementById('swal-responsavel').value;
+
+            if (!cliente || !codigo || !qtd || !data || !resp) {
+                Swal.showValidationMessage('Por favor, preencha todos os campos!');
+                return false;
+            }
+
             return {
-                id: id,
-                cliente: document.getElementById('edit-cliente').value,
-                codigo: document.getElementById('edit-codigo').value.toUpperCase(),
-                medidas: document.getElementById('edit-medida').value
+                cliente: cliente,
+                codigo: codigo,
+                quantidade: qtd,
+                data_fabricacao: data,
+                responsavel: resp
             }
         }
     });
 
     if (formValues) {
         try {
-            await fetch('http://localhost:3000/editar-dados-caixa', {
+            const response = await fetch('http://localhost:3000/api/caixas', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formValues)
             });
-            carregarTabela();
-            Swal.fire('Atualizado!', 'Os dados foram corrigidos.', 'success');
-        } catch (error) {
-            Swal.fire('Erro', 'Erro ao atualizar dados.', 'error');
+            
+            const resData = await response.json();
+            
+            if (resData.success) {
+                Swal.fire('Sucesso!', 'Caixa registrada com sucesso.', 'success');
+                carregarCaixas(); // Atualiza a tabela na hora
+            } else {
+                Swal.fire('Erro!', 'Erro ao salvar no banco: ' + resData.message, 'error');
+            }
+        } catch (erro) {
+            console.error("Erro na requisição:", erro);
+            Swal.fire('Erro!', 'Não foi possível conectar ao servidor.', 'error');
         }
     }
 }
 
-    // --- BUSCA EM TEMPO REAL ---
-    document.getElementById('input-busca').addEventListener('input', async (e) => {
-        const termo = e.target.value.trim();
+    // 3. Função de Busca (igual à de chapas)
+    function filtrarCaixas() {
+        const textoBusca = document.getElementById('input-busca').value.toLowerCase();
+        const linhas = document.querySelectorAll('#tabela-corpo-caixas tr');
 
-        if (termo.length === 0) { 
-            carregarTabela(); 
-            return; 
-        }
+        linhas.forEach(linha => {
+            const conteúdo = linha.innerText.toLowerCase();
+            linha.style.display = conteúdo.includes(textoBusca) ? "" : "none";
+        });
+    }
 
-        try {
-            const resp = await fetch(`http://localhost:3000/buscar-caixas?termo=${termo}`);
-            const caixas = await resp.json();
-            const corpoTabela = document.getElementById('tabela-corpo-caixas');
-            corpoTabela.innerHTML = ''; 
+    async function ajustarQtd(id, mudanca) {
+    try {
+        await fetch('http://localhost:3000/api/caixas/ajustar-estoque', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, mudanca })
+        });
+        carregarCaixas(); // Atualiza a tabela na hora
+    } catch (erro) {
+        console.error("Erro ao ajustar quantidade:", erro);
+    }
+}
 
-            caixas.forEach(caixa => {
-                let statusClass = caixa.quantidade <= 0 ? 'status-critico' : (caixa.quantidade < 50 ? 'status-alerta' : 'status-bom');
-                let statusTexto = caixa.quantidade <= 0 ? 'ZERADO' : (caixa.quantidade < 50 ? 'BAIXO ESTOQUE' : 'ESTOQUE BOM');
+async function editarCaixa(id, clienteAt, codigoAt, qtdAt, dataAt, respAt) {
+    // Formata a data para o padrão do input date (AAAA-MM-DD)
+    const dataFormatada = dataAt ? new Date(dataAt).toISOString().split('T')[0] : '';
 
-                const linha = `
-                    <tr>
-                        <td>
-                            <div style="font-weight: bold; font-size: 1.1em; color: #333;">
-                                <i class="fas fa-user" style="font-size: 0.85em; color: #ffa500;"></i> ${caixa.cliente || 'Consumidor Final'}
-                            </div>
-                            <div style="font-size: 0.85em; color: #666; margin-top: 2px;">
-                                Ref: ${caixa.codigo}
-                            </div>
-                        </td>
-                        <td><span class="medida-tag">${caixa.medidas}</span></td>
-                        <td>
-                            <strong>${caixa.quantidade} un</strong>
-                            <span class="status-badge ${statusClass}">${statusTexto}</span>
-                        </td>
-                        <td>${caixa.data_fabricacao ? new Date(caixa.data_fabricacao).toLocaleDateString('pt-BR') : '---'}</td>
-                        <td class="actions">
-                            <button onclick="alterarQtd(${caixa.id}, 1)" class="btn-action-small btn-plus">+</button>
-                            <button onclick="alterarQtd(${caixa.id}, -1)" class="btn-action-small btn-minus">-</button>
-                            <button onclick="editarCaixa(${caixa.id}, '${caixa.cliente || caixa.codigo}')" class="btn-action-small btn-edit">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </td>
-                    </tr>`;
-                corpoTabela.innerHTML += linha;
-            });
-        } catch (error) {
-            console.error("Erro na busca:", error);
+    const { value: formValues } = await Swal.fire({
+        title: 'Ajustar Registro de Caixa',
+        html: `
+            <label style="display:block; text-align:left; margin-left:40px;">Cliente:</label>
+            <input id="edit-cliente" class="swal2-input" value="${clienteAt}">
+            <label style="display:block; text-align:left; margin-left:40px;">Código:</label>
+            <input id="edit-codigo" class="swal2-input" value="${codigoAt}">
+            <label style="display:block; text-align:left; margin-left:40px;">Quantidade:</label>
+            <input id="edit-qtd" class="swal2-input" type="number" value="${qtdAt}">
+            <label style="display:block; text-align:left; margin-left:40px;">Data de Fabricação:</label>
+            <input id="edit-data" class="swal2-input" type="date" value="${dataFormatada}">
+            <label style="display:block; text-align:left; margin-left:40px;">Responsável:</label>
+            <input id="edit-resp" class="swal2-input" value="${respAt}">`,
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Salvar Alterações',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#27ae60',
+        preConfirm: () => {
+            return {
+                id: id,
+                cliente: document.getElementById('edit-cliente').value,
+                codigo: document.getElementById('edit-codigo').value,
+                quantidade: document.getElementById('edit-qtd').value,
+                data_fabricacao: document.getElementById('edit-data').value,
+                responsavel: document.getElementById('edit-resp').value
+            }
         }
     });
 
-    // --- ADICIONAR NOVA CAIXA ---
-    async function novoRegistro() {
-        const { value: formValues } = await Swal.fire({
-            title: 'Cadastrar Nova Caixa',
-            html: `
-                <div style="text-align: left; margin-bottom: 5px; font-weight: bold;">Cliente/Comprador:</div>
-                <input id="swal-cliente" class="swal2-input" placeholder="Ex: Nome do Cliente">
-                
-                <div style="text-align: left; margin-bottom: 5px; font-weight: bold; margin-top: 15px;">Código da Caixa:</div>
-                <input id="swal-codigo" class="swal2-input" value="CX - " placeholder="Ex: 001 ou NOME">
-                
-                <div style="text-align: left; margin-bottom: 5px; font-weight: bold; margin-top: 15px;">Medidas:</div>
-                <input id="swal-medida" class="swal2-input" placeholder="Ex: 30 x 500 x ...">
-                
-                <div style="text-align: left; margin-bottom: 5px; font-weight: bold; margin-top: 15px;">Quantidade Inicial:</div>
-                <input id="swal-qtd" class="swal2-input" type="number" value="0">
-            `,
-            focusConfirm: false,
-            showCancelButton: true,
-            confirmButtonText: 'Salvar nova Caixa',
-            preConfirm: () => {
-                return {
-                    cliente: document.getElementById('swal-cliente').value,
-                    codigo: document.getElementById('swal-codigo').value.toUpperCase(),
-                    medidas: document.getElementById('swal-medida').value,
-                    quantidade: document.getElementById('swal-qtd').value
-                }
-            }
-        });
+    if (formValues) {
+        try {
+            const response = await fetch('http://localhost:3000/api/caixas/editar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formValues)
+            });
 
-        if (formValues) {
-            try {
-                const resposta = await fetch('http://localhost:3000/add-caixa', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formValues)
+            const result = await response.json();
+
+            if (result.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Atualizado!',
+                    text: 'Os dados foram salvos com sucesso.',
+                    timer: 1500,
+                    showConfirmButton: false
                 });
-                if (resposta.ok) {
-                    Swal.fire('Sucesso!', 'Nova caixa adicionada!', 'success');
-                    carregarTabela();
-                }
-            } catch (error) {
-                Swal.fire('Erro', 'Erro ao conectar ao banco.', 'error');
+                carregarCaixas(); // Recarrega a tabela automaticamente
+            } else {
+                Swal.fire('Erro', 'Erro ao salvar: ' + result.message, 'error');
             }
+        } catch (erro) {
+            console.error("Erro na requisição:", erro);
+            Swal.fire('Erro', 'Não foi possível conectar ao servidor.', 'error');
         }
     }
+}
 
+    // 4. Inicialização
     window.onload = () => {
-        configurarData();
-        carregarTabela();
+        carregarCaixas();
+        
+        // Ativa a busca em tempo real
+        const inputBusca = document.getElementById('input-busca');
+        if (inputBusca) {
+            inputBusca.addEventListener('input', filtrarCaixas);
+        }
+
+        // Se tiver o elemento de data na top bar
+        const elementoData = document.getElementById('data-atual');
+        if (elementoData) {
+            elementoData.innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        }
     };
 </script>
 

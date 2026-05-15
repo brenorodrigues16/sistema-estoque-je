@@ -2,119 +2,235 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>J&E - Expedição </title>
+    <title>J&E - Expedição</title>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        .card-pedido { background: white; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #3498db; display: flex; justify-content: space-between; align-items: center; }
-        .btn-conferir { background: #f39c12; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        .expedicao-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            /* Altura fixa para garantir a rolagem interna */
+            height: calc(100vh - 110px);
+            box-sizing: border-box;
+        }
+
+        .coluna-expedicao {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Mantém a estrutura firme */
+        }
+
+        .titulo-secao {
+            font-size: 1.1em;
+            color: #e67e22;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .scroll-lista {
+            flex-grow: 1;
+            overflow-y: auto; /* Aqui a mágica da rolagem acontece */
+            padding-right: 10px;
+        }
+
+        /* Estilização da Scrollbar */
+        .scroll-lista::-webkit-scrollbar { width: 6px; }
+        .scroll-lista::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
+        .scroll-lista::-webkit-scrollbar-thumb { background: #3498db; border-radius: 10px; }
+
+        .card-pedido, .card-finalizado {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 5px solid #3498db;
+        }
+
+        .card-finalizado {
+            border-left: 5px solid #27ae60;
+            background: #f8fff9;
+        }
+
+        .info-txt { font-size: 0.9em; color: #555; line-height: 1.4; }
+        .info-txt strong { color: #2c3e50; font-size: 1.1em; }
+
+        .btn-conferir {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .btn-conferir:hover { background: #2ecc71; }
+        
+        .swal-label { display: block; margin-top: 15px; font-weight: bold; text-align: left; }
     </style>
 </head>
 <body>
     
     <div class="main-container">
         <aside class="sidebar">
-            <div class="logo">
-                <i class="fas fa-box-open"></i> J&E Embalagens LTDA
-            </div>
+            <div class="logo"><i class="fas fa-box-open"></i> J&E Embalagens LTDA</div>
             <nav>
                 <ul>
-                    <li class="menu-item" onclick="window.location.href='index.html'">
-                        <i class="fas fa-th-large"></i> Dashboard
-                    </li>
-                    <li class="menu-item" onclick="window.location.href='chapas.html'">
-                        <i class="fas fa-layer-group"></i> Chapas
-                    </li>
-                    <li class="menu-item" onclick="window.location.href='caixas.html'">
-                        <i class="fas fa-boxes"></i> Caixas Prontas
-                    </li>
-                    <li class="menu-item" onclick="window.location.href='producao.html'">
-                        <i class="fas fa-industry"></i> Produção
-                    </li>
-                    <li class="menu-item" onclick="window.location.href='movimentacoes.html'">
-                        <i class="fas fa-exchange-alt"></i> Movimentações
-                    </li>
-                    <li class="menu-item" onclick="window.location.href='perfil.html'">
-                        <i class="fas fa-user"></i> Perfil
-                    </li>
-                    <li class="menu-item active" onclick="window.location.href='expedicao.html'">
-                        <i class="fas fa-truck"></i> Expedição
-                    </li>
+                    <li class="menu-item" onclick="window.location.href='index.html'"><i class="fas fa-th-large"></i> Dashboard</li>
+                    <li class="menu-item" onclick="window.location.href='chapas.html'"><i class="fas fa-layer-group"></i> Chapas</li>
+                    <li class="menu-item" onclick="window.location.href='caixas.html'"><i class="fas fa-boxes"></i> Caixas Prontas</li>
+                    <li class="menu-item" onclick="window.location.href='producao.html'"><i class="fas fa-industry"></i> Produção</li>
+                    <li class="menu-item" onclick="window.location.href='movimentacoes.html'"><i class="fas fa-exchange-alt"></i> Movimentações</li>
+                    <li class="menu-item" onclick="window.location.href='perfil.html'"><i class="fas fa-user"></i> Perfil</li>
+                    <li class="menu-item active" onclick="window.location.href='expedicao.html'"><i class="fas fa-truck"></i> Expedição</li>
                 </ul>
             </nav>
 
-            <div class="user-info">
+                 <div class="user-info">
                 <div class="avatar">U</div>
                 <div>
                     <p class="username">Usuário</p>
                     <p class="role">Administrador</p>
                 </div>
             </div>
+
         </aside>
-    
-    <div class="main-container">
+
         <main class="content">
-            <header class="top-bar"><span>CONFERÊNCIA DE EXPEDIÇÃO - PALOMA</span></header>
+            <header class="top-bar">
+                <span>CONFERÊNCIA DE EXPEDIÇÃO</span>
+                <button onclick="logout()" style="background:none; border:none; color:white; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Sair</button>
+            </header>
             
-            <div id="lista-pedidos">
+            <div class="expedicao-grid">
+                <div class="coluna-expedicao">
+                    <h2 class="titulo-secao"><i class="fas fa-clock"></i> Aguardando Conferência</h2>
+                    <div id="lista-pedidos" class="scroll-lista"></div>
                 </div>
+
+                <div class="coluna-expedicao">
+                    <h2 class="titulo-secao" style="color: #27ae60;"><i class="fas fa-check-circle"></i> Finalizados Hoje</h2>
+                    <div id="lista-finalizados" class="scroll-lista"></div>
+                </div>
+            </div>
         </main>
     </div>
 
     <script>
+        const API_URL = 'http://localhost:3000';
 
-// Botão Sair (Coloque isso na função do seu botão de Sair)
-function logout() {
-    localStorage.clear();
-    window.location.href = 'login.html';
-}
+        async function carregarTudo() {
+            try {
+                const res = await fetch(`${API_URL}/pedidos-recentes`);
+                const todosOsPedidos = await res.json();
 
-        async function carregarPedidos() {
-            const resp = await fetch('http://localhost:3000/pedidos-pendentes');
-            const pedidos = await resp.json();
-            const container = document.getElementById('lista-pedidos');
-            
-            container.innerHTML = pedidos.map(p => `
-                <div class="card-pedido">
-                    <div>
-                        <strong>Cliente: ${p.cliente}</strong><br>
-                        <span>Onda: ${p.tipo_onda} | Medida: ${p.medida}</span><br>
-                        <span>Programado: ${p.qtd_programada} un</span>
-                    </div>
-                    <button class="btn-conferir" onclick="confirmarChegada(${p.id}, ${p.qtd_programada})">
-                        Conferir Quantidade
-                    </button>
-                </div>
-            `).join('');
+                // IDs corrigidos e únicos
+                const containerPendentes = document.getElementById('lista-pedidos');
+                const containerFinalizados = document.getElementById('lista-finalizados');
+
+                const pendentes = todosOsPedidos.filter(p => p.status === 'PENDENTE');
+                const finalizados = todosOsPedidos.filter(p => p.status === 'CONCLUÍDO');
+
+                // Renderiza Pendentes
+                containerPendentes.innerHTML = pendentes.length === 0 
+                    ? '<p style="color:#888; padding:20px;">Nenhuma carga aguardando.</p>'
+                    : pendentes.map(p => `
+                        <div class="card-pedido">
+                            <div class="info-txt">
+                                <strong>${p.cliente}</strong><br>
+                                Ref: ${p.referencia || 'S/ REF'} | Onda: ${p.tipo_onda}<br>
+                                <span>Prog: <b>${p.qtd_programada}</b> un</span>
+                            </div>
+                            <button class="btn-conferir" onclick="confirmarChegada(${p.id}, ${p.qtd_programada})">Conferir</button>
+                        </div>
+                    `).join('');
+
+                // Renderiza Finalizados (Mostrando a conferência real e o responsável)
+                containerFinalizados.innerHTML = finalizados.length === 0
+    ? '<p style="color:#888; padding:20px;">Nenhum concluído hoje.</p>'
+    : finalizados.map(f => `
+        <div class="card-finalizado">
+            <div class="info-txt">
+                <strong>${f.cliente}</strong><br>
+                Ref: ${f.referencia || 'S/ REF'}<br>
+                <span>Conf: <b>${f.qtd_conferida || f.qtd_programada}</b> un</span><br>
+                <small style="color:#27ae60">
+                    <i class="fas fa-user-check"></i> Resp: ${f.responsavel || 'Não informado'}
+                </small>
+            </div>
+        </div>
+    `).join('');
+    
+            } catch (err) {
+                console.error("Erro ao carregar:", err);
+            }
         }
 
         async function confirmarChegada(id, qtdOriginal) {
-            const { value: qtdReal } = await Swal.fire({
+            const { value: formValues } = await Swal.fire({
                 title: 'Conferência de Carga',
-                input: 'number',
-                inputLabel: `Quantidade real produzida (Programado: ${qtdOriginal})`,
-                inputValue: qtdOriginal,
-                showCancelButton: true
+                html:
+                    `<label class="swal-label">Quantidade Real Produzida</label>` +
+                    `<input id="swal-qtd" class="swal2-input" type="number" value="${qtdOriginal}">` +
+                    `<label class="swal-label">Responsável Conferente</label>` +
+                    `<input id="swal-resp" class="swal2-input" placeholder="Seu nome">`,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Finalizar e Enviar Estoque',
+                preConfirm: () => {
+                    const qtd = document.getElementById('swal-qtd').value;
+                    const resp = document.getElementById('swal-resp').value;
+                    if (!qtd || !resp) {
+                        Swal.showValidationMessage('Preencha a quantidade e o seu nome!');
+                    }
+                    return { qtd_conferida: parseInt(qtd), responsavel: resp }
+                }
             });
 
-            if (qtdReal) {
-                await fetch(`http://localhost:3000/conferir-pedido`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ id, qtdReal })
-                });
-                Swal.fire('Sucesso!', 'Pedido enviado ao estoque e notificado.', 'success');
-                carregarPedidos();
+            if (formValues) {
+                try {
+                    const response = await fetch(`${API_URL}/conferir-pedido`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ 
+                            id: id, 
+                            qtd_conferida: formValues.qtd_conferida,
+                            responsavel: formValues.responsavel
+                        })
+                    });
+
+                    const resultado = await response.json();
+
+                    if (resultado.success) {
+                        await Swal.fire('Sucesso!', 'Pedido enviado para Finalizados e Estoque atualizado.', 'success');
+                        carregarTudo(); // Recarrega as colunas para mover o card de lugar
+                    } else {
+                        Swal.fire('Erro', 'Servidor: ' + resultado.message, 'error');
+                    }
+                } catch (err) {
+                    Swal.fire('Erro', 'Não foi possível conectar ao servidor.', 'error');
+                }
             }
         }
-        carregarPedidos();
 
-// Função para Sair do Sistema
-function logout() {
-    localStorage.clear();
-    window.location.href = 'login.html';
-}
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        window.onload = carregarTudo;
     </script>
 </body>
 </html>

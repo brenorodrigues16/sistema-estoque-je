@@ -1,320 +1,367 @@
+require('dotenv').config();
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
-require('dotenv').config();
+const path = require('path');
 
 const app = express();
+
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+});
+
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
-const db = new Pool({
-  connectionString: process.env.DATABASE_URL,
+app.get('/api/teste-db', async (req, res)=>{
+    try{
+        const result = await pool.query('SELECT NOW()');
+        res.json({ status: "Conectado!", data: result.rows[0] });
+    } catch (err) {
+        res.status(500).json({ error: "Erro ao conectar no banco", details: err.message });
+    }
+});
+
+app.get('/tipos-onda', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM chapas');
+        const formatado = result.rows.map(row => {
+            return {
+                onda: row.onda || row.nome || row.tipo || Object.values(row)[1] 
+            };
+        });
+
+        console.log("Ondas encontradas e formatadas:", formatado);
+        res.json(formatado);
+    } catch (err) {
+        console.error("ERRO NA TABELA CHAPAS:", err.message);
+        res.status(500).json([]);
+    }
 });
 
 // --- ROTAS DO DASHBOARD ---
+// Rota para o Dashboard (Soma o total e lista as chapas)
 app.get('/dados', async (req, res) => {
     try {
-        const totalRes = await db.query('SELECT SUM(quantidade) as total FROM chapas');
-        const agrupadoRes = await db.query(`
-            SELECT UPPER(TRIM(onda)) as onda, SUM(quantidade) as quantidade 
+        // Busca a soma total geral
+        const totalGeral = await pool.query('SELECT SUM(quantidade) as total FROM chapas');
+        
+        // Busca a soma agrupada por ONDA (agora ONDA BC de tamanhos diferentes vira uma linha só)
+        const agrupado = await pool.query(`
+            SELECT onda, SUM(quantidade) as quantidade 
             FROM chapas 
-            GROUP BY UPPER(TRIM(onda))
-            ORDER BY quantidade DESC
+            GROUP BY onda 
+            ORDER BY onda ASC
         `);
-        res.json({ 
-            estoqueTotal: totalRes.rows[0].total || 0,
-            chapas: agrupadoRes.rows 
+
+        res.json({
+            estoqueTotal: parseInt(totalGeral.rows[0].total) || 0,
+            chapas: agrupado.rows
         });
     } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.get('/fornecedores-completo', async (req, res) => {
-    try {
-        const result = await db.query('SELECT * FROM fornecedores ORDER BY nome ASC');
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.post('/add-fornecedor', async (req, res) => {
-    const { nome, contato } = req.body;
-    try {
-        await db.query('INSERT INTO fornecedores (nome, contato) VALUES ($1, $2)', [nome, contato]);
-        res.json({ message: "Fornecedor cadastrado com sucesso!" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.get('/fornecedores', async (req, res) => {
-    try {
-        const result = await db.query('SELECT nome FROM fornecedores ORDER BY nome ASC');
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// --- ROTAS DE CHAPAS ---
-app.get('/chapas-detalhes', async (req, res) => {
-    try {
-        const result = await db.query('SELECT * FROM chapas ORDER BY onda ASC');
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.post('/add-chapa', async (req, res) => {
-    const { onda, comprimento, largura, quantidade, fornecedor } = req.body;
-    try {
-        await db.query(
-            'INSERT INTO chapas (onda, comprimento, largura, quantidade, fornecedor) VALUES ($1, $2, $3, $4, $5)',
-            [onda.trim().toUpperCase(), comprimento || 0, largura || 0, quantidade || 0, fornecedor || 'Geral']
-        );
-        res.json({ message: "Sucesso!" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.post('/ajustar-estoque', async (req, res) => {
-    const { id, novaQuantidade, novoComprimento, novaLargura, novoFornecedor } = req.body;
-    try {
-        await db.query(
-            'UPDATE chapas SET quantidade = $1, comprimento = $2, largura = $3, fornecedor = $4 WHERE id = $5',
-            [novaQuantidade, novoComprimento, novaLargura, novoFornecedor, id]
-        );
-        res.json({ message: "Dados atualizados!" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// --- ROTAS DE CAIXAS PRONTAS ---
-
-app.get('/caixas', async (req, res) => {
-    try {
-        const result = await db.query('SELECT * FROM caixas ORDER BY cliente ASC');
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// ROTA DE BUSCA (ESTA É A QUE FALTAVA)
-app.get('/buscar-caixas', async (req, res) => {
-    const { termo } = req.query;
-    try {
-        const query = `
-            SELECT * FROM caixas 
-            WHERE codigo ILIKE $1 OR cliente ILIKE $1 
-            ORDER BY cliente ASC`;
-        const result = await db.query(query, [`%${termo}%`]);
-        res.json(result.rows);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.post('/add-caixa', async (req, res) => {
-    const { codigo, medidas, quantidade, cliente } = req.body;
-    try {
-        const query = `
-            INSERT INTO caixas (codigo, medidas, quantidade, cliente, data_fabricacao) 
-            VALUES ($1, $2, $3, $4, NOW()) 
-            RETURNING *`;
-        const values = [codigo, medidas, quantidade, cliente];
-        const result = await db.query(query, values);
-        res.status(201).json(result.rows[0]);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.post('/ajustar-estoque-caixa', async (req, res) => {
-    const { id, ajuste, ehSubstituicao } = req.body;
-    try {
-        let query = ehSubstituicao 
-            ? 'UPDATE caixas SET quantidade = $1 WHERE id = $2' 
-            : 'UPDATE caixas SET quantidade = quantidade + $1 WHERE id = $2';
-        await db.query(query, [ajuste, id]);
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.post('/editar-dados-caixa', async (req, res) => {
-    const { id, cliente, codigo, medidas } = req.body;
-    try {
-        await db.query(
-            'UPDATE caixas SET cliente = $1, codigo = $2, medidas = $3 WHERE id = $4',
-            [cliente, codigo, medidas, id]
-        );
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.post('/produzir', async (req, res) => {
-    // Pegamos exatamente os nomes que o HTML está enviando
-    const { cliente, tipo, largura, comprimento, quantidadeChapas, quantidadeCaixas, medidaCaixa } = req.body;
-
-    try {
-        await db.query('BEGIN');
-
-        // IMPORTANTE: Usamos 'quantidadeChapas' para subtrair do estoque
-        const queryEstoque = `
-            UPDATE chapas 
-            SET quantidade = quantidade - $1 
-            WHERE TRIM(UPPER(onda)) = TRIM(UPPER($2)) 
-              AND largura::numeric = $3::numeric 
-              AND comprimento::numeric = $4::numeric
-        `;
-        
-        // Verificação de segurança: se quantidadeChapas não chegar, o erro para aqui
-        if (!quantidadeChapas || quantidadeChapas <= 0) {
-            throw new Error("Quantidade de chapas inválida para o abatimento.");
-        }
-
-        const updateEstoque = await db.query(queryEstoque, [quantidadeChapas, tipo, largura, comprimento]);
-
-        if (updateEstoque.rowCount === 0) {
-            await db.query('ROLLBACK');
-            return res.status(400).json({ message: "Chapa não encontrada no estoque para abatimento." });
-        }
-
-        // Registra o pedido na expedição com a quantidade de caixas
-        await db.query(`
-            INSERT INTO pedidos (cliente, tipo_onda, medida, qtd_programada, status) 
-            VALUES ($1, $2, $3, $4, 'PENDENTE')
-        `, [cliente, tipo, medidaCaixa, quantidadeCaixas]);
-
-        await db.query('COMMIT');
-        res.json({ success: true, message: "Estoque atualizado com sucesso!" });
-
-    } catch (err) {
-        await db.query('ROLLBACK');
-        console.error("ERRO NO BACKEND:", err.message);
-        res.status(500).json({ message: "Erro ao processar: " + err.message });
-    }
-});
-
-app.post('/conferir-pedido', async (req, res) => {
-    const { id, qtdReal } = req.body;
-
-    try {
-        await db.query('BEGIN');
-
-        // 1. Busca os dados do pedido que o Resposavel da expedicao está conferindo
-        const dadosPedido = await db.query('SELECT * FROM pedidos WHERE id = $1', [id]);
-        const p = dadosPedido.rows[0];
-
-        // 2. Marca o pedido como concluído
-        await db.query('UPDATE pedidos SET status = $1, qtd_conferida = $2 WHERE id = $3', ['CONCLUÍDO', qtdReal, id]);
-
-        // 3. Adiciona as caixas no estoque final (Página de Caixas)
-        // Se a medida já existir, ele soma. Se não, cria uma nova.
-        await db.query(`
-            INSERT INTO caixas (cliente, medidas, estoque) 
-            VALUES ($1, $2, $3)
-            ON CONFLICT (medidas) 
-            DO UPDATE SET estoque = caixas.estoque + $3
-        `, [p.cliente, p.medida, qtdReal]);
-
-        await db.query('COMMIT');
-        res.json({ success: true });
-    } catch (err) {
-        await db.query('ROLLBACK');
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.get('/verificar-estoque', async (req, res) => {
-    // Pegamos os dados e já tratamos para bater com o banco padronizado
-    const onda = req.query.tipo ? req.query.tipo.toUpperCase().trim() : '';
-    const { largura, comprimento } = req.query;
-
-    try {
-        // Mudamos 'tipo' para 'onda' no comando SQL abaixo
-        const sql = `
-            SELECT quantidade 
-            FROM chapas 
-            WHERE onda = $1 
-            AND largura::numeric = $2::numeric 
-            AND comprimento::numeric = $3::numeric
-        `;
-        
-        const resultado = await db.query(sql, [onda, largura, comprimento]);
-
-        if (resultado.rows.length > 0) {
-            // Note que usei resultado.rows[0].quantidade conforme sua imagem
-            res.json({ estoque: resultado.rows[0].quantidade });
-        } else {
-            res.json({ estoque: 0 });
-        }
-    } catch (err) {
-        console.error("Erro na consulta:", err);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-app.get('/tipos-chapa', async (req, res) => {
-    try {
-        // Busca os tipos únicos (ONDA B, ONDA BC, etc) em ordem alfabética
-        const resultado = await db.query('SELECT DISTINCT onda FROM chapas ORDER BY onda ASC');
-        res.json(resultado.rows);
-    } catch (err) {
-        res.status(500).json({ message: "Erro ao buscar tipos: " + err.message });
+        console.error("Erro na rota /dados:", err.message);
+        res.status(500).json({ error: "Erro ao processar dados" });
     }
 });
 
 app.get('/resumo-hoje', async (req, res) => {
     try {
-        // Usando o nome correto: data_criacao
-        const query = `
-            SELECT 
-                SUM(CASE WHEN status = 'CONCLUÍDO' THEN COALESCE(qtd_conferida, 0) ELSE 0 END) as total_caixas,
-                COUNT(*) FILTER (WHERE status = 'PENDENTE') as fila_pedidos
+        // Usamos ::date para comparar apenas Dia/Mês/Ano
+        const fila = await pool.query(`
+            SELECT COUNT(*) as total 
             FROM pedidos 
-            WHERE data_criacao::date = CURRENT_DATE
-        `;
+            WHERE status = 'PENDENTE' 
+            AND created_at::date = CURRENT_DATE`);
         
-        const resultado = await db.query(query);
-        
-        // Convertendo para número para garantir que o front-end entenda
+        const caixas = await pool.query(`
+            SELECT COALESCE(SUM(qtd_programada), 0) as total 
+            FROM pedidos 
+            WHERE (status = 'CONCLUÍDO' OR status = 'CONCLUSÃO')
+            AND created_at::date = CURRENT_DATE`);
+
+        console.log("Fila hoje:", fila.rows[0].total); // Isso aparecerá no terminal do VS Code
+
         res.json({
-            total_caixas: parseInt(resultado.rows[0].total_caixas) || 0,
-            fila_pedidos: parseInt(resultado.rows[0].fila_pedidos) || 0
+            total_caixas: parseInt(caixas.rows[0].total) || 0,
+            fila_pedidos: parseInt(fila.rows[0].total) || 0
         });
     } catch (err) {
-        console.error("Erro no resumo:", err.message);
-        res.status(500).json({ message: "Erro ao carregar resumo: " + err.message });
+        console.error("Erro na rota resumo:", err.message);
+        res.status(500).json({ total_caixas: 0, fila_pedidos: 0 });
     }
 });
 
-// Rota para o Log Rápido da tela de produção
-app.get('/historico-rapido', async (req, res) => {
+// --- ROTAS DE CHAPAS ---
+app.get('/api/chapas', async (req, res) => {
     try {
-        const query = `
-            SELECT cliente, qtd_programada 
-            FROM pedidos 
-            WHERE data_criacao::date = CURRENT_DATE 
-            ORDER BY data_criacao DESC 
-        `;
-        const resultado = await db.query(query);
-        res.json(resultado.rows);
+        const result = await pool.query('SELECT * FROM chapas ORDER BY onda ASC');
+        res.json(result.rows);
     } catch (err) {
-        console.error("Erro na rota historico-rapido:", err.message);
+        console.error("Erro ao buscar chapas:", err.message);
         res.status(500).json({ error: err.message });
     }
 });
 
+app.post('/api/chapas', async (req, res) => {
+    const { onda, fornecedor, comprimento, largura, quantidade } = req.body;
+    try {
+        await pool.query(
+            'INSERT INTO chapas (onda, fornecedor, comprimento, largura, quantidade) VALUES ($1, $2, $3, $4, $5)',
+            [onda, fornecedor, comprimento, largura, quantidade]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Erro ao inserir:", err.message);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// --- PRODUÇÃO E EXPEDIÇÃO ---
+app.post('/produzir', async (req, res) => {
+    // Pegando os nomes exatamente como o seu HTML envia no "payload"
+    const { cliente, referencia, tipo_onda, largura_chapa, comprimento_chapa, qtd_chapas_necessarias, qtd_programada, medida } = req.body;
+    
+    try {
+        await pool.query('BEGIN'); // Use pool, não db
+
+        // 1. Atualiza o estoque de chapas
+        const queryEstoque = `
+            UPDATE chapas 
+            SET quantidade = quantidade - $1 
+            WHERE TRIM(UPPER(onda)) = TRIM(UPPER($2)) 
+              AND largura = $3 
+              AND comprimento = $4`;
+        
+        const updateEstoque = await pool.query(queryEstoque, [qtd_chapas_necessarias, tipo_onda, largura_chapa, comprimento_chapa]);
+
+        if (updateEstoque.rowCount === 0) {
+            await pool.query('ROLLBACK');
+            return res.status(400).json({ success: false, message: "Chapa não encontrada ou estoque insuficiente." });
+        }
+
+        // 2. Insere o pedido
+        await pool.query(`
+            INSERT INTO pedidos (cliente, referencia, tipo_onda, medida, qtd_programada, status) 
+            VALUES ($1, $2, $3, $4, $5, 'PENDENTE')`, 
+            [cliente, referencia, tipo_onda, medida, qtd_programada]);
+
+        await pool.query('COMMIT');
+        res.json({ success: true });
+    } catch (err) {
+        if (pool) await pool.query('ROLLBACK');
+        console.error("Erro na produção:", err.message);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+
+app.get('/pedidos-recentes', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT cliente, qtd_programada, referencia, status 
+            FROM pedidos 
+            WHERE created_at::date = CURRENT_DATE
+            ORDER BY id DESC`);
+        
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Erro na rota pedidos-recentes:", err.message);
+        res.status(500).json([]);
+    }
+});
+
+app.post('/conferir-pedido', async (req, res) => {
+    const { id, quantidade_conferida, responsavel } = req.body;
+    try {
+        await db.query('BEGIN');
+        const resPedido = await db.query(
+            `UPDATE public.pedidos SET status = 'CONCLUÍDO', quantidade_conferida = $1, responsavel = $2 WHERE id = $3 RETURNING *`,
+            [quantidade_conferida, responsavel, id]
+        );
+        const p = resPedido.rows[0];
+        await db.query(`
+            INSERT INTO public.caixas (codigo, medidas, quantidade, cliente) 
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (codigo) 
+            DO UPDATE SET quantidade = caixas.quantidade + $3
+        `, [p.referencia || 'SEM_COD', p.medida || 'N/A', quantidade_conferida, p.cliente]);
+        await db.query('COMMIT');
+        res.json({ success: true });
+    } catch (err) {
+        await db.query('ROLLBACK');
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+
+
+app.post('/api/chapas', async (req, res) => {
+    const { nome, estoque, largura, comprimento } = req.body;
+    try {
+        await pool.query(
+            'INSERT INTO chapas (nome, estoque, largura, comprimento) VALUES ($1, $2, $3, $4)',
+            [nome, estoque, largura, comprimento]
+        );
+        res.json({ success: true, message: "Chapa adicionada!" });
+    } catch (err) {
+        console.error("Erro ao adicionar chapa:", err.message);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// Rota para a tabela de chapas
+// 1. Rota para Listar Chapas
+app.get('/api/chapas', async (req, res) => {
+    try {
+        // Buscamos tudo da tabela chapas
+        const result = await pool.query('SELECT * FROM chapas ORDER BY onda ASC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 2. Rota para Adicionar Nova Chapa (Botão .btn-add)
+app.post('/api/chapas', async (req, res) => {
+    const { onda, fornecedor, comprimento, largura, quantidade } = req.body;
+    try {
+        await pool.query(
+            'INSERT INTO chapas (onda, fornecedor, comprimento, largura, quantidade) VALUES ($1, $2, $3, $4, $5)',
+            [onda, fornecedor, comprimento, largura, quantidade]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 3. Rota para Editar/Ajustar Estoque (Função abrirAjuste)
+app.post('/ajustar-estoque', async (req, res) => {
+    const { id, novaQuantidade, novoComprimento, novaLargura, novoFornecedor } = req.body;
+    try {
+        await pool.query(
+            'UPDATE chapas SET quantidade=$1, comprimento=$2, largura=$3, fornecedor=$4 WHERE id=$5',
+            [novaQuantidade, novoComprimento, novaLargura, novoFornecedor, id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Erro ao editar:", err.message);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 4. Rota extra para Fornecedores (que o seu script pede)
+app.get('/fornecedores', async (req, res) => {
+    try {
+        // Se você não tiver uma tabela de fornecedores, vamos mandar uma lista padrão
+        // para o script não travar. Ou troque pela sua query de fornecedores.
+        const result = await pool.query('SELECT nome FROM fornecedores ORDER BY nome ASC');
+        res.json(result.rows);
+    } catch (err) {
+        // Caso não tenha a tabela ainda, manda uma lista fixa para testar:
+        res.json([{ nome: 'Fornecedor A' }, { nome: 'Fornecedor B' }]);
+    }
+});
+
+app.put('/api/chapas/:id', async (req, res) => {
+    const { id } = req.params;
+    const { nome, estoque, largura, comprimento } = req.body;
+    try {
+        await pool.query(
+            'UPDATE chapas SET nome=$1, estoque=$2, largura=$3, comprimento=$4 WHERE id=$5',
+            [nome, estoque, largura, comprimento, id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.get('/api/caixas', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM caixas ORDER BY id DESC');
+        res.json(result.rows);
+ 
+   } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/caixas', async (req, res) => {
+    try {
+        const { cliente, codigo, quantidade, data_fabricacao, responsavel } = req.body;
+        await pool.query(
+            "INSERT INTO caixas (cliente, codigo, quantidade, data_fabricacao, responsavel) VALUES ($1, $2, $3, $4, $5)",
+            [cliente, codigo, quantidade, data_fabricacao, responsavel]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.post('/api/caixas/ajustar-estoque', async (req, res) => {
+    const { id, mudanca } = req.body;
+    try {
+        await pool.query('UPDATE caixas SET quantidade = quantidade + $1 WHERE id = $2', [mudanca, id]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
+});
+
+app.post('/api/caixas/editar', async (req, res) => {
+    const { id, cliente, codigo, quantidade, data_fabricacao, responsavel } = req.body;
+
+    try {
+        const query = `
+            UPDATE caixas 
+            SET cliente = $1, 
+                codigo = $2, 
+                quantidade = $3, 
+                data_fabricacao = $4, 
+                responsavel = $5 
+            WHERE id = $6`;
+        
+        const values = [cliente, codigo, quantidade, data_fabricacao, responsavel, id];
+        
+        await pool.query(query, values);
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Erro no servidor:", err.message);
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+
+// Rota para Registrar Produção (Subtrai chapa e adiciona caixa)
+app.post('/api/producao', async (req, res) => {
+    const { cliente, referencia, tipoOnda, quantidade } = req.body;
+
+    try {
+        await pool.query('BEGIN');
+        const queryPedido = `
+            INSERT INTO pedidos (cliente, referencia, tipo_onda, qtd_programado, status) 
+            VALUES ($1, $2, $3, $4, 'CONCLUSÃO')`;
+        await pool.query(queryPedido, [cliente, referencia, tipoOnda, quantidade]);
+
+        await pool.query('UPDATE chapas SET quantidade = quantidade - $1 WHERE nome = $2', [quantidade, tipoOnda]);
+
+        await pool.query('COMMIT');
+        
+        res.json({ success: true, message: "Produção registrada e estoque atualizado!" });
+    } catch (err) {
+        await pool.query('ROLLBACK');
+        console.error(err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+
 app.listen(3000, () => {
-    console.log("✅ Servidor J&E rodando na porta 3000");
+    console.log("✅ Servidor J&E rodando na porta 3000 com prefixo public.");
 });
