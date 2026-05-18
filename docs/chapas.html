@@ -1,9 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+
+    <script>
+    const temaSalvo = localStorage.getItem('tema') || 'claro';
+    document.documentElement.setAttribute('data-theme', temaSalvo);
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Papelões Estoque - Controle de Chapas</title>
+    
+    <script>
+        if (localStorage.getItem('logado') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -17,259 +30,265 @@
             </div>
             <nav>
                 <ul>
-                    <li class="menu-item" onclick="window.location.href='index.html'">
-                        <i class="fas fa-th-large"></i> Dashboard
-                    </li>
-                    <li class="menu-item active" onclick="window.location.href='chapas.html'">
-                        <i class="fas fa-layer-group"></i> Chapas
-                    </li>
-                    <li class="menu-item" onclick="window.location.href='caixas.html'">
-                        <i class="fas fa-boxes"></i> Caixas Prontas
-                    </li>
-                    <li class="menu-item" onclick="window.location.href='producao.html'">
-                        <i class="fas fa-industry"></i> Produção
-                    </li>
-                    <li class="menu-item" onclick="window.location.href='movimentacoes.html'">
-                        <i class="fas fa-exchange-alt"></i> Movimentações
-                    </li>
-                    <li class="menu-item" onclick="window.location.href='perfil.html'">
-                        <i class="fas fa-user"></i> Perfil
-                    </li>
-                    <li class="menu-item" onclick="window.location.href='expedicao.html'">
-                        <i class="fas fa-truck"></i> Expedição
-                    </li>
+                    <li class="menu-item" onclick="window.location.href='index.html'"><i class="fas fa-th-large"></i> Dashboard</li>
+                    <li class="menu-item active" onclick="window.location.href='chapas.html'"><i class="fas fa-layer-group"></i> Chapas</li>
+                    <li class="menu-item" onclick="window.location.href='caixas.html'"><i class="fas fa-boxes"></i> Caixas Prontas</li>
+                    <li class="menu-item" onclick="window.location.href='producao.html'"><i class="fas fa-industry"></i> Produção</li>
+                    <li class="menu-item" onclick="window.location.href='movimentacoes.html'"><i class="fas fa-exchange-alt"></i> Movimentações</li>
+                    <li class="menu-item" onclick="window.location.href='perfil.html'"><i class="fas fa-user"></i> Perfil</li>
+                    <li class="menu-item" onclick="window.location.href='expedicao.html'"><i class="fas fa-truck"></i> Expedição</li>
                 </ul>
             </nav>
-            <div class="user-info">
-                <div class="avatar">U</div>
-                <div>
-                    <p class="username">Usuário</p>
-                    <p class="role">Administrador</p>
+            
+            <div class="sidebar-footer">
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 0 20px;">
+                <div class="user-info">
+                    <div class="avatar">U</div>
+                    <div>
+                        <p class="username">Usuário</p>
+                        <p class="role">Administrador</p>
+                    </div>
+                </div>
+                <div class="logout-container">
+                    <button onclick="fazerLogout()" class="btn-logout-red">
+                        <i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA
+                    </button>
                 </div>
             </div>
         </aside>
 
         <main class="content">
             <header class="top-bar">
-                <span>ESTOQUE DE CHAPAS</span>
-                <span class="date-now" id="data-atual"></span> 
+                <strong><span>ESTOQUE - CHAPAS</span></strong>
+                <strong><span class="date-now" id="data-atual"></span></strong> 
             </header>
 
-               <div class="filtros-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px;">
-    
-    <div class="busca-container" style="position: relative; flex-grow: 1; max-width: 400px;">
-        <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #888;"></i>
-        <input type="text" id="input-busca" placeholder="Buscar chapa..." style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 8px; border: 1px solid #ddd;">
-    </div>
-
-    <button class="btn-add" style="background-color: #27ae60; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; white-space: nowrap;">
-        <i class="fas fa-plus"></i> Nova Chapa
-    </button>
-
-</div>
+            <div class="filtros-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px;">
+                <div class="busca-container" style="position: relative; flex-grow: 1; max-width: 400px;">
+                    <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #888;"></i>
+                    <input type="text" id="input-busca" placeholder="Buscar chapa por onda ou fornecedor..." style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 8px; border: 1px solid #ddd;">
+                </div>
+                <button class="btn-add" style="background-color: #27ae60; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-plus"></i> Nova Chapa
+                </button>
+            </div>
 
             <div class="tabela-container">
-                <h4 style="margin-bottom: 15px; color: #333;">ESTOQUE DE CHAPAS</h4>
+                <h4 style="margin-bottom: 15px; color: #333; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-table" style="color: #3498db;"></i> LISTA DE MATERIAIS
+                </h4>
                 <table id="table-container">
                     <thead>
                         <tr>
-                            <th>ONDA</th>
+                            <th>ONDA / FORNECEDOR</th>
                             <th>COMPRIMENTO</th>
                             <th>LARGURA</th>
                             <th>QUANTIDADE</th>
-                            <th>EDITAR</th>
+                            <th style="text-align: center;">AÇÕES</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-chapas">
-                    </tbody>
+                    <tbody id="tabela-chapas"></tbody>
                 </table>
             </div>
         </main>
     </div>
 
     <script>
-    // 1. Função para carregar a tabela
-    async function carregarChapas() {
-        try {
-            const resp = await fetch('http://localhost:3000/api/chapas');
-            if (!resp.ok) throw new Error('Erro ao buscar chapas');
-            const chapas = await resp.json();
-            const tabelaCorpo = document.getElementById('tabela-chapas');
-            
-            tabelaCorpo.innerHTML = '';
+        const API_BASE = 'http://localhost:3000';
 
-            chapas.forEach(chapa => {
-                const comp = chapa.comprimento ?? 0;
-                const larg = chapa.largura ?? 0;
-                const fornecedor = chapa.fornecedor || 'Não informado';
-                const estoqueZerado = chapa.quantidade <= 0;
-                const corTexto = estoqueZerado ? 'color: #e74c3c;' : '';
+        async function carregarChapas() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/chapas`);
+                if (!resp.ok) throw new Error('Erro ao buscar chapas');
+                const chapas = await resp.json();
+                const tabelaCorpo = document.getElementById('tabela-chapas');
+                
+                tabelaCorpo.innerHTML = '';
 
-                const linha = `
-                    <tr style="${estoqueZerado ? 'background-color: #fff5f5;' : ''}">
-                        <td style="${corTexto}">
-                            <strong>${chapa.onda}</strong><br>
-                            <small style="color: #666; font-style: italic;">${fornecedor}</small>
-                        </td>
-                        <td>${comp} mm</td>
-                        <td>${larg} mm</td>
-                        <td style="${corTexto}"><strong>${chapa.quantidade}</strong> un</td>
-                        <td class="actions">
-                            <button onclick="abrirAjuste('${chapa.onda}', ${chapa.quantidade}, ${chapa.id}, ${comp}, ${larg}, '${fornecedor}')" 
-                                    style="background:#27ae60; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">
-                                Editar
-                            </button>
-                        </td>
-                    </tr>`;
-                tabelaCorpo.innerHTML += linha;
+                chapas.forEach(chapa => {
+                    const comp = chapa.comprimento ?? 0;
+                    const larg = chapa.largura ?? 0;
+                    const fornecedor = chapa.fornecedor || 'Não informado';
+                    const estoqueBaixo = chapa.quantidade <= 100; // Define o que é estoque baixo
+                    
+                    const classeQtd = estoqueBaixo ? 'qtd-baixa' : 'qtd-ok';
+
+                    const linha = `
+                        <tr>
+                            <td>
+                                <strong>${chapa.onda}</strong><br>
+                                <small style="color: #888;"><i class="fas fa-truck-moving"></i> ${fornecedor}</small>
+                            </td>
+                            <td>${comp} mm</td>
+                            <td>${larg} mm</td>
+                            <td><span class="badge-qtd ${classeQtd}">${chapa.quantidade} un</span></td>
+                            <td style="text-align: center;">
+                                <button class="btn-edit-icon" onclick="abrirAjuste('${chapa.onda}', ${chapa.quantidade}, ${chapa.id}, ${comp}, ${larg}, '${fornecedor}')">
+                                    <i class="fas fa-edit"></i> 
+                                </button>
+                            </td>
+                        </tr>`;
+                    tabelaCorpo.innerHTML += linha;
+                });
+            } catch (erro) {
+                console.error("Erro ao carregar tabela:", erro);
+            }
+        }
+
+        function filtrarTabela() {
+            const textoBusca = document.getElementById('input-busca').value.toLowerCase();
+            const linhas = document.querySelectorAll('#tabela-chapas tr');
+
+            linhas.forEach(linha => {
+                const textoLinha = linha.innerText.toLowerCase();
+                linha.style.display = textoLinha.includes(textoBusca) ? "" : "none";
             });
-        } catch (erro) {
-            console.error("Erro ao carregar tabela:", erro);
         }
+
+       async function abrirAjuste(onda, qtdAtual, id, compAtual, largAtual, fornecedorAtual) {
+    try {
+        const respF = await fetch(`${API_BASE}/fornecedores`);
+        const fornecedores = await respF.json();
+        let opcoesHtml = fornecedores.map(f => 
+            `<option value="${f.nome}" ${f.nome === fornecedorAtual ? 'selected' : ''}>${f.nome}</option>`
+        ).join('');
+
+        const { value: formValues } = await Swal.fire({
+            title: `Ajustar Chapa`,
+            html: `
+                <div class="swal-container-custom" style="display: flex; flex-direction: column; text-align: left;">
+                    <label class="swal-label">Tipo de Onda</label>
+                    <input id="edit-onda-input" class="swal2-input" type="text" 
+                           value="${onda.toUpperCase()}" 
+                           oninput="this.value = this.value.toUpperCase()">
+
+                    <label class="swal-label">Quantidade em Estoque</label>
+                    <input id="edit-qtd" class="swal2-input" type="number" value="${qtdAtual}">
+                    
+                    <label class="swal-label">Comprimento (mm)</label>
+                    <input id="edit-comp" class="swal2-input" type="number" value="${compAtual}">
+                    
+                    <label class="swal-label">Largura (mm)</label>
+                    <input id="edit-larg" class="swal2-input" type="number" value="${largAtual}">
+                    
+                    <label class="swal-label">Fornecedor</label>
+                    <select id="edit-forn" class="swal2-input">
+                        ${opcoesHtml}
+                    </select>
+                </div>
+            `,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Salvar Alterações',
+            preConfirm: () => {
+                // DECLARANDO as variáveis corretamente para evitar o erro "is not defined"
+                const ondaInput = document.getElementById('edit-onda-input').value;
+                const qtdInput = document.getElementById('edit-qtd').value;
+                const compInput = document.getElementById('edit-comp').value;
+                const largInput = document.getElementById('edit-larg').value;
+                const fornInput = document.getElementById('edit-forn').value;
+
+                return {
+                    onda: ondaInput.trim().toUpperCase(), // Força maiúsculo aqui também
+                    novaQuantidade: Number(qtdInput),
+                    novoComprimento: Number(compInput),
+                    novaLargura: Number(largInput),
+                    novoFornecedor: fornInput
+                }
+            }
+        });
+
+        if (formValues) {
+            const response = await fetch(`${API_BASE}/ajustar-estoque`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id, ...formValues })
+            });
+
+            if (response.ok) {
+                Swal.fire('Sucesso!', 'Dados atualizados.', 'success');
+                carregarChapas();
+            } else {
+                Swal.fire('Erro', 'O servidor não processou a alteração.', 'error');
+            }
+        }
+    } catch (err) {
+        console.error("Erro:", err);
     }
-
-   function filtrarTabela() {
-    const inputBusca = document.getElementById('input-busca');
-    if (!inputBusca) return;
-
-    const textoBusca = inputBusca.value.toLowerCase();
-    const linhas = document.querySelectorAll('#tabela-chapas tr');
-
-    linhas.forEach(linha => {
-        // Pega todo o texto da linha (Onda, Fornecedor, Medidas)
-        const textoLinha = linha.innerText.toLowerCase();
-
-        // Se o que o usuário digitou estiver em qualquer lugar da linha, mostra
-        if (textoLinha.includes(textoBusca)) {
-            linha.style.display = "";
-        } else {
-            linha.style.display = "none";
-        }
-    });
 }
 
-    // 2. Função para Editar Chapa
-    async function abrirAjuste(onda, qtdAtual, id, compAtual, largAtual, fornecedorAtual) {
-        try {
-            const respF = await fetch('http://localhost:3000/fornecedores');
-            const fornecedores = await respF.json();
-            let opcoesHtml = fornecedores.map(f => 
-                `<option value="${f.nome}" ${f.nome === fornecedorAtual ? 'selected' : ''}>${f.nome}</option>`
-            ).join('');
+        document.querySelector('.btn-add').onclick = async () => {
+            try {
+                const resp = await fetch(`${API_BASE}/fornecedores`);
+                const fornecedores = await resp.json();
+                let opcoesHtml = fornecedores.map(f => `<option value="${f.nome}">${f.nome}</option>`).join('');
 
-            const { value: formValues } = await Swal.fire({
-                title: `Editar Chapa: ${onda}`,
-                html:
-                    `<label style="display:block;margin-top:10px;text-align:left;margin-left:10%">Quantidade</label><input id="swal-input1" class="swal2-input" type="number" value="${qtdAtual}">` +
-                    `<label style="display:block;margin-top:10px;text-align:left;margin-left:10%">Comprimento (mm)</label><input id="swal-input2" class="swal2-input" type="number" value="${compAtual}">` +
-                    `<label style="display:block;margin-top:10px;text-align:left;margin-left:10%">Largura (mm)</label><input id="swal-input3" class="swal2-input" type="number" value="${largAtual}">` +
-                    `<label style="display:block;margin-top:10px;text-align:left;margin-left:10%">Fornecedor</label>` +
-                    `<select id="swal-input4" class="swal2-input" style="width: 78%; display: block; margin: 10px auto;">${opcoesHtml}</select>`,
-                focusConfirm: false,
-                showCancelButton: true,
-                confirmButtonText: 'Salvar',
-                cancelButtonText: 'Cancelar',
-                preConfirm: () => {
-                    return {
-                        novaQuantidade: Number(document.getElementById('swal-input1').value),
-                        novoComprimento: Number(document.getElementById('swal-input2').value),
-                        novaLargura: Number(document.getElementById('swal-input3').value),
-                        novoFornecedor: document.getElementById('swal-input4').value
+                const { value: formValues } = await Swal.fire({
+                    title: 'Nova Entrada de Chapa',
+                    html:
+                        '<input id="swal-onda" class="swal2-input" placeholder="Onda (ex: B, BC, C)">' +
+                        '<select id="swal-forn" class="swal2-input"><option value="" disabled selected>Escolha o Fornecedor</option>' + opcoesHtml + '</select>' +
+                        '<input id="swal-comp" class="swal2-input" type="number" placeholder="Comprimento (mm)">' +
+                        '<input id="swal-larg" class="swal2-input" type="number" placeholder="Largura (mm)">' +
+                        '<input id="swal-qtd" class="swal2-input" type="number" placeholder="Quantidade inicial">',
+                    preConfirm: () => {
+                        const forn = document.getElementById('swal-forn').value;
+                        const onda = document.getElementById('swal-onda').value;
+                        if (!forn || !onda) return Swal.showValidationMessage('Onda e Fornecedor são obrigatórios!');
+                        return {
+                            onda: onda.toUpperCase().startsWith('ONDA') ? onda.toUpperCase() : 'ONDA ' + onda.toUpperCase(),
+                            fornecedor: forn,
+                            comprimento: Number(document.getElementById('swal-comp').value),
+                            largura: Number(document.getElementById('swal-larg').value),
+                            quantidade: Number(document.getElementById('swal-qtd').value)
+                        };
+                    }
+                });
+
+                if (formValues) {
+                    const response = await fetch(`${API_BASE}/api/chapas`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formValues)
+                    });
+                    if (response.ok) {
+                        Swal.fire('Cadastrado!', 'Nova chapa no estoque.', 'success');
+                        carregarChapas();
                     }
                 }
-            });
+            } catch (err) { console.error(err); }
+        };
 
-            if (formValues) {
-                await fetch('http://localhost:3000/ajustar-estoque', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: id, ...formValues })
-                });
-                carregarChapas();
-            }
-        } catch (err) {
-            console.error("Erro ao editar:", err);
-        }
-    }
-
-    // 3. Botão Adicionar Nova Chapa
-    document.querySelector('.btn-add').onclick = async () => {
-        try {
-            const resp = await fetch('http://localhost:3000/fornecedores');
-            const fornecedores = await resp.json();
-            let opcoesHtml = fornecedores.map(f => `<option value="${f.nome}">${f.nome}</option>`).join('');
-
-            const { value: formValues } = await Swal.fire({
-                title: 'Nova Chapa',
-                html:
-                    '<input id="swal-onda" class="swal2-input" placeholder="Onda (ex: B, BC, C)" style="text-transform: uppercase;">' +
-                    '<select id="swal-forn" class="swal2-input" style="width: 78%; display: block; margin: 10px auto;">' +
-                        '<option value="" disabled selected>Selecione o Fornecedor</option>' +
-                        opcoesHtml +
-                    '</select>' +
-                    '<input id="swal-comp" class="swal2-input" type="number" placeholder="Comprimento">' +
-                    '<input id="swal-larg" class="swal2-input" type="number" placeholder="Largura">' +
-                    '<input id="swal-qtd" class="swal2-input" type="number" placeholder="Quantidade">',
-                preConfirm: () => {
-                    const forn = document.getElementById('swal-forn').value;
-                    const ondaOriginal = document.getElementById('swal-onda').value;
-                    if (!forn) { Swal.showValidationMessage('Selecione um fornecedor!'); return false; }
-                    if (!ondaOriginal) { Swal.showValidationMessage('Digite o tipo de onda!'); return false; }
-
-                    return {
-                        onda: ondaOriginal.toUpperCase().trim().startsWith('ONDA') ? ondaOriginal.toUpperCase().trim() : 'ONDA ' + ondaOriginal.toUpperCase().trim(),
-                        fornecedor: forn,
-                        comprimento: Number(document.getElementById('swal-comp').value),
-                        largura: Number(document.getElementById('swal-larg').value),
-                        quantidade: Number(document.getElementById('swal-qtd').value)
-                    };
+        function fazerLogout() {
+            Swal.fire({
+                title: 'Deseja sair?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sim, sair'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.clear(); 
+                    window.location.href = 'login.html'; 
                 }
             });
+        }
 
-            if (formValues) {
-                const response = await fetch('http://localhost:3000/api/chapas', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formValues)
-                });
-                
-                const resData = await response.json();
-                if (resData.success) {
-                    Swal.fire('Sucesso!', 'Chapa adicionada.', 'success');
-                    carregarChapas();
-                } else {
-                    Swal.fire('Erro', resData.message || 'Erro ao salvar', 'error');
-                }
+        window.onload = async () => {
+            await carregarChapas(); 
+            const elData = document.getElementById('data-atual');
+            if (elData) elData.innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('input-busca').addEventListener('input', filtrarTabela);
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const user = localStorage.getItem('usuario');
+            const cargo = localStorage.getItem('cargo');
+            if (user) {
+                document.querySelector('.username').innerText = user;
+                document.querySelector('.avatar').innerText = user.charAt(0).toUpperCase();
             }
-        } catch (err) {
-            console.error("Erro no processo:", err);
-        }
-    };
-
-    // 4. Configurações iniciais
-    function configurarData() {
-        const elementoData = document.getElementById('data-atual');
-        if (elementoData) {
-            const data = new Date();
-            elementoData.innerText = data.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-        }
-    }
-
-    window.onload = async () => {
-    // 1. Primeiro carrega os dados do banco
-    await carregarChapas(); 
-    
-    // 2. Depois configura a data
-    if (typeof configurarData === "function") configurarData();
-
-    // 3. Por último, ativa o campo de busca
-    const inputB = document.getElementById('input-busca');
-    if (inputB) {
-        inputB.addEventListener('input', filtrarTabela);
-        console.log("✅ Sistema de busca ativado!");
-    }
-};
-</script>
-
+            if (cargo) document.querySelector('.role').innerText = cargo;
+        });
+    </script>
 </body>
 </html>

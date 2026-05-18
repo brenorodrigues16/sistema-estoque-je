@@ -1,6 +1,25 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+
+    <script>
+    const temaSalvo = localStorage.getItem('tema') || 'claro';
+    document.documentElement.setAttribute('data-theme', temaSalvo);
+    </script>
+
+    <script>
+        if (localSrorage.getItem('logado') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+<script>
+    // - - FORCA LOGIN - - //
+    if (localStorage.getItem('logado') !== 'true') {
+        window.location.href = 'login.html'; 
+    }
+</script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Estoque - Dashboard</title>
@@ -36,22 +55,33 @@
         <li class="menu-item" onclick="window.location.href='expedicao.html'">
             <i class="fas fa-truck"></i> Expedição
         </li>
-        
     </ul>
-            </nav>
+    </nav>
         
-            <div class="user-info">
-                <div class="avatar">U</div>
-                <div>
-                    <p class="username">Usuário</p>
-                    <p class="role">Administrador</p>
-                </div>
+        <div class="sidebar-footer">
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 0 20px;">
+        
+        <div class="user-info">
+            <div class="avatar">U</div>
+            <div>
+                <p class="username">Usuário</p>
+                <p class="role">Administrador</p>
             </div>
+        </div>
+
+        <div class="logout-container">
+            <button onclick="fazerLogout()" class="btn-logout-red">
+                <i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA
+            </button>
+        </div>
+    </div>    
+        
         </aside>
 
         <main class="content">
         <header class="top-bar">
-            <span>MOVIMENTAÇÕES</span> <span class="date-now" id="data-atual"></span> 
+            <strong><span>MOVIMENTAÇÕES</span></strong>  
+            <strong><span class="date-now" id="data-atual"></span></strong> 
         </header>
 
             <section class="cards-grid">
@@ -83,64 +113,54 @@
         const data = new Date();
         const opcoes = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('data-atual').innerText = data.toLocaleDateString('pt-BR', opcoes);
-    </script>
 
-    <script>
-// CONFIGURAÇÕES ESSENCIAIS
-app.use(cors());
-app.use(bodyParser.json());
+// - - CONFIGURACAO DE LOGIN E LOGOUT - - //
 
-// AQUI ESTÁ O SEGREDO: 
-// Esta linha diz ao Node que tudo o que for HTML, CSS e JS de tela está na pasta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
+    function fazerLogout() {
+    Swal.fire({
+        title: 'Deseja sair?',
+        text: "Sua sessão será encerrada.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, sair!',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            localStorage.clear(); 
+            window.location.href = 'login.html'; 
+        }
+    });
+}
 
-// Rota para abrir o Dashboard automaticamente ao acessar 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+window.addEventListener('DOMContentLoaded', () => {
+    // Busca os dados salvos no momento do login
+    const nomeUsuario = localStorage.getItem('usuario');
+    const cargoUsuario = localStorage.getItem('cargo');
+
+    // Seleciona os elementos pelas classes que você já tem no HTML
+    const elementoNome = document.querySelector('.username');
+    const elementoCargo = document.querySelector('.role');
+    const elementoAvatar = document.querySelector('.avatar');
+
+    if (nomeUsuario && elementoNome) {
+        elementoNome.innerText = nomeUsuario;
+    }
+
+    if (cargoUsuario && elementoCargo) {
+        elementoCargo.innerText = cargoUsuario;
+    }
+
+    // Bônus: Muda a letra do Avatar para a primeira letra do nome do usuário
+    if (nomeUsuario && elementoAvatar) {
+        elementoAvatar.innerText = nomeUsuario.charAt(0).toUpperCase();
+    }
 });
 
-// ... (Suas outras rotas /dados, /produzir, etc, continuam iguais abaixo daqui)
-
-Swal.fire({
-  title: 'Tem certeza?',
-  text: "Você não poderá reverter isso!",
-  icon: 'warning',
-  showCancelButton: true,
-  confirmButtonColor: '#c0392b',
-  cancelButtonColor: '#95a5a6',
-  confirmButtonText: 'Sim, excluir!'
-}).then((result) => {
-  if (result.isConfirmed) {
-      // Aqui vai o seu código de fetch para excluir
-  }
-})
+    </script>
 
 
-    window.onload = async () => {
-        try {
-            const resp = await fetch('/dados');
-            const dados = await resp.json();
-            const tabelaCorpo = document.querySelector('tbody');
-            
-            tabelaCorpo.innerHTML = "";
 
-            // Inverte a ordem para que a movimentação mais recente apareça primeiro
-            dados.movimentacoes.reverse().forEach(mov => {
-                const classeTipo = mov.tipo.includes("Entrada") ? "badge-entrada" : "badge-saida";
-                const linha = `
-                    <tr>
-                        <td>${mov.data}</td>
-                        <td>${mov.produto}</td>
-                        <td><span class="badge ${classeTipo}">${mov.tipo}</span></td>
-                        <td>${mov.qtd} un</td>
-                        <td><strong>Verificar</strong></td>
-                    </tr>`;
-                tabelaCorpo.innerHTML += linha;
-            });
-        } catch (erro) {
-            console.error("Erro ao buscar movimentações:", erro);
-        }
-    };
-</script>
 </body>
 </html>

@@ -4,6 +4,24 @@
 
 <head>
 
+    <script>
+    const temaSalvo = localStorage.getItem('tema') || 'claro';
+    document.documentElement.setAttribute('data-theme', temaSalvo);
+    </script>
+
+    <script>
+        if (localSrorage.getItem('logado') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+
+<script>
+    // - - FORCA LOGIN - - //
+    if (localStorage.getItem('logado') !== 'true') {
+        window.location.href = 'login.html'; 
+    }
+</script>
+
     <meta charset="UTF-8">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -180,13 +198,23 @@
 
             </nav>
 
-              <div class="user-info">
-                <div class="avatar">U</div>
-                <div>
-                    <p class="username">Usuário</p>
-                    <p class="role">Administrador</p>
-                </div>
+        <div class="sidebar-footer">
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 0 20px;">
+        
+        <div class="user-info">
+            <div class="avatar">U</div>
+            <div>
+                <p class="username">Usuário</p>
+                <p class="role">Administrador</p>
             </div>
+        </div>
+
+        <div class="logout-container">
+            <button onclick="fazerLogout()" class="btn-logout-red">
+                <i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA
+            </button>
+        </div>
+    </div>
 
         </aside>
 
@@ -196,7 +224,8 @@
 
             <header class="top-bar">
 
-                <span>CENTRAL DE PRODUÇÃO</span> <span id="data-atual"></span>
+                <strong><span>CENTRAL DE PRODUÇÃO</span></strong>
+                <strong><span id="data-atual"></span></strong>
 
             </header>
 
@@ -578,14 +607,68 @@ document.getElementById('form-producao').addEventListener('submit', async (e) =>
 
 document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', calcularERevalidar));
 
+// - - CONFIGURACAO DE LOGIN E LOGOUT - - //
+
+    function fazerLogout() {
+    Swal.fire({
+        title: 'Deseja sair?',
+        text: "Sua sessão será encerrada.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#e74c3c',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sim, sair!',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            localStorage.clear(); 
+            window.location.href = 'login.html'; 
+        }
+    });
+}
 
 // ÚNICO window.onload
 window.onload = function() {
     carregarTiposChapa();
     atualizarResumoHoje();
     carregarPedidosRecentes();
-    
+
+     const elementoData = document.getElementById('data-atual');
+            if (elementoData) {
+                elementoData.innerText = new Date().toLocaleDateString('pt-BR', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+            }
 };
+
+    window.addEventListener('DOMContentLoaded', () => {
+    // Busca os dados salvos no momento do login
+    const nomeUsuario = localStorage.getItem('usuario');
+    const cargoUsuario = localStorage.getItem('cargo');
+
+    // Seleciona os elementos pelas classes que você já tem no HTML
+    const elementoNome = document.querySelector('.username');
+    const elementoCargo = document.querySelector('.role');
+    const elementoAvatar = document.querySelector('.avatar');
+
+    if (nomeUsuario && elementoNome) {
+        elementoNome.innerText = nomeUsuario;
+    }
+
+    if (cargoUsuario && elementoCargo) {
+        elementoCargo.innerText = cargoUsuario;
+    }
+
+    // Bônus: Muda a letra do Avatar para a primeira letra do nome do usuário
+    if (nomeUsuario && elementoAvatar) {
+        elementoAvatar.innerText = nomeUsuario.charAt(0).toUpperCase();
+    }
+});
+    
+
 
     </script>
 </body>

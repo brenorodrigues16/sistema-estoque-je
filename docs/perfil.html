@@ -1,16 +1,23 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <script>
+        // Bloqueio de segurança e aplicação imediata do tema
+        const logado = localStorage.getItem('logado');
+        const temaSalvo = localStorage.getItem('tema') || 'claro';
+        
+        if (logado !== 'true') { 
+            window.location.href = 'login.html'; 
+        } else {
+            // Aplica o tema antes da página carregar para evitar o "flash" branco
+            document.documentElement.setAttribute('data-theme', temaSalvo);
+        }
+    </script>
     <meta charset="UTF-8">
-    <title>Perfil - J&E</title>
+    <title>Configurações - J&E</title>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        label { display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #4d4d4d; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #32be45; color: rgb(255, 255, 255); border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    </style>
 </head>
 <body>
 
@@ -44,85 +51,140 @@
                     </li>
                 </ul>
             </nav>
-
+                    
+        <div class="sidebar-footer">
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 0 20px;">
             <div class="user-info">
-                <div class="avatar">U</div>
-                <div>
-                    <p class="username">Usuário</p>
-                    <p class="role">Administrador</p>
-                </div>
+            <div class="avatar">U</div>
+            <div>
+                <p class="username">Usuário</p>
+                <p class="role">administrador</p>
             </div>
-        </aside>
-
-        <main class="content">
-            <header class="top-bar">
-                <span>CONFIGURAÇÕES</span> 
-                <span class="date-now" id="data-atual"></span> 
-            </header>
-
-    <div class="perfil-box">
-        <div class="usuario">
-            <span id="nome-usuario">
         </div>
-        <h2>Minhas Configurações</h2>
-        <form id="form-perfil">
-            <div class="campo">
-                <label>E-mail de Recuperação</label>
-                <input type="email" id="email" required>
-            </div>
-            <div class="campo">
-                <label>Nova Senha</label>
-                  <input type="password" id="senha" required>
-                    <label>Confirmar Nova Senha</label>
-                  <input type="password" id="confirmar-senha" required>
-            </div>
 
-            <div class="campo">
-                <label>Tema</label>
-                <select id="tema" data-theme="dark">
-                    <option value="claro">Tema Claro</option>
-                    <option value="escuro">Tema Escuro</option>
-                </select>
-            </div>
-            <br><br>
-            <button type="submit">SALVAR ALTERAÇÕES</button>
-        </form>
-        <button onclick="window.location.href='index.html'" style="background:#354464; color:#FFFFFF; margin-top:10px;">Voltar ao Inicio</button>
-    
-        </main>
-        </span>
+        <div class="logout-container">
+            <button onclick="fazerLogout()" class="btn-logout-red">
+                <i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA
+            </button>
+        </div>
     </div>
 
-    <script>
-    // 1. ALGORITMO DA DATA
-    function formatarData() {
-        const elementoData = document.getElementById('data-atual');
-        const data = new Date();
-        const opcoes = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-        elementoData.innerText = data.toLocaleDateString('pt-BR', opcoes);
+        </aside>
+
+
+    <main class="content">
+        <header class="top-bar">
+            <strong>CONFIGURAÇÕES</strong>
+            <strong id="data-atual"></strong>
+        </header>
+
+        <div class="settings-container">
+            <form id="form-perfil">
+                <div class="settings-card">
+                    <h2 class="settings-section-title"><i class="fas fa-lock"></i> Segurança</h2>
+                    <div style="margin-bottom: 20px;">
+                        <label class="swal-label">E-mail de Recuperação</label>
+                        <input type="email" id="email" class="swal2-input-custom" style="padding:10px; border-radius:6px; border:1px solid #ddd; width:100%;">
+                    </div>
+                    <div class="grid-campos">
+                        <div>
+                            <label class="swal-label">Nova Senha</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="senha" class="swal2-input-custom" style="padding:10px; border-radius:6px; border:1px solid #ddd; width:100%;">
+                                <i class="fas fa-eye" onclick="verSenha('senha')"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="swal-label">Confirmar Senha</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="confirmar-senha" class="swal2-input-custom" style="padding:10px; border-radius:6px; border:1px solid #ddd; width:100%;">
+                                <i class="fas fa-eye" onclick="verSenha('confirmar-senha')"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h2 class="settings-section-title"><i class="fas fa-palette"></i> Aparência</h2>
+                    <label class="swal-label">Tema do Sistema</label>
+                    <select id="tema" class="swal2-input-custom" style="padding:10px; border-radius:6px; border:1px solid #ddd; width:100%;">
+                        <option value="claro">Modo Claro</option>
+                        <option value="dark">Modo Escuro</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" style="flex:2; background: var(--accent-green); color:white; padding:15px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">
+                        SALVAR ALTERAÇÕES
+                    </button>
+                    <button type="button" onclick="window.location.href='index.html'" style="flex:1; background: var(--secondary-color); color:white; border:none; border-radius:8px; cursor:pointer;">
+                        CANCELAR
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Mostrar/Esconder senha
+    function verSenha(id) {
+        const input = document.getElementById(id);
+        input.type = input.type === 'password' ? 'text' : 'password';
     }
 
+    // Carregar dados e data
+    window.onload = () => {
+        document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         document.getElementById('email').value = localStorage.getItem('usuarioEmail') || '';
         document.getElementById('tema').value = localStorage.getItem('tema') || 'claro';
 
-        document.getElementById('form-perfil').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const resp = await fetch('/atualizar-perfil', {
+        // Atualiza Sidebar
+        const nome = localStorage.getItem('usuario');
+        if(nome) {
+            document.querySelector('.username').innerText = nome;
+            document.querySelector('.avatar').innerText = nome.charAt(0).toUpperCase();
+        }
+    };
+
+    // Salvar Alterações
+    document.getElementById('form-perfil').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const temaSelecionado = document.getElementById('tema').value;
+
+        // Validação simples de senha
+        if (document.getElementById('senha').value !== document.getElementById('confirmar-senha').value) {
+            return Swal.fire('Erro', 'As senhas não coincidem!', 'error');
+        }
+
+        try {
+            const resp = await fetch('http://localhost:3000/api/atualizar-perfil', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    usuario: localStorage.getItem('usuarioID'),
-                    novoEmail: document.getElementById('email').value,
-                    novaSenha: document.getElementById('senha').value,
-                    confirmarSenha: document.getElementById('confirmar-senha').value,
-                    novoTema: document.getElementById('tema').value
+                    id: localStorage.getItem('usuarioID'),
+                    email: document.getElementById('email').value,
+                    senha: document.getElementById('senha').value,
+                    tema: temaSelecionado
                 })
             });
+
             if(resp.ok) {
-                localStorage.setItem('tema', document.getElementById('tema').value);
-                Swal.fire('Pronto!', 'Dados atualizados!', 'success').then(() => window.location.href='index.html');
+                // Salva localmente e aplica o tema na hora
+                localStorage.setItem('tema', temaSelecionado);
+                document.documentElement.setAttribute('data-theme', temaSelecionado);
+                
+                Swal.fire('Sucesso!', 'Configurações atualizadas!', 'success');
             }
-        });
-    </script>
+        } catch (err) {
+            Swal.fire('Erro', 'Falha ao conectar com o servidor.', 'error');
+        }
+    });
+
+    function fazerLogout() {
+        localStorage.clear();
+        window.location.href = 'login.html';
+    }
+</script>
 </body>
 </html>

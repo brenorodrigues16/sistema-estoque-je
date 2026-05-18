@@ -2,38 +2,207 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>J&E Embalagens LTDA - Acesso</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
-        body { font-family: sans-serif; background: #2c3e50; display: flex; height: 100vh; align-items: center; justify-content: center; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 12px; width: 350px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .toggle { margin-top: 15px; font-size: 0.85rem; color: #666; cursor: pointer; text-decoration: underline; }
-    </style>
+        :root {
+            --primary: #ff9027; /* Laranja J&E */
+            --dark-bg: #1a1d23;
+            --secondary-bg: #2c3e50;
+            --text-color: #333;
+            --glass: rgba(255, 255, 255, 0.98);
+        }
 
-    <link rel="stylesheet" href="dashboard.css">
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--secondary-bg) 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Efeito de iluminação de fundo */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: var(--primary);
+            filter: blur(150px);
+            opacity: 0.1;
+            z-index: 0;
+        }
+
+        .card {
+            background: var(--glass);
+            padding: 45px 35px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            z-index: 1;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .logo-login {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--dark-bg);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .logo-login i { color: var(--primary); }
+
+        h2 {
+            font-size: 0.85rem;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 35px;
+            font-weight: 600;
+        }
+
+        /* Grupos de Input com Ícones */
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+            transition: 0.3s;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s;
+            background: #fdfdfd;
+            box-sizing: border-box;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            background: #fff;
+            box-shadow: 0 0 15px rgba(255, 144, 39, 0.1);
+        }
+
+        input:focus + i { color: var(--primary); }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: #e67e22;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 144, 39, 0.3);
+        }
+
+        .btn-register { background: #27ae60 !important; }
+        .btn-register:hover { background: #219150 !important; box-shadow: 0 8px 20px rgba(39, 174, 96, 0.3) !important;}
+
+        .toggle {
+            margin-top: 25px;
+            font-size: 0.85rem;
+            color: #888;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .toggle span {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .toggle:hover span { text-decoration: underline; }
+    </style>
 </head>
 <body>
+
     <div class="card" id="login-box">
-        <h2>Sistema de Estoque -J&E Embalagens LTDA</h2>
+        <div class="logo-login">
+            <i class="fas fa-box-open"></i> J&E DASHBOARD
+        </div>
+        <h2>Acesso ao Sistema</h2>
+        
         <form id="form-login">
-            <input type="text" id="user" placeholder="Usuário" required>
-            <input type="password" id="pass" placeholder="Senha" required>
-            <button type="submit">ENTRAR</button>
+            <div class="input-group">
+                <input type="text" id="user" placeholder="Seu usuário" required>
+                <i class="fas fa-user"></i>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="pass" placeholder="Sua senha" required>
+                <i class="fas fa-lock"></i>
+            </div>
+            
+            <button type="submit">Entrar no Sistema</button>
         </form>
-        <div class="toggle" onclick="toggleForm()">Não tem usuario? Solicite acesso clicando aqui.</div>
+        
+        <div class="toggle" onclick="toggleForm()">
+            Não tem usuário? <span>Solicite acesso aqui</span>
+        </div>
     </div>
 
     <div class="card" id="register-box" style="display:none;">
-        <h2>Solicitar Acesso</h2>
+        <div class="logo-login">
+            <i class="fas fa-user-plus"></i> SOLICITAR ACESSO
+        </div>
+        <h2>Cadastro de Colaborador</h2>
+        
         <form id="form-register">
-            <input type="text" id="reg-nome" placeholder="Nome Completo" required>
-            <input type="text" id="reg-user" placeholder="Usuário desejado" required>
-            <input type="password" id="reg-pass" placeholder="Senha" required>
-            <button type="submit" style="background: #27ae60;">ENVIAR SOLICITAÇÃO DE ACESSO</button>
+            <div class="input-group">
+                <input type="text" id="reg-nome" placeholder="Nome Completo" required>
+                <i class="fas fa-id-card"></i>
+            </div>
+            <div class="input-group">
+                <input type="text" id="reg-user" placeholder="Usuário desejado" required>
+                <i class="fas fa-at"></i>
+            </div>
+            <div class="input-group">
+                <input type="password" id="reg-pass" placeholder="Crie uma senha" required>
+                <i class="fas fa-key"></i>
+            </div>
+            <button type="submit" class="btn-register">Enviar Solicitação</button>
         </form>
-        <div class="toggle" onclick="toggleForm()">Já tenho conta? Entrar</div>
+        
+        <div class="toggle" onclick="toggleForm()">
+            Já tem conta? <span>Voltar ao login</span>
+        </div>
     </div>
 
     <script>
@@ -44,39 +213,75 @@
             reg.style.display = reg.style.display === 'none' ? 'block' : 'none';
         }
 
-        // LOGIN
+        // LÓGICA DE LOGIN
         document.getElementById('form-login').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const resp = await fetch('/login', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ usuario: document.getElementById('user').value, senha: document.getElementById('pass').value })
-            });
-            const dados = await resp.json();
-            if (resp.ok) {
-                localStorage.setItem('logado', 'true');
-                localStorage.setItem('usuario', dados.nome);
-                localStorage.setItem('cargo', dados.cargo);
-                window.location.href = 'index.html';
-            } else {
-                Swal.fire('Erro', dados.message, 'error');
+            
+            // Feedback visual de carregamento
+            const btn = e.target.querySelector('button');
+            const btnOriginalText = btn.innerText;
+            btn.innerText = 'AUTENTICANDO...';
+            btn.disabled = true;
+
+            try {
+                const resp = await fetch('http://localhost:3000/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        usuario: document.getElementById('user').value, 
+                        senha: document.getElementById('pass').value 
+                    })
+                });
+
+                const dados = await resp.json();
+
+                if (resp.ok) {
+                    localStorage.setItem('logado', 'true');
+                    localStorage.setItem('usuario', dados.nome);
+                    localStorage.setItem('cargo', dados.cargo);
+                    window.location.href = 'index.html';
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Acesso Negado',
+                        text: dados.message,
+                        confirmButtonColor: '#ff9027'
+                    });
+                }
+            } catch (error) {
+                Swal.fire('Erro', 'Não foi possível conectar ao servidor.', 'error');
+            } finally {
+                btn.innerText = btnOriginalText;
+                btn.disabled = false;
             }
         });
 
-        // REGISTRO
+        // LÓGICA DE REGISTRO
         document.getElementById('form-register').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const resp = await fetch('/registrar', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ 
-                    nome: document.getElementById('reg-nome').value, 
-                    usuario: document.getElementById('reg-user').value, 
-                    senha: document.getElementById('reg-pass').value 
-                })
-            });
-            const dados = await resp.json();
-            Swal.fire('Recebido', dados.message, resp.ok ? 'success' : 'error').then(() => { if(resp.ok) toggleForm(); });
+            try {
+                const resp = await fetch('http://localhost:3000/registrar', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        nome: document.getElementById('reg-nome').value, 
+                        usuario: document.getElementById('reg-user').value, 
+                        senha: document.getElementById('reg-pass').value 
+                    })
+                });
+                const dados = await resp.json();
+                
+                Swal.fire({
+                    title: resp.ok ? 'Sucesso!' : 'Erro',
+                    text: dados.message,
+                    icon: resp.ok ? 'success' : 'error',
+                    confirmButtonColor: '#27ae60'
+                }).then(() => { 
+                    if(resp.ok) toggleForm(); 
+                });
+            } catch (err) {
+                Swal.fire('Erro', 'Servidor offline.', 'error');
+            }
         });
     </script>
 </body>

@@ -1,12 +1,61 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <script>
+    const temaSalvo = localStorage.getItem('tema') || 'claro';
+    document.documentElement.setAttribute('data-theme', temaSalvo);
+    </script>
+
+    <script>
+        if (localStorage.getItem('logado') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Papelões Estoque - Caixas Prontas</title>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        .tabela-container table tbody tr:hover {
+            background-color: rgba(52, 152, 219, 0.05); /*hoover*/
+            transition: 0.2s;
+        }
+
+        .btn-ajuste {
+            background: #3498db;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            margin: 0 auto; 
+        }
+
+        .btn-ajuste:hover {
+            background: #2980b9;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .badge-codigo {
+            background: #e1f5fe;
+            color: #0288d1;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85em;
+            border: 1px solid #b3e5fc;
+        }
+    </style>
 </head>
 <body>
 
@@ -41,45 +90,53 @@
                 </ul>
             </nav>
 
-            <div class="user-info">
-                <div class="avatar">U</div>
-                <div>
-                    <p class="username">Usuário</p>
-                    <p class="role">Administrador</p>
+            <div class="sidebar-footer">
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 0 20px;">
+                <div class="user-info">
+                    <div class="avatar">U</div>
+                    <div>
+                        <p class="username">Usuário</p>
+                        <p class="role">Administrador</p>
+                    </div>
+                </div>
+                <div class="logout-container">
+                    <button onclick="fazerLogout()" class="btn-logout-red">
+                        <i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA
+                    </button>
                 </div>
             </div>
         </aside>
 
         <main class="content">
             <header class="top-bar">
-                <span>ESTOQUE DE CAIXAS PRONTAS</span> 
-                <span class="date-now" id="data-atual"></span> 
+                <strong><span>ESTOQUE - CAIXAS</span></strong> 
+                <strong><span class="date-now" id="data-atual"></span></strong> 
             </header>
 
             <div class="filtros-container" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    
-    <div class="busca-container" style="position: relative; flex-grow: 1; max-width: 400px;">
-        <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #888;"></i>
-        <input type="text" id="input-busca" placeholder="Buscar por cliente ou código..." style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 8px; border: 1px solid #ddd;">
-    </div>
+                <div class="busca-container" style="position: relative; flex-grow: 1; max-width: 400px;">
+                    <i class="fas fa-search" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #888;"></i>
+                    <input type="text" id="input-busca" placeholder="Buscar por cliente ou código..." style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 8px; border: 1px solid #ddd;">
+                </div>
 
-    <button onclick="novoRegistro()" class="btn-novo" style="background-color: var(--accent-green); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;">
-        <i class="fas fa-plus"></i> Registrar Nova Caixa
-    </button>
-
-    </div>
+                <button onclick="novoRegistro()" class="btn-novo" style="background-color: var(--accent-green); color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-plus"></i> Registrar Nova Caixa
+                </button>
+            </div>
 
             <div class="tabela-container">
-                <h4 style="margin-bottom: 15px; color: var(--sidebar-color);">CONTROLE DE CAIXAS PRONTAS</h4>
+                <h4 style="margin-bottom: 15px; color: var(--sidebar-color); font-weight: bold;">
+                    <i class="fas fa-clipboard-list"></i> CONTROLE DE CAIXAS PRONTAS
+                </h4>
                 <table>
                     <thead>
                         <tr>
-                            <th>Cliente</th>
-                            <th>Código/Referencia</th>
-                            <th>QUANTIDADE</th>
-                            <th>DATA DE FABRICAÇÃO</th>
-                            <th>RESPONSAVEL</th>
-                            <th>EDITAR</th>
+                            <th>CLIENTE</th>
+                            <th>CÓDIGO / REF</th>
+                            <th style="text-align: center;">QUANTIDADE</th>
+                            <th>FABRICAÇÃO</th>
+                            <th>RESPONSÁVEL</th>
+                            <th style="text-align: center;">EDITAR</th>
                         </tr>
                     </thead>
                     <tbody id="tabela-corpo-caixas">
@@ -89,211 +146,200 @@
         </main>
     </div>
 
+    <div id="context-menu" class="context-menu">
+        <ul>
+            <li onclick="executarAcaoContexto('editar')"><i class="fas fa-edit"></i> Editar Item</li>
+            <li onclick="executarAcaoContexto('excluir')" class="delete-opt"><i class="fas fa-trash"></i> Excluir Registro</li>
+            <hr>
+            <li onclick="executarAcaoContexto('detalhes')"><i class="fas fa-info-circle"></i> Ver Detalhes</li>
+        </ul>
+    </div>
+
     <script>
-    // 1. Função para carregar as caixas do banco
-    async function carregarCaixas() {
-        try {
-            const resp = await fetch('http://localhost:3000/api/caixas');
-            const caixas = await resp.json();
-            const tabelaCorpo = document.getElementById('tabela-corpo-caixas'); // Garanta que este ID existe no seu <tbody>
-            
-            tabelaCorpo.innerHTML = '';
+        const API_BASE = 'http://localhost:3000/api';
 
-            caixas.forEach(caixa => {
-   
-                const linha = `
-                    <tr>
-                        <td><strong>${caixa.cliente}</strong></td>
-                        <td>${caixa.codigo}</td>
-                        <td>${caixa.quantidade} un</td>
-                        <td>${new Date(caixa.data_fabricacao).toLocaleDateString('pt-BR')}</td>
-                        <td><strong>${caixa.responsavel}</strong></td>
-                        <td class="actions" style="display: flex; gap: 8px;">
-                            <button onclick="editarCaixa(${caixa.id}, '${caixa.cliente}', '${caixa.codigo}', ${caixa.quantidade}, '${caixa.data_fabricacao}', '${caixa.responsavel}')" 
-                                 style="background:#3498db; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        
+        async function carregarCaixas() {
+            try {
+                const resp = await fetch(`${API_BASE}/caixas`);
+                const caixas = await resp.json();
+                const tabelaCorpo = document.getElementById('tabela-corpo-caixas'); 
+                tabelaCorpo.innerHTML = '';
+
+                caixas.forEach(caixa => {
+                    const dataFormatada = caixa.data_fabricacao.split('T')[0].split('-').reverse().join('/');
+                    
+                    const linha = `
+                        <tr data-id="${caixa.id}">
+                            <td><strong>${caixa.cliente.toUpperCase()}</strong></td>
+                            <td><span class="badge-codigo">${caixa.codigo.toUpperCase()}</span></td>
+                            <td style="text-align: center; font-weight: bold; color: var(--accent-blue);">
+                                ${caixa.quantidade} <small>un</small>
                             </td>
-                    </tr>`;
-                tabelaCorpo.innerHTML += linha;
-            });
-
-        } catch (erro) {
-            console.error("Erro ao carregar caixas:", erro);
-        }
-    }
-
-    // 2. Função para o botão "Registrar Nova Caixa"
-   async function novoRegistro() {
-    const { value: formValues } = await Swal.fire({
-        title: 'Registrar Nova Caixa',
-        html:
-            `<label style="display:block; text-align:left; margin-left:40px;">Cliente:</label>` +
-            `<input id="swal-cliente" class="swal2-input" placeholder="Nome do cliente">` +
-            `<label style="display:block; text-align:left; margin-left:40px;">Código:</label>` +
-            `<input id="swal-codigo" class="swal2-input" placeholder="Código / Referência da caixa">` +
-            `<label style="display:block; text-align:left; margin-left:40px;">Quantidade:</label>` +
-            `<input id="swal-qtd" class="swal2-input" type="number" placeholder="Quantidade">` +
-            `<label style="display:block; text-align:left; margin-left:40px;">Data de Fabricação:</label>` +
-            `<input id="swal-data" class="swal2-input" type="date">` +
-            `<label style="display:block; text-align:left; margin-left:40px;">Responsável:</label>` +
-            `<input id="swal-responsavel" class="swal2-input" placeholder="Nome do responsável">`, // CORRIGIDO: removido o 'n' extra
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: 'Confirmar novo Registro',
-        cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#27ae60',
-        preConfirm: () => {
-            // Verificação básica para não enviar campo vazio
-            const cliente = document.getElementById('swal-cliente').value;
-            const codigo = document.getElementById('swal-codigo').value;
-            const qtd = document.getElementById('swal-qtd').value;
-            const data = document.getElementById('swal-data').value;
-            const resp = document.getElementById('swal-responsavel').value;
-
-            if (!cliente || !codigo || !qtd || !data || !resp) {
-                Swal.showValidationMessage('Por favor, preencha todos os campos!');
-                return false;
-            }
-
-            return {
-                cliente: cliente,
-                codigo: codigo,
-                quantidade: qtd,
-                data_fabricacao: data,
-                responsavel: resp
-            }
-        }
-    });
-
-    if (formValues) {
-        try {
-            const response = await fetch('http://localhost:3000/api/caixas', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formValues)
-            });
-            
-            const resData = await response.json();
-            
-            if (resData.success) {
-                Swal.fire('Sucesso!', 'Caixa registrada com sucesso.', 'success');
-                carregarCaixas(); // Atualiza a tabela na hora
-            } else {
-                Swal.fire('Erro!', 'Erro ao salvar no banco: ' + resData.message, 'error');
-            }
-        } catch (erro) {
-            console.error("Erro na requisição:", erro);
-            Swal.fire('Erro!', 'Não foi possível conectar ao servidor.', 'error');
-        }
-    }
-}
-
-    // 3. Função de Busca (igual à de chapas)
-    function filtrarCaixas() {
-        const textoBusca = document.getElementById('input-busca').value.toLowerCase();
-        const linhas = document.querySelectorAll('#tabela-corpo-caixas tr');
-
-        linhas.forEach(linha => {
-            const conteúdo = linha.innerText.toLowerCase();
-            linha.style.display = conteúdo.includes(textoBusca) ? "" : "none";
-        });
-    }
-
-    async function ajustarQtd(id, mudanca) {
-    try {
-        await fetch('http://localhost:3000/api/caixas/ajustar-estoque', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, mudanca })
-        });
-        carregarCaixas(); // Atualiza a tabela na hora
-    } catch (erro) {
-        console.error("Erro ao ajustar quantidade:", erro);
-    }
-}
-
-async function editarCaixa(id, clienteAt, codigoAt, qtdAt, dataAt, respAt) {
-    // Formata a data para o padrão do input date (AAAA-MM-DD)
-    const dataFormatada = dataAt ? new Date(dataAt).toISOString().split('T')[0] : '';
-
-    const { value: formValues } = await Swal.fire({
-        title: 'Ajustar Registro de Caixa',
-        html: `
-            <label style="display:block; text-align:left; margin-left:40px;">Cliente:</label>
-            <input id="edit-cliente" class="swal2-input" value="${clienteAt}">
-            <label style="display:block; text-align:left; margin-left:40px;">Código:</label>
-            <input id="edit-codigo" class="swal2-input" value="${codigoAt}">
-            <label style="display:block; text-align:left; margin-left:40px;">Quantidade:</label>
-            <input id="edit-qtd" class="swal2-input" type="number" value="${qtdAt}">
-            <label style="display:block; text-align:left; margin-left:40px;">Data de Fabricação:</label>
-            <input id="edit-data" class="swal2-input" type="date" value="${dataFormatada}">
-            <label style="display:block; text-align:left; margin-left:40px;">Responsável:</label>
-            <input id="edit-resp" class="swal2-input" value="${respAt}">`,
-        focusConfirm: false,
-        showCancelButton: true,
-        confirmButtonText: 'Salvar Alterações',
-        cancelButtonText: 'Cancelar',
-        confirmButtonColor: '#27ae60',
-        preConfirm: () => {
-            return {
-                id: id,
-                cliente: document.getElementById('edit-cliente').value,
-                codigo: document.getElementById('edit-codigo').value,
-                quantidade: document.getElementById('edit-qtd').value,
-                data_fabricacao: document.getElementById('edit-data').value,
-                responsavel: document.getElementById('edit-resp').value
-            }
-        }
-    });
-
-    if (formValues) {
-        try {
-            const response = await fetch('http://localhost:3000/api/caixas/editar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formValues)
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Atualizado!',
-                    text: 'Os dados foram salvos com sucesso.',
-                    timer: 1500,
-                    showConfirmButton: false
+                            <td>${dataFormatada}</td>
+                            <td><strong>${caixa.responsavel}</strong></td>
+                            <td style="text-align: center;">
+                                <button class="btn-ajuste" onclick="editarCaixa(${caixa.id}, '${caixa.cliente}', '${caixa.codigo}', ${caixa.quantidade}, '${caixa.data_fabricacao}', '${caixa.responsavel}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                    tabelaCorpo.innerHTML += linha;
                 });
-                carregarCaixas(); // Recarrega a tabela automaticamente
-            } else {
-                Swal.fire('Erro', 'Erro ao salvar: ' + result.message, 'error');
+            } catch (erro) { console.error("Erro ao carregar:", erro); }
+        }
+
+        async function novoRegistro() {
+            const { value: formValues } = await Swal.fire({
+                title: 'Registrar Nova Caixa',
+                html: `
+                    <label style="display:block; text-align:left; margin-left:40px;">Cliente:</label>
+                    <input id="swal-cliente" class="swal2-input">
+                    <label style="display:block; text-align:left; margin-left:40px;">Código:</label>
+                    <input id="swal-codigo" class="swal2-input">
+                    <label style="display:block; text-align:left; margin-left:40px;">Quantidade:</label>
+                    <input id="swal-qtd" class="swal2-input" type="number">
+                    <label style="display:block; text-align:left; margin-left:40px;">Data de Fabricação:</label>
+                    <input id="swal-data" class="swal2-input" type="date">
+                    <label style="display:block; text-align:left; margin-left:40px;">Responsável:</label>
+                    <input id="swal-responsavel" class="swal2-input">`,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Confirmar Registro',
+                confirmButtonColor: '#27ae60',
+                preConfirm: () => {
+                    const values = {
+                        cliente: document.getElementById('swal-cliente').value,
+                        codigo: document.getElementById('swal-codigo').value,
+                        quantidade: document.getElementById('swal-qtd').value,
+                        data_fabricacao: document.getElementById('swal-data').value,
+                        responsavel: document.getElementById('swal-responsavel').value
+                    };
+                    if (!values.cliente || !values.codigo || !values.quantidade || !values.data_fabricacao || !values.responsavel) {
+                        Swal.showValidationMessage('Preencha todos os campos!');
+                        return false;
+                    }
+                    return values;
+                }
+            });
+
+            if (formValues) {
+                try {
+                    const response = await fetch(`${API_BASE}/caixas`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formValues)
+                    });
+                    const resData = await response.json();
+                    if (resData.success) {
+                        Swal.fire('Sucesso!', 'Caixa registrada.', 'success');
+                        carregarCaixas();
+                    }
+                } catch (erro) { console.error(erro); }
             }
-        } catch (erro) {
-            console.error("Erro na requisição:", erro);
-            Swal.fire('Erro', 'Não foi possível conectar ao servidor.', 'error');
-        }
-    }
-}
-
-    // 4. Inicialização
-    window.onload = () => {
-        carregarCaixas();
-        
-        // Ativa a busca em tempo real
-        const inputBusca = document.getElementById('input-busca');
-        if (inputBusca) {
-            inputBusca.addEventListener('input', filtrarCaixas);
         }
 
-        // Se tiver o elemento de data na top bar
-        const elementoData = document.getElementById('data-atual');
-        if (elementoData) {
-            elementoData.innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-        }
-    };
-</script>
+        async function editarCaixa(id, clienteAt, codigoAt, qtdAt, dataAt, respAt) {
+            const { value: formValues } = await Swal.fire({
+                title: 'Ajustar Registro de Caixa',
+                html: `
+                    <label style="display:block; text-align:left; margin-left:40px;">Cliente:</label>
+                    <input id="edit-cliente" class="swal2-input" value="${clienteAt}">
+                    <label style="display:block; text-align:left; margin-left:40px;">Código:</label>
+                    <input id="edit-codigo" class="swal2-input" value="${codigoAt}">
+                    <label style="display:block; text-align:left; margin-left:40px;">Quantidade:</label>
+                    <input id="edit-qtd" class="swal2-input" type="number" value="${qtdAt}">
+                    <label style="display:block; text-align:left; margin-left:40px; font-weight:bold;">Confirmar Nova Data:</label>
+                    <input id="edit-data" class="swal2-input" type="date">
+                    <label style="display:block; text-align:left; margin-left:40px;">Responsável:</label>
+                    <input id="edit-resp" class="swal2-input" value="${respAt}">`,
+                showCancelButton: true,
+                confirmButtonText: 'Salvar Alterações',
+                confirmButtonColor: '#27ae60',
+                preConfirm: () => {
+                    const novaData = document.getElementById('edit-data').value;
+                    if (!novaData) {
+                        Swal.showValidationMessage('Confirme a data do ajuste!');
+                        return false;
+                    }
+                    return {
+                        id,
+                        cliente: document.getElementById('edit-cliente').value,
+                        codigo: document.getElementById('edit-codigo').value,
+                        quantidade: document.getElementById('edit-qtd').value,
+                        data_fabricacao: novaData,
+                        responsavel: document.getElementById('edit-resp').value
+                    }
+                }
+            });
 
+            if (formValues) {
+                try {
+                    const response = await fetch(`${API_BASE}/caixas/editar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formValues)
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        Swal.fire({ icon: 'success', title: 'Atualizado!', timer: 1500, showConfirmButton: false });
+                        carregarCaixas(); 
+                    }
+                } catch (erro) { console.error(erro); }
+            }
+        }
+
+        function filtrarCaixas() {
+            const textoBusca = document.getElementById('input-busca').value.toLowerCase();
+            const linhas = document.querySelectorAll('#tabela-corpo-caixas tr');
+            linhas.forEach(linha => {
+                linha.style.display = linha.innerText.toLowerCase().includes(textoBusca) ? "" : "none";
+            });
+        }
+
+        function fazerLogout() {
+            Swal.fire({ title: 'Deseja sair?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Sim, sair!' })
+            .then((result) => { if (result.isConfirmed) { localStorage.clear(); window.location.href = 'login.html'; } });
+        }
+
+        window.onload = () => {
+            carregarCaixas();
+            document.getElementById('input-busca').addEventListener('input', filtrarCaixas);
+            document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            
+            const nomeUsuario = localStorage.getItem('usuario');
+            const cargoUsuario = localStorage.getItem('cargo');
+            if (nomeUsuario) {
+                document.querySelector('.username').innerText = nomeUsuario;
+                document.querySelector('.avatar').innerText = nomeUsuario.charAt(0).toUpperCase();
+            }
+            if (cargoUsuario) document.querySelector('.role').innerText = cargoUsuario;
+        };
+
+        let itemSelecionadoId = null;
+        const menu = document.getElementById('context-menu');
+        document.addEventListener('contextmenu', (e) => {
+            const row = e.target.closest('tr');
+            if (row && row.parentNode.id === 'tabela-corpo-caixas') {
+                e.preventDefault();
+                itemSelecionadoId = row.getAttribute('data-id');
+                menu.style.display = 'block';
+                menu.style.left = e.pageX + 'px';
+                menu.style.top = e.pageY + 'px';
+            } else { menu.style.display = 'none'; }
+        });
+        document.addEventListener('click', () => menu.style.display = 'none');
+
+        async function executarAcaoContexto(acao) {
+            if (!itemSelecionadoId) return;
+            if (acao === 'excluir') {
+                const confirm = await Swal.fire({ title: 'Excluir?', text: 'Essa ação é irreversível!', icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c' });
+                if (confirm.isConfirmed) {
+                    const resp = await fetch(`${API_BASE}/caixas/${itemSelecionadoId}`, { method: 'DELETE' });
+                    const res = await resp.json();
+                    if (res.success) { carregarCaixas(); Swal.fire('Deletado!', '', 'success'); }
+                }
+            }
+        }
+    </script>
 </body>
 </html>

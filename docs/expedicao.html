@@ -1,61 +1,107 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+
+    <script>
+    const temaSalvo = localStorage.getItem('tema') || 'claro';
+    document.documentElement.setAttribute('data-theme', temaSalvo);
+    </script>
+
     <meta charset="UTF-8">
     <title>J&E - Expedição</title>
+    
+    <script>
+        // Trava de Segurança Corrigida
+        if (localStorage.getItem('logado') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <style>
+        /* Ajustes para travar a rolagem da página principal */
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* Trava a rolagem externa */
+        }
+
+        .main-container {
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .top-bar {
+            flex-shrink: 0; /* Impede o cabeçalho de achatar */
+        }
+
         .expedicao-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
             padding: 20px;
-            /* Altura fixa para garantir a rolagem interna */
-            height: calc(100vh - 110px);
+            flex-grow: 1; /* Ocupa o restante da tela */
+            height: calc(100vh - 80px); /* Ajuste dinâmico conforme sua top-bar */
             box-sizing: border-box;
+            overflow: hidden;
         }
 
         .coluna-expedicao {
-            background: rgba(0, 0, 0, 0.05);
-            padding: 15px;
-            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.03);
+            padding: 20px;
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* Mantém a estrutura firme */
+            height: 100%; /* Ocupa o total da grid */
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
         }
 
         .titulo-secao {
             font-size: 1.1em;
             color: #e67e22;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
+            flex-shrink: 0;
         }
 
         .scroll-lista {
             flex-grow: 1;
-            overflow-y: auto; /* Aqui a mágica da rolagem acontece */
-            padding-right: 10px;
+            overflow-y: auto; /* Rolagem apenas aqui dentro */
+            padding-right: 8px;
         }
 
-        /* Estilização da Scrollbar */
+        /* Estilização da Scrollbar para ficar discreta */
         .scroll-lista::-webkit-scrollbar { width: 6px; }
-        .scroll-lista::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
-        .scroll-lista::-webkit-scrollbar-thumb { background: #3498db; border-radius: 10px; }
+        .scroll-lista::-webkit-scrollbar-track { background: transparent; }
+        .scroll-lista::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+        .scroll-lista::-webkit-scrollbar-thumb:hover { background: #ff9027; }
 
         .card-pedido, .card-finalizado {
             background: white;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-left: 5px solid #3498db;
+            transition: 0.2s;
         }
 
         .card-finalizado {
@@ -70,13 +116,13 @@
             background: #27ae60;
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
+            padding: 10px 18px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
             transition: 0.3s;
         }
-        .btn-conferir:hover { background: #2ecc71; }
+        .btn-conferir:hover { background: #2ecc71; transform: scale(1.05); }
         
         .swal-label { display: block; margin-top: 15px; font-weight: bold; text-align: left; }
     </style>
@@ -98,20 +144,27 @@
                 </ul>
             </nav>
 
-                 <div class="user-info">
-                <div class="avatar">U</div>
-                <div>
-                    <p class="username">Usuário</p>
-                    <p class="role">Administrador</p>
+            <div class="sidebar-footer">
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 0 20px;">
+                <div class="user-info">
+                    <div class="avatar">U</div>
+                    <div>
+                        <p class="username">Usuário</p>
+                        <p class="role">Administrador</p>
+                    </div>
+                </div>
+                <div class="logout-container">
+                    <button onclick="fazerLogout()" class="btn-logout-red">
+                        <i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA
+                    </button>
                 </div>
             </div>
-
         </aside>
 
         <main class="content">
             <header class="top-bar">
-                <span>CONFERÊNCIA DE EXPEDIÇÃO</span>
-                <button onclick="logout()" style="background:none; border:none; color:white; cursor:pointer;"><i class="fas fa-sign-out-alt"></i> Sair</button>
+                <strong><span>CONFERÊNCIA DE EXPEDIÇÃO</span></strong>
+                <strong><span class="date-now" id="data-atual"></span></strong>
             </header>
             
             <div class="expedicao-grid">
@@ -136,14 +189,12 @@
                 const res = await fetch(`${API_URL}/pedidos-recentes`);
                 const todosOsPedidos = await res.json();
 
-                // IDs corrigidos e únicos
                 const containerPendentes = document.getElementById('lista-pedidos');
                 const containerFinalizados = document.getElementById('lista-finalizados');
 
                 const pendentes = todosOsPedidos.filter(p => p.status === 'PENDENTE');
                 const finalizados = todosOsPedidos.filter(p => p.status === 'CONCLUÍDO');
 
-                // Renderiza Pendentes
                 containerPendentes.innerHTML = pendentes.length === 0 
                     ? '<p style="color:#888; padding:20px;">Nenhuma carga aguardando.</p>'
                     : pendentes.map(p => `
@@ -157,21 +208,20 @@
                         </div>
                     `).join('');
 
-                // Renderiza Finalizados (Mostrando a conferência real e o responsável)
                 containerFinalizados.innerHTML = finalizados.length === 0
-    ? '<p style="color:#888; padding:20px;">Nenhum concluído hoje.</p>'
-    : finalizados.map(f => `
-        <div class="card-finalizado">
-            <div class="info-txt">
-                <strong>${f.cliente}</strong><br>
-                Ref: ${f.referencia || 'S/ REF'}<br>
-                <span>Conf: <b>${f.qtd_conferida || f.qtd_programada}</b> un</span><br>
-                <small style="color:#27ae60">
-                    <i class="fas fa-user-check"></i> Resp: ${f.responsavel || 'Não informado'}
-                </small>
-            </div>
-        </div>
-    `).join('');
+                    ? '<p style="color:#888; padding:20px;">Nenhum concluído hoje.</p>'
+                    : finalizados.map(f => `
+                        <div class="card-finalizado">
+                            <div class="info-txt">
+                                <strong>${f.cliente}</strong><br>
+                                Ref: ${f.referencia || 'S/ REF'}<br>
+                                <span>Conf: <b>${f.qtd_conferida || f.qtd_programada}</b> un</span><br>
+                                <small style="color:#27ae60">
+                                    <i class="fas fa-user-check"></i> Resp: ${f.responsavel || 'Não informado'}
+                                </small>
+                            </div>
+                        </div>
+                    `).join('');
     
             } catch (err) {
                 console.error("Erro ao carregar:", err);
@@ -183,7 +233,7 @@
                 title: 'Conferência de Carga',
                 html:
                     `<label class="swal-label">Quantidade Real Produzida</label>` +
-                    `<input id="swal-qtd" class="swal2-input" type="number" value="${qtdOriginal}">` +
+                    `<input id="swal-qtd" class="swal2-input" type="number" min="1" value="${qtdOriginal}">` +
                     `<label class="swal-label">Responsável Conferente</label>` +
                     `<input id="swal-resp" class="swal2-input" placeholder="Seu nome">`,
                 focusConfirm: false,
@@ -214,23 +264,63 @@
                     const resultado = await response.json();
 
                     if (resultado.success) {
-                        await Swal.fire('Sucesso!', 'Pedido enviado para Finalizados e Estoque atualizado.', 'success');
-                        carregarTudo(); // Recarrega as colunas para mover o card de lugar
+                        await Swal.fire('Sucesso!', 'Pedido conferido e estoque atualizado.', 'success');
+                        carregarTudo();
                     } else {
-                        Swal.fire('Erro', 'Servidor: ' + resultado.message, 'error');
+                        Swal.fire('Erro', resultado.message, 'error');
                     }
                 } catch (err) {
-                    Swal.fire('Erro', 'Não foi possível conectar ao servidor.', 'error');
+                     Swal.fire('Erro de Conexão', 'O servidor Node.js está desligado.', 'error');
                 }
             }
         }
 
-        function logout() {
-            localStorage.clear();
-            window.location.href = 'login.html';
+        function fazerLogout() {
+            Swal.fire({
+                title: 'Deseja sair?',
+                text: "Sua sessão será encerrada.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, sair!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.clear(); 
+                    window.location.href = 'login.html'; 
+                }
+            });
         }
 
-        window.onload = carregarTudo;
+        window.onload = () => {
+            if (typeof carregarTudo === "function") {
+                carregarTudo();
+            }
+
+            const elementoData = document.getElementById('data-atual');
+            if (elementoData) {
+                elementoData.innerText = new Date().toLocaleDateString('pt-BR', { 
+                    weekday: 'long', 
+                    day: 'numeric', 
+                    month: 'long', 
+                    year: 'numeric' 
+                });
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const nomeUsuario = localStorage.getItem('usuario');
+            const cargoUsuario = localStorage.getItem('cargo');
+
+            const elementoNome = document.querySelector('.username');
+            const elementoCargo = document.querySelector('.role');
+            const elementoAvatar = document.querySelector('.avatar');
+
+            if (nomeUsuario && elementoNome) elementoNome.innerText = nomeUsuario;
+            if (cargoUsuario && elementoCargo) elementoCargo.innerText = cargoUsuario;
+            if (nomeUsuario && elementoAvatar) elementoAvatar.innerText = nomeUsuario.charAt(0).toUpperCase();
+        });
     </script>
 </body>
 </html>
