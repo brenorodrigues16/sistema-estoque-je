@@ -14,18 +14,18 @@
 }
 
 /* MODO ESCURO AUTOMÁTICO */
-/* --- AJUSTES PARA MODO ESCURO PROFISSIONAL --- */
+
 
 [data-theme='dark'] {
-    --bg-light: #121212;          /* Fundo mais profundo */
-    --card-white: #1e1e1e;        /* Cards levemente mais claros que o fundo */
-    --secondary-color: #000000;   /* Sidebar preta para contraste */
-    --text-main: #e0e0e0;         /* Branco suave */
+    --bg-light: #121212;          
+    --card-white: #1e1e1e;        
+    --secondary-color: #000000;  
+    --text-main: #e0e0e0;         
     --text-muted: #a0a0a0;
-    --border-color: #333333;      /* Bordas subtis */
+    --border-color: #333333;      
 }
 
-/* Corrigindo as Tabelas no Modo Escuro */
+
 [data-theme='dark'] th {
     background-color: #252525 !important;
     color: var(--primary-color) !important;
@@ -37,7 +37,7 @@
     color: var(--text-main) !important;
 }
 
-/* Corrigindo Inputs e Selects na página de Perfil e outras */
+
 [data-theme='dark'] input, 
 [data-theme='dark'] select, 
 [data-theme='dark'] .swal2-input-custom {
@@ -46,13 +46,13 @@
     color: white !important;
 }
 
-/* Ajuste das Tags de Medida e Badges no Escuro */
+
 [data-theme='dark'] .medida-tag {
     background: #2d3748;
     color: #cbd5e0;
 }
 
-/* Ajuste do Top Bar e Containers */
+
 [data-theme='dark'] .top-bar {
     border-bottom: 2px solid var(--border-color) !important;
     background-color: var(--bg-light);
@@ -69,12 +69,12 @@ body {
     font-family: 'Segoe UI', Roboto, sans-serif;
     background-color: var(--bg-light);
     color: var(--text-main);
-    transition: background 0.3s;
+    transition: background-color 0.3s;
 }
 
 .main-container { display: flex; min-height: 100vh; }
 
-/* SIDEBAR PROFISSIONAL */
+
 .sidebar {
     width: 260px;
     background-color: var(--secondary-color);
@@ -167,7 +167,7 @@ body {
     box-shadow: inset 5px 0 0 white;
 }
 
-/* ÁREA DE CONTEÚDO */
+
 .content { flex: 1; padding: 30px; }
 
 .top-bar {
@@ -179,7 +179,7 @@ body {
     border-bottom: 2px solid rgba(0,0,0,0.05);
 }
 
-/* CARDS DE STATUS */
+
 .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -200,7 +200,7 @@ body {
 .blue i { color: var(--accent-blue); }
 .green i { color: var(--accent-green); }
 
-/* TABELAS */
+
 .table-container {
     background: var(--card-white);
     padding: 20px;
@@ -224,7 +224,7 @@ th {
 
 td { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
 
-/* BADGES */
+
 .badge {
     padding: 5px 12px;
     border-radius: 20px;
@@ -234,7 +234,7 @@ td { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
 .badge-entrada { background: #e8f5e9; color: #2e7d32; }
 .badge-saida { background: #ffebee; color: #c62828; }
 
-/* RESPONSIVIDADE PARA SEU IPHONE */
+
 @media (max-width: 768px) {
     .main-container { flex-direction: column; }
     .sidebar { width: 100%; }
@@ -245,7 +245,7 @@ td { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
     .content { padding: 15px; }
 }
 
-/* Estilo das Tags de Medida (Cinza) */
+
 .medida-tag {
     background: #e2e8f0;
     padding: 4px 10px;
@@ -256,7 +256,7 @@ td { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
     font-size: 0.9rem;
 }
 
-/* Selos de Status de Estoque */
+
 .status-badge {
     padding: 6px 12px;
     border-radius: 50px;
@@ -271,7 +271,7 @@ td { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
 .status-alerta { background-color: #ecc94b; color: #744210; }
 .status-critico { background-color: #f56565; color: white; }
 
-/* Botões de Ação Modernos (dentro da tabela) */
+
 .btn-action-small {
     width: 32px;
     height: 32px;
@@ -284,18 +284,17 @@ td { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
     transition: 0.2s;
 }
 
-.btn-plus { background-color: #48bb78; }  /* Verde */
-.btn-minus { background-color: #f56565; } /* Vermelho */
-.btn-edit { background-color: #4299e1; }  /* Azul */
+.btn-plus { background-color: #48bb78; }  
+.btn-minus { background-color: #f56565; } 
+.btn-edit { background-color: #4299e1; } 
 
 .btn-action-small:hover {
     transform: translateY(-2px);
     filter: brightness(1.1);
 }
 
-/* Ajuste fino na tabela */
 .table-container table tbody tr td {
-    padding: 15px 12px; /* Aumenta o espaço para não ficar apertado */
+    padding: 15px 12px; 
     vertical-align: middle;
 }
 
@@ -334,7 +333,6 @@ td { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
     color: #ecf0f1;
 }
 
-/* Container que vai segurar a tabela */
 .tabela-container {
     background: var(--card-white);
     padding: 20px;
@@ -363,7 +361,6 @@ td { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
     box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
 }
 
-/* Estilizando a barra de rolagem para ficar elegante */
 .tabela-container::-webkit-scrollbar {
     width: 8px;
 }
@@ -378,7 +375,6 @@ td { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
     border-radius: 10px;
 }
 
-/* Garante que o cabeçalho da tabela fique fixo no topo enquanto você rola */
 table thead th {
     position: sticky;
     top: 0;
@@ -451,7 +447,6 @@ table thead th {
 .qtd-ok { background-color: #e8f5e9; color: #27ae60; }
 .qtd-baixa { background-color: #fceaea; color: #e74c3c; }
 
-/* Botão de edição moderno */
 .btn-edit-icon {
     background: #3498db;
     color: white;
@@ -533,4 +528,40 @@ table thead th {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
+}
+
+/* --- REFINAMENTO FINAL MODO ESCURO --- */
+
+[data-theme='dark'] .card, 
+[data-theme='dark'] .stat-card, 
+[data-theme='dark'] .table-container,
+[data-theme='dark'] .settings-card {
+    background-color: #1e1e1e !important;
+    border: 1px solid #333 !important;
+    box-shadow: none !important; 
+}
+
+[data-theme='dark'] .card .value, 
+[data-theme='dark'] .stat-card .value {
+    color: var(--primary-color) !important;
+}
+
+[data-theme='dark'] .tabela-container table thead th {
+    background-color: #252525 !important;
+    color: var(--primary-color) !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5); 
+}
+
+[data-theme='dark'] table tbody tr td {
+    border-bottom: 1px solid #2d2d2d !important;
+}
+
+[data-theme='dark'] .role, 
+[data-theme='dark'] .text-muted, 
+[data-theme='dark'] label {
+    color: #a0a0a0 !important;
+}
+
+[data-theme='dark'] .btn-edit-icon {
+    background: #2980b9;
 }
