@@ -565,3 +565,28 @@ table thead th {
 [data-theme='dark'] .btn-edit-icon {
     background: #2980b9;
 }
+
+.card.green { 
+    border-left: 5px solid var(--accent-green); 
+}
+
+.card.red { 
+    border-left: 5px solid var(--accent-red); 
+}
+
+.card.black { 
+    border-left: 5px solid var(--secondary-color); 
+}
+
+.card.blue {
+    border-left: 5px solid var(--accent-blue)
+}
+
+.red i { color: var(--accent-red) !important; }
+.green i { color: var(--accent-green) !important; }
+
+.card:hover {
+    transform: translateY(-5px);
+    transition: 0.3s;
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}

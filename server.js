@@ -180,27 +180,39 @@ app.post('/conferir-pedido', async (req, res) => {
     try {
         await pool.query('BEGIN');
 
-        // 1. Atualizar Pedido
+  
         const resPedido = await pool.query(
             `UPDATE pedidos SET status = 'CONCLUÍDO', qtd_conferida = $1, responsavel = $2 WHERE id = $3 RETURNING *`,
             [qtd_conferida, responsavel, id]
         );
-        console.log("1. Pedido atualizado com sucesso");
 
+        if (resPedido.rows.length === 0) throw new Error("pedido não encontrado");
         const pedido = resPedido.rows[0];
+        const referencia = pedido.referencia || 'S/ REF';
 
-        // 2. Inserir na tabela Caixas (VERIFIQUE OS NOMES DAS COLUNAS AQUI)
-        // Se sua tabela no banco tiver nomes diferentes (ex: 'ref' em vez de 'codigo'), mude aqui.
-        await pool.query(
-            `INSERT INTO caixas (cliente, codigo, quantidade, data_fabricacao, responsavel) VALUES ($1, $2, $3, NOW(), $4)`,
-            [pedido.cliente, pedido.referencia || 'S/ REF', qtd_conferida, responsavel]
-        );
-        console.log("2. Inserido no estoque de caixas");
+        
+        const sqlEstoque = `
+            INSERT INTO caixas (cliente, codigo, quantidade, data_fabricacao, responsavel)
+            VALUES ($1, $2, $3, NOW(), $4)
+            ON CONFLICT (cliente, codigo)
+            DO UPDATE SET
+                quantidade = caixas.quantidade + EXCLUDED.quantidade,
+                data_fabricacao = NOW(),
+                responsavel = EXCLUDED.responsavel
+        `;
 
-        // 3. Movimentação (DICA: Se esta tabela não existir, o erro 500 será aqui!)
+        await pool.query(sqlEstoque, [
+            pedido.cliente,
+            referencia,
+            qtd_conferida,
+            responsavel
+        ]);
+        console.log(`2. Estoque atualizado: ${referencia} para ${pedido.cliente}`);
+
+    
         await pool.query(
             `INSERT INTO movimentacoes (tipo, descricao, quantidade, responsavel, data) VALUES ($1, $2, $3, $4, NOW())`,
-            ['SAÍDA', `Expedição cliente: ${pedido.cliente}`, qtd_conferida, responsavel]
+            ['ENTRADA ESTOQUE', `Produção concluída: ${referencia} - ${pedido.cliente}`, qtd_conferida, responsavel]
         );
         console.log("3. Movimentação registrada");
 
@@ -209,13 +221,9 @@ app.post('/conferir-pedido', async (req, res) => {
 
     } catch (error) {
         if (pool) await pool.query('ROLLBACK');
-        
-        // ESSE LOG ABAIXO É O MAIS IMPORTANTE:
         console.error("--- ERRO NO SERVIDOR ---");
-        console.error("Mensagem:", error.message); 
-        console.error("Coluna/Tabela com erro:", error.detail || "Verifique os nomes no SQL");
-        console.error("------------------------");
-        
+        console.error("Mensagem:", error.message);
+        console.error("-------------------------");
         res.status(500).json({ success: false, message: error.message });
     }
 }); // - FIM - //
@@ -511,7 +519,48 @@ app.post('/api/atualizar-perfil', async (req, res) => {
     }
     
     res.sendStatus(200);
-});
+}); // - FIM - //
+
+
+// - - ROTA ESTATICAS DO DASHBOARD - - //
+app.get('/dashboard-stats', async (req, res) => {
+    try {
+        const resChapasTotal = await pool.query('SELECT SUM(quantidade) as total FROM chapas');
+        
+        const resChapasHoje = await pool.query(`
+            SELECT SUM(quantidade) as total 
+            FROM movimentacoes 
+            WHERE tipo = 'ENTRADA' 
+            AND data::date = CURRENT_DATE
+        `);
+
+        const resProducaoHoje = await pool.query(`
+            SELECT SUM(quantidade) as total 
+            FROM movimentacoes 
+            WHERE tipo = 'ENTRADA ESTOQUE' 
+            AND data::date = CURRENT_DATE
+        `);
+
+        const resAlertasChapas = await pool.query(`
+            SELECT COUNT(*) as total FROM chapas WHERE quantidade <= 500
+        `);
+
+        const resAlertasCaixas = await pool.query(`
+            SELECT COUNT(*) as total FROM caixas WHERE quantidade <= 100
+        `);
+
+        res.json({
+            estoqueChapas: resChapasTotal.rows[0].total || 0,
+            chapasRecebidasHoje: resChapasHoje.rows[0].total || 0,
+            producaoHoje: resProducaoHoje.rows[0].total || 0,
+            alertasCriticosChapas: resAlertasChapas.rows[0].total || 0,
+            alertasCriticosCaixas: resAlertasCaixas.rows[0].total || 0
+        });
+    } catch (error) {
+        console.error("Erro nas estatísticas:", error);
+        res.status(500).json({ error: "Erro ao buscar dados" });
+    }
+}); // - FIM - //
 
 
 app.listen(3000, () => {

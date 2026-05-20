@@ -7,7 +7,7 @@
     </script>
     
     <script>
-        if (localSrorage.getItem('logado') !== 'true') {
+        if (localStorage.getItem('logado') !== 'true') {
             window.location.href = 'login.html';
         }
     </script>
@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -85,35 +86,62 @@
             </header>
 
             <section class="cards-grid">
-                <div class="card blue">
-                    <i class="fas fa-layer-group"></i>
-                    <div class="card-info">
-                        <h3><span id="estoque-valor">0</span></h3>
-                        <p>QUANTIDADE DE CHAPAS ESTOQUE ATUAL </p>
-                    </div>
-                </div>
-                <div class="card orange">
-                    <i class="fas fa-clock"></i>
-                    <div class="card-info">
-                        <h3><span id="hora-atualizacao">--:--</span></h3>
-                        <p>ÚLTIMA ATUALIZAÇÃO.</p>
-                    </div>
-                </div>
-            </section>
+    <div class="card blue">
+        <i class="fas fa-layer-group"></i>
+        <div class="card-info">
+            <h3><span id="estoque-valor">0</span></h3>
+            <p>ESTOQUE TOTAL DE CHAPAS</p>
+        </div>
+    </div>
+
+    <div class="card black">
+        <i class="fas fa-truck"></i>
+        <div class="card-info">
+            <h3><span id="chapas-recebidas-valor">0</span></h3>
+            <p>ENTRADA DE CHAPAS HOJE</p>
+        </div>
+    </div>
+
+    <div class="card red" id="card-alerta-critico">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div class="card-info">
+            <h3><span id="alertas-chapas-valor">0</span></h3>
+            <p>ALERTAS DE ESTOQUE DE CHAPAS BAIXO</p>
+        </div>
+    </div>
+</section>
 
             <section class="cards-grid">
                 <div class="card blue">
                     <i class="fas fa-boxes"></i>
                     <div class="card-info">
-                        <h3>Caixas em Estoque</h3>
+                    <h3><span id="producao-caixas-valor">0</span></h3>
+                    <p>ESTOQUE DE CAIXAS</p>
                     </div>
                 </div>
+
+                <div class="card green">
+                    <i class="fas fa-industry"></i>
+                    <div class="card-info">
+                         <h3><span id="alertas-caixas-valor">0</span></h3>
+                         <p>CAIXAS PRODUZIDAS HOJE</p>
+                    </div>
+                </div>
+           
+            <div class="card red" id="card-alerta critico">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="card-info">
+                  <h3><span id="alertas-caixas-valor">0</span></h3>      
+                  <p>ALERTA DE ESTOQUE DE CAIXAS BAIXO</p>
+                </div>
+            </div>
             </section>
 
             <section class="stats-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
                 <div class="chart-placeholder" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                     <h4 style="margin-bottom: 20px;"><i class="fas fa-chart-line"></i> Estoque atual</h4>
                     <div id="container-progresso"></div>
+                    <canvas id="graficoEstoque" style="max-height: 300px;"></canvas>
                 </div>
                 
                 <div class="chart-placeholder" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
@@ -136,61 +164,121 @@
         if (elementoHora) elementoHora.innerText = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     }
 
-    async function carregarDashboard() {
-        try {
-            const resposta = await fetch('http://localhost:3000/dados');
-            const dados = await resposta.json();
+   
+ let meuGrafico;
 
-            const valorEstoque = document.getElementById('estoque-valor');
-            if (valorEstoque) {
-                valorEstoque.innerText = `${dados.estoqueTotal.toLocaleString()} un`;
+async function carregarDashboard() {
+    try {
+        const respostaStats = await fetch('http://localhost:3000/dashboard-stats');
+        const stats = await respostaStats.json();
+
+        const elementos = {
+            'estoque-valor': `${Number(stats.estoqueChapas || 0).toLocaleString()} un`,
+            'chapas-recebidas-valor': `${Number(stats.chapasRecebidasHoje || 0).toLocaleString()} un`,
+            'alertas-chapas-valor': stats.alertasCriticosChapas || 0,
+            'producao-caixas-valor': `${Number(stats.producaoHoje || 0).toLocaleString()} un`,
+            'alertas-caixas-valor': stats.alertasCriticosCaixas || 0
+        };
+
+        Object.keys(elementos).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.innerText = elementos[id];
             }
+        });
 
-            const container = document.getElementById('container-progresso');
-            const containerAvisos = document.getElementById('container-avisos');
-            
-            container.innerHTML = '';
-            containerAvisos.innerHTML = '';
+        const respostaChapas = await fetch('http://localhost:3000/dados');
+        const dadosChapas = await respostaChapas.json();
 
-            const limiteVisual = 100000;
+        const container = document.getElementById('container-progresso');
+        const containerAvisos = document.getElementById('container-avisos');
+        
+        if (container) container.innerHTML = '';
+        if (containerAvisos) containerAvisos.innerHTML = '';
 
-            if (dados.chapas && dados.chapas.length > 0) {
-                dados.chapas.forEach(item => {
-                    const qtd = Number(item.quantidade) || 0;
-                    let porcentagem = (qtd / limiteVisual) * 100;
-                    if (porcentagem > 100) porcentagem = 100;
+        const labelsGrafico = [];
+        const valoresGrafico = [];
 
+        if (dadosChapas.chapas && dadosChapas.chapas.length > 0) {
+            dadosChapas.chapas.forEach(item => {
+                const qtd = Number(item.quantidade) || 0;
+                labelsGrafico.push(item.onda);
+                valoresGrafico.push(qtd);
+
+                let porcentagem = (qtd / 100000) * 100;
+                if (porcentagem > 100) porcentagem = 100;
+
+                if (container) {
                     container.innerHTML += `
                         <div class="progress-item" style="margin-bottom: 20px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                                 <strong>${item.onda}</strong>
                                 <span>${qtd.toLocaleString()} un</span>
                             </div>
-                            <div style="background: #eee; height: 12px; border-radius: 10px; width: 100%; overflow: hidden;">
-                                <div style="background: #3498db; width: ${porcentagem}%; height: 100%; transition: width 0.8s ease-in-out;"></div>
+                            <div style="background: #eee; height: 8px; border-radius: 10px; width: 100%; overflow: hidden;">
+                                <div style="background: var(--accent-blue); width: ${porcentagem}%; height: 100%; transition: width 0.8s ease-in-out;"></div>
                             </div>
                         </div>`;
-
-                    if (qtd <= 500) {
-                        containerAvisos.innerHTML += `
-                            <p style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #e74c3c; font-weight: bold;">
-                                • Estoque de ${item.onda} crítico: apenas ${qtd.toLocaleString()} un no total.
-                            </p>`;
-                    }
-                });
-
-                if (containerAvisos.innerHTML === '') {
-                    containerAvisos.innerHTML = '<p style="color: #27ae60;">• Todas as ondas com estoque saudável.</p>';
                 }
-            } else {
-                container.innerHTML = '<p style="color:#666;">Nenhuma chapa cadastrada.</p>';
-            }
 
-            atualizarRelogio();
-        } catch (erro) {
-            console.error('Erro ao carregar dashboard:', erro);
+                if (qtd <= 500 && containerAvisos) {
+                    containerAvisos.innerHTML += `
+                        <p style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: var(--accent-red); font-weight: bold;">
+                            • Estoque de ${item.onda} crítico: apenas ${qtd.toLocaleString()} un.
+                        </p>`;
+                }
+            });
+
+            renderizarGrafico(labelsGrafico, valoresGrafico);
         }
+
+        if (containerAvisos && containerAvisos.innerHTML === '') {
+            containerAvisos.innerHTML = '<p style="color: var(--accent-green);">• Todas as ondas com estoque saudável.</p>';
+        }
+
+        if (typeof atualizarRelogio === "function") {
+            atualizarRelogio();
+        }
+
+    } catch (erro) {
+        console.error('Erro ao carregar dashboard:', erro);
     }
+}
+
+function renderizarGrafico(labels, valores) {
+    const ctx = document.getElementById('graficoEstoque');
+    if (!ctx) return;
+
+    if (meuGrafico) {
+        meuGrafico.destroy();
+    }
+
+    meuGrafico = new Chart(ctx.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: valores,
+                backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#e67e22', '#9b59b6', '#1abc9c'],
+                borderWidth: 2,
+                borderColor: document.documentElement.getAttribute('data-theme') === 'dark' ? '#1e1e1e' : '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { 
+                    position: 'bottom', 
+                    labels: { 
+                        color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#e0e0e0' : '#333', 
+                        font: { weight: 'bold' } 
+                    } 
+                }
+            },
+            cutout: '70%'
+        }
+    });
+}
 
     // - - CONFIGURACAO DE LOGIN E LOGOUT - - //
 
