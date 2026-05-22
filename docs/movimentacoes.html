@@ -1,31 +1,43 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-
     <script>
     const temaSalvo = localStorage.getItem('tema') || 'claro';
     document.documentElement.setAttribute('data-theme', temaSalvo);
     </script>
 
     <script>
-        if (localSrorage.getItem('logado') !== 'true') {
+        // -- FORÇA LOGIN (Corrigido para localStorage) -- //
+        if (localStorage.getItem('logado') !== 'true') {
             window.location.href = 'login.html';
         }
     </script>
 
-<script>
-    // - - FORCA LOGIN - - //
-    if (localStorage.getItem('logado') !== 'true') {
-        window.location.href = 'login.html'; 
-    }
-</script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Estoque - Dashboard</title>
+    <title>Sistema Estoque - Movimentações</title>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        /* Estilos da Tabela Profissional */
+        .table-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-top: 20px; flex-grow: 1; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 12px; border-bottom: 2px solid #eee; color: #666; font-weight: bold; }
+        td { padding: 12px; border-bottom: 1px solid #f9f9f9; }
+        tbody tr:hover { background-color: #f5f7fa; }
+        .btn-refresh { background: var(--accent-blue, #3498db); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        .btn-refresh:hover { opacity: 0.8; }
+        
+        /* Adaptação para o Modo Escuro */
+        [data-theme="dark"] .table-card { background: #1e1e1e; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        [data-theme="dark"] th { border-bottom: 2px solid #333; color: #aaa; }
+        [data-theme="dark"] td { border-bottom: 1px solid #2d2d2d; color: #e0e0e0; }
+        [data-theme="dark"] tbody tr:hover { background-color: #2a2a2a; }
+    </style>
 </head>
 <body>
 
@@ -33,134 +45,164 @@
         <aside class="sidebar">
             <div class="logo"><i class="fas fa-box-open"></i> J&E Embalagens LTDA</div>
             <nav>
-    <ul>
-        <li class="menu-item" onclick="window.location.href='index.html'">
-            <i class="fas fa-th-large"></i> Dashboard
-        </li>
-        <li class="menu-item" onclick="window.location.href='chapas.html'">
-            <i class="fas fa-layer-group"></i> Chapas
-        </li>
-        <li class="menu-item" onclick="window.location.href='caixas.html'">
-            <i class="fas fa-boxes"></i> Caixas Prontas
-        </li>
-        <li class="menu-item" onclick="window.location.href='producao.html'">
-            <i class="fas fa-industry"></i> Produção
-        </li>
-        <li class="menu-item active" onclick="window.location.href='movimentacoes.html'">
-            <i class="fas fa-exchange-alt"></i> Movimentações
-        </li>
-        <li class="menu-item" onclick="window.location.href='perfil.html'">
-            <i class="fas fa-user"></i> Perfil
-        </li>
-        <li class="menu-item" onclick="window.location.href='expedicao.html'">
-            <i class="fas fa-truck"></i> Expedição
-        </li>
-    </ul>
-    </nav>
-        
-        <div class="sidebar-footer">
-        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 0 20px;">
-        
-        <div class="user-info">
-            <div class="avatar">U</div>
-            <div>
-                <p class="username">Usuário</p>
-                <p class="role">Administrador</p>
-            </div>
-        </div>
-
-        <div class="logout-container">
-            <button onclick="fazerLogout()" class="btn-logout-red">
-                <i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA
-            </button>
-        </div>
-    </div>    
-        
-        </aside>
-
-        <main class="content">
-        <header class="top-bar">
-            <strong><span>MOVIMENTAÇÕES</span></strong>  
-            <strong><span class="date-now" id="data-atual"></span></strong> 
-        </header>
-
-            <section class="cards-grid">
-                <div class="card blue"><i class="fas fa-box"></i><div class="card-info"><h3>1.250</h3><p>ESTOQUE ATUAL</p></div></div>
-                <div class="card green"><i class="fas fa-check-circle"></i><div class="card-info"><h3>98%</h3><p>EFICIÊNCIA</p></div></div>
-                <div class="card orange"><i class="fas fa-clock"></i><div class="card-info"><h3>12h</h3><p>ÚLTIMA ATUALIZ.</p></div></div>
-                <div class="card red"><i class="fas fa-exclamation-circle"></i><div class="card-info"><h3>Crítico</h3><p>NÍVEL CHAPA B</p></div></div>
-            </section>
-
-            <section class="stats-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div class="chart-placeholder" style="background: white; padding: 20px; border-radius: 8px;">
-                    <h4><i class="fas fa-chart-line"></i> Produção Semanal</h4>
-                    <div style="margin: 15px 0;">
-                        <p>Onda B: 85%</p>
-                        <div style="background:#eee; height:10px; border-radius:5px;"><div style="width:85%; background:#4a90e2; height:100%; border-radius:5px;"></div></div>
+                <ul>
+                    <li class="menu-item" onclick="window.location.href='index.html'">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='chapas.html'">
+                        <i class="fas fa-layer-group"></i> Chapas
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='caixas.html'">
+                        <i class="fas fa-boxes"></i> Caixas Prontas
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='producao.html'">
+                        <i class="fas fa-industry"></i> Produção
+                    </li>
+                    <li class="menu-item active" onclick="window.location.href='movimentacoes.html'">
+                        <i class="fas fa-exchange-alt"></i> Movimentações
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='perfil.html'">
+                        <i class="fas fa-user"></i> Perfil
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='expedicao.html'">
+                        <i class="fas fa-truck"></i> Expedição
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 0 20px;">
+                
+                <div class="user-info">
+                    <div class="avatar">U</div>
+                    <div>
+                        <p class="username">Usuário</p>
+                        <p class="role">Administrador</p>
                     </div>
                 </div>
-                <div class="chart-placeholder" style="background: white; padding: 20px; border-radius: 8px;">
-                    <h4><i class="fas fa-bell"></i> Avisos Rápidos</h4>
-                    <p>• Reposição de Chapa B necessária.</p>
-                    <p>• Manutenção sábado.</p>
+
+                <div class="logout-container">
+                    <button onclick="fazerLogout()" class="btn-logout-red">
+                        <i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA
+                    </button>
+                </div>
+            </div>    
+        </aside>
+
+        <main class="content" style="display: flex; flex-direction: column;">
+            <header class="top-bar">
+                <strong><span>MOVIMENTAÇÕES</span></strong>  
+                <strong><span class="date-now" id="data-atual"></span></strong> 
+            </header>
+
+            <section class="table-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-history"></i> Histórico Recente de Atividades</h3>
+                    <button onclick="carregarMovimentacoes()" class="btn-refresh"><i class="fas fa-sync-alt"></i> Atualizar Tabela</button>
+                </div>
+                <div class="table-responsive">
+                    <table id="tabela-movimentacoes">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Tipo</th>
+                                <th>Produto/Onda</th>
+                                <th>Quantidade</th>
+                                <th>Usuário</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-tabela">
+                            <tr><td colspan="5" style="text-align:center;">Carregando dados do servidor...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
         </main>
     </div>
 
     <script>
-        // Data Automática
+        // Data Automática Superior
         const data = new Date();
         const opcoes = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('data-atual').innerText = data.toLocaleDateString('pt-BR', opcoes);
 
-// - - CONFIGURACAO DE LOGIN E LOGOUT - - //
+        // -- BUSCAR MOVIMENTAÇÕES NO SERVIDOR -- //
+        async function carregarMovimentacoes() {
+            const corpoTabela = document.getElementById('corpo-tabela');
+            corpoTabela.innerHTML = '<tr><td colspan="5" style="text-align:center;">Carregando...</td></tr>';
 
-    function fazerLogout() {
-    Swal.fire({
-        title: 'Deseja sair?',
-        text: "Sua sessão será encerrada.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#e74c3c',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Sim, sair!',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            localStorage.clear(); 
-            window.location.href = 'login.html'; 
+            try {
+                const resposta = await fetch('http://localhost:3000/movimentacoes');
+                
+                if (!resposta.ok) throw new Error('Falha ao buscar movimentações');
+                
+                const dados = await resposta.json();
+                corpoTabela.innerHTML = ''; 
+
+                if (dados.length === 0) {
+                    corpoTabela.innerHTML = '<tr><td colspan="5" style="text-align:center;">Nenhuma movimentação registrada.</td></tr>';
+                    return;
+                }
+
+                dados.forEach(mov => {
+                    // Formata a data (ex: 20/05/2026 14:30)
+                    const dataFormatada = new Date(mov.data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+                    
+                    // Lógica de cores: verde para entrada, vermelho para saída/produção
+                    const tipoMaiusculo = (mov.tipo || '').toUpperCase();
+                    const corTipo = tipoMaiusculo.includes('ENTRADA') ? '#2ecc71' : '#e74c3c';
+                    
+                    corpoTabela.innerHTML += `
+                        <tr>
+                            <td>${dataFormatada}</td>
+                            <td><span style="color: ${corTipo}; font-weight: bold;">${tipoMaiusculo}</span></td>
+                            <td>${mov.nome_produto || mov.onda || 'N/A'}</td>
+                            <td>${Number(mov.quantidade).toLocaleString()} un</td>
+                            <td>${mov.usuario || 'Sistema'}</td>
+                        </tr>
+                    `;
+                });
+            } catch (erro) {
+                corpoTabela.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Erro ao conectar com o banco de dados.</td></tr>';
+                console.error("Erro na tabela:", erro);
+            }
         }
-    });
-}
 
-window.addEventListener('DOMContentLoaded', () => {
-    // Busca os dados salvos no momento do login
-    const nomeUsuario = localStorage.getItem('usuario');
-    const cargoUsuario = localStorage.getItem('cargo');
+        // -- CONFIGURAÇÃO DE LOGIN E LOGOUT -- //
+        function fazerLogout() {
+            Swal.fire({
+                title: 'Deseja sair?',
+                text: "Sua sessão será encerrada.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, sair!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.clear(); 
+                    window.location.href = 'login.html'; 
+                }
+            });
+        }
 
-    // Seleciona os elementos pelas classes que você já tem no HTML
-    const elementoNome = document.querySelector('.username');
-    const elementoCargo = document.querySelector('.role');
-    const elementoAvatar = document.querySelector('.avatar');
+        window.addEventListener('DOMContentLoaded', () => {
+            // Carrega os dados do usuário no menu
+            const nomeUsuario = localStorage.getItem('usuario');
+            const cargoUsuario = localStorage.getItem('cargo');
 
-    if (nomeUsuario && elementoNome) {
-        elementoNome.innerText = nomeUsuario;
-    }
+            const elementoNome = document.querySelector('.username');
+            const elementoCargo = document.querySelector('.role');
+            const elementoAvatar = document.querySelector('.avatar');
 
-    if (cargoUsuario && elementoCargo) {
-        elementoCargo.innerText = cargoUsuario;
-    }
+            if (nomeUsuario && elementoNome) elementoNome.innerText = nomeUsuario;
+            if (cargoUsuario && elementoCargo) elementoCargo.innerText = cargoUsuario;
+            if (nomeUsuario && elementoAvatar) elementoAvatar.innerText = nomeUsuario.charAt(0).toUpperCase();
 
-    // Bônus: Muda a letra do Avatar para a primeira letra do nome do usuário
-    if (nomeUsuario && elementoAvatar) {
-        elementoAvatar.innerText = nomeUsuario.charAt(0).toUpperCase();
-    }
-});
-
+            // Chama a tabela assim que a página abre
+            carregarMovimentacoes();
+        });
     </script>
-
-
-
 </body>
 </html>
