@@ -457,7 +457,6 @@ app.put('/api/caixas/:id', async (req, res) => {
 
 
 // - - PAGINA DE LOGIN - - //
-
 app.post('/login', async (req, res) => {
     const { usuario, senha } = req.body;
     console.log("Tentativa de login:", usuario, senha);
@@ -470,6 +469,14 @@ app.post('/login', async (req, res) => {
 
         if (resultado.rows.length > 0) {
             const user = resultado.rows[0];
+
+            if (user.status === 'PENDENTE') {
+                return res.status(403).json({ 
+                    success: false, 
+                    message: "Seu cadastro está em análise. Aguarde a liberação do administrador." 
+                });
+            }
+
             res.json({
                 success: true,
                 nome: user.nome,
@@ -483,26 +490,31 @@ app.post('/login', async (req, res) => {
         res.status(500).json({ success: false, message: "Erro ao conectar ao banco de dados." });
     }
 });
+
 // - REGISTRO NOVO USUARIO -
 app.post('/registrar', async (req, res) => {
     const { nome, usuario, senha } = req.body;
 
     try {
-        // Por padrão, novos usuários entram com cargo 'Operador'
         await pool.query(
-            'INSERT INTO usuarios (nome, usuario, senha, cargo) VALUES ($1, $2, $3, $4)',
-            [nome, usuario, senha, 'Operador']
+            'INSERT INTO usuarios (nome, usuario, senha, cargo, status) VALUES ($1, $2, $3, $4, $5)',
+            [nome, usuario, senha, 'Operador', 'PENDENTE']
         );
-        res.json({ success: true, message: "Solicitação enviada com sucesso! Aguarde a liberação." });
+
+        res.json({ 
+            success: true, 
+            message: "Solicitação enviada com sucesso! Seu acesso será liberado em breve pelo administrador." 
+        });
+
     } catch (err) {
-        if (err.code === '23505') { // Erro de duplicidade no Postgres
+        if (err.code === '23505') { // Erro de duplicidade (Unique Key) no Postgres
             res.status(400).json({ success: false, message: "Este nome de usuário já está em uso." });
         } else {
             console.error("Erro no registro:", err);
             res.status(500).json({ success: false, message: "Erro ao registrar usuário." });
         }
     }
-}); // - FIM - //
+});// - FIM - //
 
 // - - PAGINA DE CONFIGURACOES - - //
 app.post('/api/atualizar-perfil', async (req, res) => {
@@ -562,6 +574,69 @@ app.get('/dashboard-stats', async (req, res) => {
     }
 }); // - FIM - //
 
+
+// - - SISTEMA PARA INFORMAR O PROPRIETARIO DO SITE DE UM NOVO CADASTRO DE USUARIO - - //
+
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+        user:'breno.rodriguesdednow@gmail.com',
+        pass: 'upxhdfhchxlozsip'
+    },
+    tls: {
+        rejectUnauthorized: false
+    }
+});
+
+app.post('/registrar', async (req, res) => {
+    const {nome, usuario, senha} = req.body;
+
+    try {
+        await pool.query(
+            'INSERT INTO usuarios (nome, usuario, cargo, status) VALUES ($1, $2, $3, $4, $5)',
+            [nome, usuario, senha, 'operador', 'PENDENTE']
+        );
+
+        const mailOptions = {
+            from: 'breno.rodriguesdednow@gmail.com',
+            to: 'breno.rodriguesdednow@gmail.com',
+            subject: '🚨 Nova Solicitação de Acesso - Servidor J&E',
+            html: `
+                <div style="font-family: sans-serif; border: 1px solid #ddd; padding:  20px; border-radius: 10px;">
+                    <h2 style="color: #e67e22;">Nova solicitação de cadastro</h2>
+                    <p><strong>nome:</strong> ${nome}</p>
+                    <p><strong>Usuário:</strong> ${usuario}</p>
+                    <p><strong>Status:</strong> <span style="color red;">PENDENTE</span></p>
+                    <hr>
+                    <p>Para liberar o acesso, entre no painel do <strong>Supabase</strong> e altere o status para <strong>ATIVO</strong>.</p>
+                </div>
+                `
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log("Erro ao enviar email:", error);
+            } else {
+                console.log("Aviso de cadastro enviado para o seu e-mail!");
+            }
+        });
+
+        res.json({
+            success: true,
+            message: "Solicitação enviada! Aguarde a liberação do administrador no seu email."
+        });
+    } catch (err) {
+        if (err.code === '23505') {
+            res.status(400).json({ success: false, message: "Este usuário já existe."});
+        } else {
+            res.status(500).json({ success: false, message: "Erro ao registrar."});
+        }
+    }
+});
 
 app.listen(3000, () => {
     console.log("✅ Servidor J&E rodando na porta 3000 com prefixo public.");

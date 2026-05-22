@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-
     <script>
     const temaSalvo = localStorage.getItem('tema') || 'claro';
     document.documentElement.setAttribute('data-theme', temaSalvo);
     </script>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Papelões Estoque - Controle de Chapas</title>
-    
     <script>
         if (localStorage.getItem('logado') !== 'true') {
             window.location.href = 'login.html';
         }
     </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papelões Estoque - Controle de Chapas</title>
 
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -74,9 +73,8 @@
             </div>
 
             <div class="tabela-container">
-                <h4 style="margin-bottom: 15px; color: #333; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-table"></i> LISTA DE MATERIAIS
-                </h4>
+                <h4 style="margin-bottom: 15px; color: var(--sidebar-color); display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-table"></i> LISTA DE MATERIAIS</h4>
                 <table id="table-container">
                     <thead>
                         <tr>

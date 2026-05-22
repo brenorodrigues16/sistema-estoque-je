@@ -15,47 +15,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Papelões Estoque - Caixas Prontas</title>
+    
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <style>
-        .tabela-container table tbody tr:hover {
-            background-color: rgba(52, 152, 219, 0.05); /*hoover*/
-            transition: 0.2s;
-        }
-
-        .btn-ajuste {
-            background: #3498db;
-            color: white;
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            margin: 0 auto; 
-        }
-
-        .btn-ajuste:hover {
-            background: #2980b9;
-            transform: scale(1.1);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .badge-codigo {
-            background: #e1f5fe;
-            color: #0288d1;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 0.85em;
-            border: 1px solid #b3e5fc;
-        }
-    </style>
 </head>
 <body>
 
@@ -125,22 +88,20 @@
             </div>
 
             <div class="tabela-container">
-                <h4 style="margin-bottom: 15px; color: var(--sidebar-color); font-weight: bold;">
-                    <i class="fas fa-clipboard-list"></i> CONTROLE DE CAIXAS PRONTAS
-                </h4>
-                <table>
+                <h4 style="margin-bottom: 15px; color: var(--sidebar-color); display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-clipboard-list"></i> CONTROLE DE CAIXAS PRONTAS</h4>
+                <table id="table-container">
                     <thead>
                         <tr>
                             <th>CLIENTE</th>
                             <th>CÓDIGO / REF</th>
-                            <th style="text-align: center;">QUANTIDADE</th>
+                            <th>QUANTIDADE</th>
                             <th>FABRICAÇÃO</th>
                             <th>RESPONSÁVEL</th>
                             <th style="text-align: center;">EDITAR</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-corpo-caixas">
-                        </tbody>
+                    <tbody id="tabela-corpo-caixas"></tbody>
                 </table>
             </div>
         </main>

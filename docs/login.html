@@ -217,37 +217,34 @@
         document.getElementById('form-login').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Feedback visual de carregamento
             const btn = e.target.querySelector('button');
             const btnOriginalText = btn.innerText;
             btn.innerText = 'AUTENTICANDO...';
             btn.disabled = true;
 
             try {
-                const resp = await fetch('http://localhost:3000/login', {
+                const resposta = await fetch('http://localhost:3000/login', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ 
-                        usuario: document.getElementById('user').value, 
-                        senha: document.getElementById('pass').value 
-                    })
+                    body: JSON.stringify({ usuario, senha })
                 });
 
-                const dados = await resp.json();
+                const dados = await resposta.json();
 
-                if (resp.ok) {
+                if (resposta.ok) {
                     localStorage.setItem('logado', 'true');
                     localStorage.setItem('usuario', dados.nome);
                     localStorage.setItem('cargo', dados.cargo);
                     window.location.href = 'index.html';
                 } else {
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Acesso Negado',
+                        icon: resposta.status === 403 ? 'info' : 'error',
+                        title: resposta.status === 403 ? 'Acesso em Análise' : 'Falha no Login',
                         text: dados.message,
-                        confirmButtonColor: '#ff9027'
+                        confirmButtonColor: '#3498db'
                     });
                 }
+                
             } catch (error) {
                 Swal.fire('Erro', 'Não foi possível conectar ao servidor.', 'error');
             } finally {
