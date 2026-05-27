@@ -1,502 +1,306 @@
 <!DOCTYPE html>
-
 <html lang="pt-BR">
-
 <head>
-
     <script>
-    const temaSalvo = localStorage.getItem('tema') || 'claro';
-    document.documentElement.setAttribute('data-theme', temaSalvo);
+        const temaSalvo = localStorage.getItem('tema') || 'claro';
+        document.documentElement.setAttribute('data-theme', temaSalvo);
     </script>
-
     <script>
-        if (localSrorage.getItem('logado') !== 'true') {
-            window.location.href = 'login.html';
+        // - - FORCA LOGIN - - //
+        if (localStorage.getItem('logado') !== 'true') {
+            window.location.href = 'login.html'; 
         }
     </script>
-
-<script>
-    // - - FORCA LOGIN - - //
-    if (localStorage.getItem('logado') !== 'true') {
-        window.location.href = 'login.html'; 
-    }
-</script>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Sistema Estoque - Lançar Produção</title>
-
     <link rel="stylesheet" href="dashboard.css">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <style>
-
         .producao-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 20px; }
-
         .form-card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-
         .info-card { background: #2c313c; color: white; padding: 30px; border-radius: 10px; display: flex; flex-direction: column; gap: 20px; }
-
-       
-
         .campo { margin-bottom: 20px; }
-
         .campo label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; font-size: 0.9rem; }
-
         .campo input, .campo select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; box-sizing: border-box; }
-
-       
-
+        
         #btn-produzir {
-
             width: 100%; padding: 15px; background: #27ae60; color: white; border: none;
-
             border-radius: 6px; font-size: 1.1rem; font-weight: bold; cursor: pointer;
-
             transition: background 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
-
         }
-
         #btn-produzir:hover { background: #2ecc71; }
-
         #btn-produzir:disabled { background: #95a5a6; cursor: not-allowed; }
-
-       
-
+        
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
-
         .stat-card { background: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px; border-left: 4px solid #27ae60; text-align: center; }
-
         .stat-card .label { display: block; font-size: 0.75rem; text-transform: uppercase; color: #bdc3c7; margin-bottom: 5px; }
-
         .stat-card .value { font-size: 1.8rem; font-weight: bold; color: #ffffff; display: block; }
-
-
 
         #resultado-calculo { padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; border-left: 4px solid #2ecc71; }
 
-
-
         .area-azul-interna {
-
             background: rgba(0, 0, 0, 0.2);
-
             padding: 20px;
-
             border-radius: 8px;
-
             border: 1px solid rgba(255, 255, 255, 0.1);
-
         }
-
-
 
         .status-servidor { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #2ecc71; margin-bottom: 15px; font-weight: bold; }
-
         .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
-
         .dot.online { background-color: #2ecc71; animation: pulse 2s infinite; }
-
         .dot.offline { background-color: #e74c3c; }
 
-
-
         .hist-lista {
-
             margin-top: 10px;
-
-            max-height: 250px ;
-
-            overflow-y:auto ;
-
-            padding-right: 10px ;
-
+            max-height: 250px;
+            overflow-y: auto;
+            padding-right: 10px;
          }
-
          .hist-lista::-webkit-scrollbar {
-
-            width:6px;
-
+            width: 6px;
          }
-
          .hist-lista::-webkit-scrollbar-track {
-
             background: rgba(255,255,255,0.05);
-
             border-radius: 10px;
-
          }
-
-         .hist-lista::-webkit-scrollbar-thimb {
-
+         .hist-lista::-webkit-scrollbar-thumb {
             background: #27ae60;
-
             border-radius: 10px;
-
          }
-
          .hist-lista::-webkit-scrollbar-thumb:hover {
-
             background: #2ecc71;
-
          }
-
         .hist-titulo { font-size: 0.75rem; text-transform: uppercase; color: #888; margin-bottom: 10px; display: block; }
-
         .hist-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
-
         .hist-item span:last-child { color: #f1c40f; font-weight: bold; }
 
-
-
         @keyframes pulse {
-
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
-
             70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(46, 204, 113, 0); }
-
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
-
         }
-
     </style>
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 </head>
-
 <body>
-
     <div class="main-container">
-
         <aside class="sidebar">
-
             <div class="logo"><i class="fas fa-box-open"></i> J&E Embalagens LTDA</div>
-
             <nav>
-
                 <ul>
-
                     <li class="menu-item" onclick="window.location.href='index.html'"><i class="fas fa-th-large"></i> Dashboard</li>
-
                     <li class="menu-item" onclick="window.location.href='chapas.html'"><i class="fas fa-layer-group"></i> Chapas</li>
-
                     <li class="menu-item" onclick="window.location.href='caixas.html'"><i class="fas fa-boxes"></i> Caixas Prontas</li>
-
                     <li class="menu-item active" onclick="window.location.href='producao.html'"><i class="fas fa-industry"></i> Produção</li>
-
                     <li class="menu-item" onclick="window.location.href='movimentacoes.html'"><i class="fas fa-exchange-alt"></i> Movimentações</li>
-
                     <li class="menu-item" onclick="window.location.href='perfil.html'"><i class="fas fa-user"></i> Perfil</li>
-
                     <li class="menu-item" onclick="window.location.href='expedicao.html'"><i class="fas fa-truck"></i> Expedição</li>
-
                 </ul>
-
             </nav>
-
-        <div class="sidebar-footer">
-        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 0 20px;">
-        
-        <div class="user-info">
-            <div class="avatar">U</div>
-            <div>
-                <p class="username">Usuário</p>
-                <p class="role">Administrador</p>
+            <div class="sidebar-footer">
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 0 20px;">
+                <div class="user-info">
+                    <div class="avatar">U</div>
+                    <div>
+                        <p class="username">Usuário</p>
+                        <p class="role">Administrador</p>
+                    </div>
+                </div>
+                <div class="logout-container">
+                    <button onclick="fazerLogout()" class="btn-logout-red">
+                        <i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA
+                    </button>
+                </div>
             </div>
-        </div>
-
-        <div class="logout-container">
-            <button onclick="fazerLogout()" class="btn-logout-red">
-                <i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA
-            </button>
-        </div>
-    </div>
-
         </aside>
 
-
-
         <main class="content">
-
             <header class="top-bar">
-
                 <strong><span>CENTRAL DE PRODUÇÃO</span></strong>
                 <strong><span id="data-atual"></span></strong>
-
             </header>
 
-
-
             <div class="producao-container">
-
                 <section class="form-card">
-
                     <h3 style="margin-bottom:25px;"><i class="fas fa-plus-circle"></i> Nova Ordem de Produção</h3>
-
                     <form id="form-producao">
-
                         <div class="campo">
-
                             <label>Nome do Cliente:</label>
-
                             <input type="text" id="cliente" required placeholder="Ex: Hilario">
-
                         </div>
-
                         <div class="campo">
-
                             <label>Referência da Caixa:</label>
-
                             <input type="text" id="referencia" placeholder="Ex: CX 001">
-
                         </div>
-
                         <div class="campo">
-
                             <label>Tipo de Onda:</label>
-
                             <select id="tipo_onda" required>
-
                                 <option value="">Carregando ondas...</option>
-
                             </select>
-
                         </div>
-
                         <div class="campo">
-
                             <label>Medidas da Caixa (mm):</label>
-
                             <div style="display: flex; gap: 10px;">
-
                                 <input type="number" id="caixa-comp" placeholder="Comp." required>
-
                                 <input type="number" id="caixa-larg" placeholder="Larg." required>
-
                             </div>
-
                         </div>
-
                         <div style="display: flex; gap: 10px;">
-
                             <div class="campo" style="flex: 1;">
-
                                 <label>Largura Chapa (mm):</label>
-
                                 <input type="number" id="largura-chapa" required>
-
                             </div>
-
                             <div class="campo" style="flex: 1;">
-
                                 <label>Comprimento Chapa (mm):</label>
-
                                 <input type="number" id="comprimento-chapa" required>
-
                             </div>
-
                         </div>
-
                         <div class="campo">
-
                             <label>Quantidade de Caixas:</label>
-
                             <input type="number" id="quantidade-desejada" required>
-
                         </div>
-
                         <button type="submit" id="btn-produzir">FINALIZAR PRODUÇÃO</button>
-
                     </form>
-
                 </section>
-
-
 
                 <section class="info-card">
-
                     <div class="resumo-container">
-
                         <h3><i class="fas fa-chart-line"></i> Desempenho de Hoje</h3>
-
                         <div class="stats-grid">
-
                             <div class="stat-card">
-
                                 <span class="label">Caixas Produzidas</span>
-
                                 <h3 id="stat-caixas">0</h3>
-
                             </div>
-
                             <div class="stat-card">
-
                                 <span class="label">Pedidos na Fila</span>
-
                                 <h3 id="stat-fila">0</h3>
-
                             </div>
-
                         </div>
-
                     </div>
-
-
 
                     <div id="resultado-calculo">
-
                         <h4 style="color: #2ecc71;"><i class="fas fa-calculator"></i> Inteligência de Corte</h4>
-
                         <p>Saem <b id="calc-pecas">0</b> caixas por chapa.</p>
-
                         <p>Chapas necessárias: <b id="calc-chapas">0</b></p>
-
                         <p style="color: #f1c40f; font-size: 0.8rem;">Retalho: <span id="calc-retalho">0mm x 0mm</span></p>
-
                         <p id="aviso-estoque" style="color: #e74c3c; font-weight: bold; display: none; margin-top:10px;"></p>
-
                     </div>
-
-
 
                     <div class="area-azul-interna">
-
                         <div class="status-servidor">
-
                             <span id="servidor-dot" class="dot online"></span>
-
                             Status: <span id="servidor-texto">Servidor Conectado</span>
-
                         </div>
-
-                       
-
-                       <p style="font-size: 0.8em; color: #888; margin-bottom: 10px;">RESUMO DE LANÇAMENTOS</p>
-
-                         <div class="hist-lista">
-                            <div id="lista-lancamentos">
-                            </div>
-                         </div>
-
-                        
+                        <p style="font-size: 0.8em; color: #888; margin-bottom: 10px;">RESUMO DE LANÇAMENTOS</p>
+                        <div class="hist-lista">
+                            <div id="lista-lancamentos"></div>
                         </div>
-
                     </div>
-
                 </section>
-
             </div>
-
         </main>
-
     </div>
 
     <script>
         const API_URL = 'http://localhost:3000';
 
-// 1. Carrega os tipos de chapa do banco
+        // 1. Carrega os tipos de chapa do banco
+        async function carregarTiposChapa() {
+            try {
+                const urlCompleta = typeof API_URL !== 'undefined' ? `${API_URL}/tipos_onda` : 'http://localhost:3000/tipo_onda';
+                console.log("Tentando buscar ondas em:", urlCompleta);
+                const res = await fetch(urlCompleta);
 
-async function carregarTiposChapa() {
-    try {
-        const urlCompleta = typeof API_URL !== 'undefined' ? `${API_URL}/tipos-onda` : 'http://localhost:3000/tipos-onda';
+                if (!res.ok) {
+                    throw new Error(`erro na resposta do servidor:${res.status}`);
+                }
 
-        console.log("Tentando buscar ondas em:", urlCompleta);
-        const res = await fetch(urlCompleta);
+                const tipos = await res.json();
+                console.log("Dados recebidos do banco:", tipos);
 
-        if (!res.ok) {
-            throw new Error(`erro na resposta do servidor:${res.status}`);
-            return;
+                const select = document.getElementById('tipo_onda');
+                if (!select) {
+                    console.error("Erro: Não encontrei o elemento <select id='tipo_onda'> na pagina.");
+                    return;
+                }
+
+                select.innerHTML = '<option value="">Selecione a Onda</option>';
+
+                if (tipos.length === 0) {
+                    select.innerHTML = '<option value="">Nenhuma chapa encontrada no banco</option>';
+                    return;
+                }
+
+                tipos.forEach(t => {
+                    const option = document.createElement('option');
+                    option.value = t.onda;
+                    option.textContent = t.onda;
+                    select.appendChild(option);
+                });
+
+                console.log("seletor de ondas preenchido com sucesso!");
+            } catch (err) {
+                console.error("Erro comppleto ao carregar as ondas no HTML:", err);
+                alert("Erro ao carregar ondas: " + err.message);
+            }
         }
 
-        const tipos = await res.json();
-        console.log("Dados recebidos do banco:", tipos);
+        // 2. Carrega estatísticas de hoje
+        async function atualizarResumoHoje() {
+            try {
+                const res = await fetch('http://localhost:3000/resumo-hoje'); 
+                const dados = await res.json();
+                
+                const elCaixas = document.getElementById('stat-caixas');
+                const elFila = document.getElementById('stat-fila');
 
-        const select = document.getElementById('tipo_onda');
-        if (!select) {
-            console.error("Erro: Não encontrei o elemento <select id='tipo_onda'> na pagina.");
-            return;
+                if(elCaixas) elCaixas.innerText = dados.total_caixas;
+                if(elFila) elFila.innerText = dados.fila_pedidos;
+                
+                console.log("Resumo atualizado:", dados);
+            } catch (err) { 
+                console.error("Erro ao buscar resumo:", err); 
+            }
         }
 
-        select.innerHTML = '<option value="">Selecione a Onda</option>';
+        // 3. Carregar Log Lateral
+        async function carregarPedidosRecentes() {
+            const container = document.getElementById('lista-lancamentos');
+            if(!container) return;
 
-        if (tipos.length === 0) {
-            select.innerHTML = '<option value="">Nenhuma chapa encontrada no banco</option>';
-            return;
+            try {
+                const res = await fetch(`${API_URL}/pedidos-recentes`);
+                const dados = await res.json();
+                
+                if (dados.length === 0) {
+                    container.innerHTML = '<div class="hist-item"><span>Nenhum lançamento pendente</span></div>';
+                    return;
+                }
+
+                container.innerHTML = dados.map(item => `
+                    <div class="hist-item" style="border-left: 5px solid ${item.status === 'PENDENTE' ? '#e67e22' : '#2ecc71'}; padding: 10px; margin-bottom: 8px; background: rgba(255,255,255,0.05); border-radius: 4px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="color: #fff;"><i class="fas fa-user"></i> ${item.cliente}</strong>
+                            <span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #f1c40f;">${item.qtd_programada} un</span>
+                        </div>
+                        <div style="font-size: 12px; color: #aaa; margin-top: 5px;">
+                            <i class="fas fa-tag"></i> ${item.referencia || 'S/ Ref'}
+                        </div>
+                        <div style="font-size: 10px; margin-top: 5px; font-weight: bold; color: ${item.status === 'PENDENTE' ? '#e67e22' : '#2ecc71'}">
+                            ${item.status === 'PENDENTE' ? 'AGUARDANDO EXPEDIÇÃO' : 'FINALIZADO'}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error("Erro no fetch:", err);
+                container.innerHTML = '<div class="hist-item"><span>Erro ao carregar lista</span></div>';
+            }
         }
 
-        tipos.forEach(t => {
-            const option = document.createElement('option');
-            option.value = t.onda;
-            option.textContent = t.onda;
-            select.appendChild(option);
-        });
-
-        console.log("seletor de ondas preenchido com sucesso!");
-
-    } catch (err) {
-        console.error("Erro comppleto ao carregar as ondas no HTML:", err);
-        alert("Erro ao carregar ondas: " + err.message);
-    }
-}
-
-// 2. Carrega estatísticas de hoje
-async function atualizarResumoHoje() {
-    try {
-        const res = await fetch('http://localhost:3000/resumo-hoje'); 
-        const dados = await res.json();
-        
-        const elCaixas = document.getElementById('stat-caixas');
-        const elFila = document.getElementById('stat-fila');
-
-        if(elCaixas) elCaixas.innerText = dados.total_caixas;
-        if(elFila) elFila.innerText = dados.fila_pedidos;
-        
-        console.log("Resumo atualizado:", dados);
-    } catch (err) { 
-        console.error("Erro ao buscar resumo:", err); 
-    }
-}
-
-// 3. Carregar Log Lateral
-async function carregarPedidosRecentes() {
-    const container = document.getElementById('lista-lancamentos');
-    if(!container) return;
-
-    try {
-        const res = await fetch(`${API_URL}/pedidos-recentes`);
-        const dados = await res.json();
-        
-        if (dados.length === 0) {
-            container.innerHTML = '<div class="hist-item"><span>Nenhum lançamento pendente</span></div>';
-            return;
-        }
-
-        container.innerHTML = dados.map(item => `
-            <div class="hist-item" style="border-left: 5px solid ${item.status === 'PENDENTE' ? '#e67e22' : '#2ecc71'}; padding: 10px; margin-bottom: 8px; background: rgba(255,255,255,0.05); border-radius: 4px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <strong style="color: #fff;"><i class="fas fa-user"></i> ${item.cliente}</strong>
-                    <span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #f1c40f;">${item.qtd_programada} un</span>
-                </div>
-                <div style="font-size: 12px; color: #aaa; margin-top: 5px;">
-                    <i class="fas fa-tag"></i> ${item.referencia || 'S/ Ref'}
-                </div>
-                <div style="font-size: 10px; margin-top: 5px; font-weight: bold; color: ${item.status === 'PENDENTE' ? '#e67e22' : '#2ecc71'}">
-                    ${item.status === 'PENDENTE' ? 'AGUARDANDO EXPEDIÇÃO' : 'FINALIZADO'}
-                </div>
-            </div>
-        `).join('');
-    } catch (err) {
-        console.error("Erro no fetch:", err);
-        container.innerHTML = '<div class="hist-item"><span>Erro ao carregar lista</span></div>';
-    }
-}
-
-// 4. Inteligência de Corte
-async function calcularERevalidar() {
+        // 4. Inteligência de Corte
+       async function calcularERevalidar() {
+    // 1. Coleta os valores
     const chapaLarg = parseFloat(document.getElementById('largura-chapa').value) || 0;
     const chapaComp = parseFloat(document.getElementById('comprimento-chapa').value) || 0;
     const caixaLarg = parseFloat(document.getElementById('caixa-larg').value) || 0;
@@ -504,8 +308,8 @@ async function calcularERevalidar() {
     const qtdDesejada = parseInt(document.getElementById('quantidade-desejada').value) || 0;
     const tipoOnda = document.getElementById('tipo_onda').value;
 
+    // 2. Calcula métricas visuais (sempre que possível)
     let totalPorChapa = 0, chapasNecessarias = 0;
-
     if (chapaLarg > 0 && chapaComp > 0 && caixaLarg > 0 && caixaComp > 0) {
         totalPorChapa = Math.floor(chapaLarg / caixaLarg) * Math.floor(chapaComp / caixaComp);
         chapasNecessarias = totalPorChapa > 0 ? Math.ceil(qtdDesejada / totalPorChapa) : 0;
@@ -514,13 +318,16 @@ async function calcularERevalidar() {
         document.getElementById('calc-retalho').innerText = `${chapaLarg % caixaLarg}mm x ${chapaComp % caixaComp}mm`;
     }
 
-    if (tipoOnda && chapaLarg && chapaComp) {
+    // 3. O PULO DO GATO: Só faz o fetch se tudo estiver preenchido corretamente
+    const aviso = document.getElementById('aviso-estoque');
+    const btn = document.getElementById('btn-produzir');
+    
+    if (tipoOnda && chapaLarg > 0 && chapaComp > 0 && chapasNecessarias > 0) {
         try {
+            // Adicionamos cache ou verificação rápida aqui
             const res = await fetch(`${API_URL}/verificar-estoque?tipo=${tipoOnda}&largura=${chapaLarg}&comprimento=${chapaComp}`);
             const dados = await res.json();
             const estoqueDisp = dados.estoque || 0;
-            const aviso = document.getElementById('aviso-estoque');
-            const btn = document.getElementById('btn-produzir');
 
             if (chapasNecessarias > estoqueDisp) {
                 aviso.innerText = `⚠️ Falta estoque! Disponível: ${estoqueDisp} chapas.`;
@@ -530,146 +337,148 @@ async function calcularERevalidar() {
                 aviso.style.display = 'none';
                 btn.disabled = false;
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { 
+            console.error("Erro na validação de estoque:", e); 
+        }
+    } else {
+        // Se faltar algum dado, apenas esconde o aviso e libera o botão (ou bloqueia se preferir)
+        aviso.style.display = 'none';
     }
 }
 
+        async function finalizarProducao() {
+            const dados = {
+                cliente: document.querySelector('input[placeholder="Nome do Cliente a produzir..."]').value,
+                referencia: document.querySelector('input[placeholder="Ex: CX 001"]').value,
+                tipoOnda: document.getElementById('tipo_onda').value,
+                quantidade: document.getElementById('quantidade-desejada').value
+            };
 
-async function finalizarProducao() {
-    const dados = {
-        cliente: document.querySelector('input[placeholder="Nome do cliente"]').value,
-        referencia: document.querySelector('input[placeholder="Ex: CX 01"]').value,
-        tipoOnda: document.getElementById('tipo-onda').value,
-        quantidade: document.querySelector('input[placeholder="Quantidade de Caixas"]').value
-    };
-
-    if (!dados.cliente || !dados.quantidade) {
-        return Swal.fire('Erro', 'Preencha os campos principais!', 'error');
-    }
-
-    try {
-        const response = await fetch('http://localhost:3000/api/producao', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            Swal.fire('Sucesso!', 'Produção enviada para o banco.', 'success');
-        }
-    } catch (error) {
-        console.error("Erro ao conectar:", error);
-        Swal.fire('Erro de Conexão', 'O servidor está ligado?', 'error');
-    }
-}
-
-// 5. Event Listeners e Inicialização
-document.getElementById('form-producao').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('btn-produzir');
-    btn.disabled = true;
-
-    const payload = {
-        cliente: document.getElementById('cliente').value,
-        referencia: document.getElementById('referencia').value, 
-        tipo_onda: document.getElementById('tipo_onda').value, // CORRIGIDO: era tipo-chapa
-        largura_chapa: document.getElementById('largura-chapa').value, 
-        comprimento_chapa: document.getElementById('comprimento-chapa').value, 
-        qtd_chapas_necessarias: parseInt(document.getElementById('calc-chapas').innerText), 
-        qtd_programada: parseInt(document.getElementById('quantidade-desejada').value), 
-        medida: `${document.getElementById('caixa-comp').value}x${document.getElementById('caixa-larg').value}` 
-    };
-
-    try {
-        const res = await fetch(`${API_URL}/produzir`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-
-        if (result.success) {
-            Swal.fire('Sucesso!', 'Pedido enviado!', 'success');
-            document.getElementById('form-producao').reset();
-            atualizarResumoHoje();
-            carregarPedidosRecentes(); 
-        } else {
-            Swal.fire('Erro', result.message, 'error');
-        }
-    } catch (err) {
-        Swal.fire('Erro', 'Conexão falhou.', 'error');
-    } finally {
-        btn.disabled = false;
-    }
-});
-
-document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', calcularERevalidar));
-
-// - - CONFIGURACAO DE LOGIN E LOGOUT - - //
-
-    function fazerLogout() {
-    Swal.fire({
-        title: 'Deseja sair?',
-        text: "Sua sessão será encerrada.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#e74c3c',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Sim, sair!',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            localStorage.clear(); 
-            window.location.href = 'login.html'; 
-        }
-    });
-}
-
-// ÚNICO window.onload
-window.onload = function() {
-    carregarTiposChapa();
-    atualizarResumoHoje();
-    carregarPedidosRecentes();
-
-     const elementoData = document.getElementById('data-atual');
-            if (elementoData) {
-                elementoData.innerText = new Date().toLocaleDateString('pt-BR', { 
-                    weekday: 'long', 
-                    day: 'numeric', 
-                    month: 'long', 
-                    year: 'numeric' 
-                });
+            if (!dados.cliente || !dados.quantidade) {
+                return Swal.fire('Erro', 'Preencha os campos principais!', 'error');
             }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/producao', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire('Sucesso!', 'Produção enviada para o banco.', 'success');
+                }
+            } catch (error) {
+                console.error("Erro ao conectar:", error);
+                Swal.fire('Erro de Conexão', 'O servidor está ligado?', 'error');
+            }
+        }
+
+        // 5. Event Listeners e Inicialização
+        document.getElementById('form-producao').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-produzir');
+            btn.disabled = true;
+
+            const payload = {
+                cliente: document.getElementById('cliente').value,
+                referencia: document.getElementById('referencia').value, 
+                tipo_onda: document.getElementById('tipo_onda').value,
+                largura_chapa: document.getElementById('largura-chapa').value, 
+                comprimento_chapa: document.getElementById('comprimento-chapa').value, 
+                qtd_chapas_necessarias: parseInt(document.getElementById('calc-chapas').innerText), 
+                qtd_programada: parseInt(document.getElementById('quantidade-desejada').value), 
+                medida: `${document.getElementById('caixa-comp').value}x${document.getElementById('caixa-larg').value}` 
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/produzir`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    Swal.fire('Sucesso!', 'Pedido enviado!', 'success');
+                    document.getElementById('form-producao').reset();
+                    atualizarResumoHoje();
+                    carregarPedidosRecentes(); 
+                } else {
+                    Swal.fire('Erro', result.message, 'error');
+                }
+            } catch (err) {
+                Swal.fire('Erro', 'Conexão falhou.', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+       let timer;
+         document.querySelectorAll('input, select').forEach(el => {
+                el.addEventListener('input', () => {
+                  clearTimeout(timer);
+              timer = setTimeout(calcularERevalidar, 600); // Só calcula após o usuário parar de digitar por 600ms
+           });
+    });
+
+        // - - CONFIGURACAO DE LOGIN E LOGOUT - - //
+        function fazerLogout() {
+            Swal.fire({
+                title: 'Deseja sair?',
+                text: "Sua sessão será encerrada.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, sair!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.clear(); 
+                    window.location.href = 'login.html'; 
+                }
+            });
+        }
+
+        // ÚNICO window.onload
+      window.onload = async function() {
+    console.log("Iniciando página...");
+    await carregarTiposChapa();
+    await atualizarResumoHoje();
+    await carregarPedidosRecentes();
+
+    const elementoData = document.getElementById('data-atual');
+    if (elementoData) {
+        elementoData.innerText = new Date().toLocaleDateString('pt-BR');
+    }
 };
 
-    window.addEventListener('DOMContentLoaded', () => {
-    // Busca os dados salvos no momento do login
-    const nomeUsuario = localStorage.getItem('usuario');
-    const cargoUsuario = localStorage.getItem('cargo');
+        window.addEventListener('DOMContentLoaded', () => {
+            // Busca os dados salvos no momento do login
+            const nomeUsuario = localStorage.getItem('usuario');
+            const cargoUsuario = localStorage.getItem('cargo');
 
-    // Seleciona os elementos pelas classes que você já tem no HTML
-    const elementoNome = document.querySelector('.username');
-    const elementoCargo = document.querySelector('.role');
-    const elementoAvatar = document.querySelector('.avatar');
+            // Seleciona os elementos pelas classes que você já tem no HTML
+            const elementoNome = document.querySelector('.username');
+            const elementoCargo = document.querySelector('.role');
+            const elementoAvatar = document.querySelector('.avatar');
 
-    if (nomeUsuario && elementoNome) {
-        elementoNome.innerText = nomeUsuario;
-    }
+            if (nomeUsuario && elementoNome) {
+                elementoNome.innerText = nomeUsuario;
+            }
 
-    if (cargoUsuario && elementoCargo) {
-        elementoCargo.innerText = cargoUsuario;
-    }
+            if (cargoUsuario && elementoCargo) {
+                elementoCargo.innerText = cargoUsuario;
+            }
 
-    // Bônus: Muda a letra do Avatar para a primeira letra do nome do usuário
-    if (nomeUsuario && elementoAvatar) {
-        elementoAvatar.innerText = nomeUsuario.charAt(0).toUpperCase();
-    }
-});
-    
-
-
+            // Bônus: Muda a letra do Avatar para a primeira letra do nome do usuário
+            if (nomeUsuario && elementoAvatar) {
+                elementoAvatar.innerText = nomeUsuario.charAt(0).toUpperCase();
+            }
+        });
     </script>
 </body>
 </html>

@@ -1272,6 +1272,30 @@ app.get('/admin/logs', (req, res) => {
 
 }); // - FIM - //
 
+// - -  ROTA PARA EXIBIR TIPOS DE ONDA - - //
+app.get('/tipos_onda', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT DISTINCT onda FROM chapas');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Erro ao buscar ondas:', err);
+        res.status(500).json({ error: 'Erro no servidor' });
+    }
+});
+
+app.get('/verificar-estoque', async (req, res) => {
+    const { tipo, largura, comprimento } = req.query;
+    try {
+        const result = await pool.query(
+            'SELECT quantidade FROM chapas WHERE TRIM(UPPER(onda)) = TRIM(UPPER($1)) AND largura = $2 AND comprimento = $3 LIMIT 1',
+            [tipo, largura, comprimento]
+        );
+        res.json({ estoque: result.rows.length > 0 ? result.rows[0].quantidade : 0 });
+    } catch (err) {
+        res.status(500).json({ estoque: 0 });
+    }
+}); // - FIM - //
+
 
 app.listen(3000, () => {
     logger("info", "✅ Servidor J&E rodando na porta 3000 com prefixo public.");
