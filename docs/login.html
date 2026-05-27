@@ -214,20 +214,27 @@
         }
 
         // LÓGICA DE LOGIN
-        document.getElementById('form-login').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const btn = e.target.querySelector('button');
-            const btnOriginalText = btn.innerText;
-            btn.innerText = 'AUTENTICANDO...';
-            btn.disabled = true;
+       // LÓGICA DE LOGIN
+document.getElementById('form-login').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // 1. CAPTURE OS VALORES DOS INPUTS AQUI
+    const usuario = document.getElementById('user').value;
+    const senha = document.getElementById('pass').value;
 
-            try {
-                const resposta = await fetch('http://localhost:3000/login', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ usuario, senha })
-                });
+    const btn = e.target.querySelector('button');
+    const btnOriginalText = btn.innerText;
+    btn.innerText = 'AUTENTICANDO...';
+    btn.disabled = true;
+
+    try {
+        const resposta = await fetch('http://localhost:3000/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            // Agora 'usuario' e 'senha' existem!
+            body: JSON.stringify({ usuario, senha }) 
+        });
+        // ... resto do código
 
                 const dados = await resposta.json();
 

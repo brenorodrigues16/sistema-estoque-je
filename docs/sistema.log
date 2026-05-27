@@ -1,0 +1,137 @@
+[26/05/2026, 17:47:23] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[26/05/2026, 17:48:00] [INFO] Tentativa de login: Teste 
+[26/05/2026, 17:48:12] [INFO] Tentativa de login: Breno
+[26/05/2026, 17:54:54] [INFO] Tentativa de login: Breno
+[26/05/2026, 17:55:01] [INFO] Tentativa de login: Breno
+[26/05/2026, 17:55:59] [INFO] Tentativa de login: Breno
+[26/05/2026, 17:56:55] [INFO] Tentativa de login: Teste 
+[26/05/2026, 17:57:06] [INFO] Tentativa de login: Teste 
+[26/05/2026, 17:58:15] [INFO] Tentativa de login: Breno
+[26/05/2026, 18:03:43] [INFO] Tentativa de login: Breno
+[26/05/2026, 18:05:09] [INFO] Tentativa de login: Saul
+[26/05/2026, 18:11:29] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[26/05/2026, 18:11:45] [INFO] Tentativa de login: Breno
+[26/05/2026, 18:32:07] [INFO] ✅ Servidor J&E rodando.
+[27/05/2026, 14:07:19] [INFO] ✅ Servidor J&E rodando.
+[27/05/2026, 14:09:34] [INFO] Tentativa de login para: Teste  com senha: 16022005
+[27/05/2026, 14:09:34] [INFO] Resultado do banco: 0 registros encontrados.
+[27/05/2026, 14:09:53] [INFO] Tentativa de login para: Teste  com senha: 16022005
+[27/05/2026, 14:09:53] [INFO] Resultado do banco: 0 registros encontrados.
+[27/05/2026, 14:10:55] [INFO] Tentativa de login para: Teste  com senha: 16022005
+[27/05/2026, 14:10:55] [INFO] Resultado do banco: 0 registros encontrados.
+[27/05/2026, 14:12:14] [INFO] Tentativa de login para: Teste  com senha: 16022005
+[27/05/2026, 14:12:14] [INFO] Resultado do banco: 0 registros encontrados.
+[27/05/2026, 14:13:02] [INFO] Tentativa de login para: Teste  com senha: 16022005
+[27/05/2026, 14:13:02] [INFO] Resultado do banco: 0 registros encontrados.
+[27/05/2026, 14:16:58] [INFO] ✅ Servidor J&E rodando.
+[27/05/2026, 14:17:14] [INFO] DEBUG: Total de usuários no banco acessado: 2
+[27/05/2026, 14:17:22] [INFO] DEBUG: Total de usuários no banco acessado: 2
+[27/05/2026, 14:18:06] [INFO] DEBUG: Total de usuários no banco acessado: 2
+[27/05/2026, 14:18:26] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:26] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:26] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:26] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:26] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:27] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:27] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:27] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:27] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:27] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:27] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:27] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:31] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:31] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:31] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:31] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:32] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:39] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:39] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:39] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:40] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:40] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:40] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:40] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:42] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:42] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:42] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:42] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:42] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:43] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:43] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:43] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:43] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:43] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:43] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:44] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:44] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:44] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:44] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:44] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:44] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:44] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:45] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:45] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:45] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:45] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:45] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:45] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:45] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:46] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:46] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:46] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:46] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:46] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:46] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:47] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:47] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:47] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:47] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:47] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:47] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:47] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:48] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:48] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:48] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:48] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:48] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:48] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:49] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:49] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:49] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:49] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:49] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:49] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:50] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:50] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:50] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:50] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:50] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:50] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:50] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:51] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:51] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:51] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:51] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:51] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:51] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:52] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:52] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:52] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:52] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:52] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:53] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:53] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:53] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:53] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:53] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:53] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:53] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:54] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:54] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:54] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:54] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:54] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:54] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:55] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:55] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
+[27/05/2026, 14:18:55] [INFO] Ondas encontradas e formatadas: [{"onda":"ONDA B"},{"onda":"ONDA BC"},{"onda":"ONDA BB"},{"onda":"ONDA BC"},{"onda":"ONDA C"}]
