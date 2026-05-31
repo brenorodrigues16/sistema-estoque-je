@@ -47,7 +47,10 @@
                         <i class="fas fa-user"></i> Perfil
                     </li>
                     <li class="menu-item" onclick="window.location.href='expedicao.html'">
-                        <i class="fas fa-truck"></i> Expedição
+                        <i class="fas fa-clipboard-list"></i> Expedição
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='entrada_chapas.html'">
+                        <i class="fas fa-truck-loading"></i> Entrada de Chapas
                     </li>
                 </ul>
             </nav>
@@ -139,13 +142,14 @@
         document.getElementById('email').value = localStorage.getItem('usuarioEmail') || '';
         document.getElementById('tema').value = localStorage.getItem('tema') || 'claro';
 
-        // Atualiza Sidebar
-        const nome = localStorage.getItem('usuario');
-        if(nome) {
-            document.querySelector('.username').innerText = nome;
-            document.querySelector('.avatar').innerText = nome.charAt(0).toUpperCase();
-        }
-    };
+       const user = localStorage.getItem('usuario');
+            const cargo = localStorage.getItem('cargo');
+            if (user) {
+                document.querySelector('.username').innerText = user;
+                document.querySelector('.avatar').innerText = user.charAt(0).toUpperCase();
+            }
+            if (cargo) document.querySelector('.role').innerText = cargo;
+        };
 
     // Salvar Alterações
     document.getElementById('form-perfil').addEventListener('submit', async (e) => {
@@ -181,10 +185,24 @@
         }
     });
 
-    function fazerLogout() {
-        localStorage.clear();
-        window.location.href = 'login.html';
-    }
+     function fazerLogout() {
+            Swal.fire({
+                title: 'Deseja sair?',
+                text: "Sua sessão será encerrada.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, sair!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.clear(); 
+                    window.location.href = 'login.html'; 
+                }
+            });
+        }
+
 </script>
 </body>
 </html>

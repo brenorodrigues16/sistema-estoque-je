@@ -95,7 +95,8 @@
                     <li class="menu-item active" onclick="window.location.href='producao.html'"><i class="fas fa-industry"></i> Produção</li>
                     <li class="menu-item" onclick="window.location.href='movimentacoes.html'"><i class="fas fa-exchange-alt"></i> Movimentações</li>
                     <li class="menu-item" onclick="window.location.href='perfil.html'"><i class="fas fa-user"></i> Perfil</li>
-                    <li class="menu-item" onclick="window.location.href='expedicao.html'"><i class="fas fa-truck"></i> Expedição</li>
+                    <li class="menu-item" onclick="window.location.href='expedicao.html'"><i class="fas fa-clipboard-list"></i> Expedição</li>
+                    <li class="menu-item" onclick="window.location.href='entrada_chapas.html'"><i class="fas fa-truck-loading"></i> Entrada de Chapas</li>
                 </ul>
             </nav>
             <div class="sidebar-footer">
@@ -369,6 +370,15 @@
 
                 if (result.success) {
                     Swal.fire('Sucesso!', 'Produção enviada para o banco.', 'success');
+
+                 // AQUI VOCÊ REGISTRA O MOVIMENTO NO LOG
+                await registrarLog('PRODUCAO', payload.tipo_onda, payload.qtd_programada);
+    
+                 document.getElementById('form-producao').reset();
+                 atualizarResumoHoje();
+                 carregarPedidosRecentes();
+                 carregarMovimentacoes(); 
+
                 }
             } catch (error) {
                 console.error("Erro ao conectar:", error);
@@ -442,6 +452,19 @@
                 }
             });
         }
+
+    async function registrarLog(tipo, produto, qtd) {
+    const usuario = localStorage.getItem('usuario') || 'Desconhecido';
+    try {
+        await fetch('http://localhost:3000/api/registrar-movimentacao', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tipo, produto, quantidade: qtd, usuario })
+        });
+    } catch (err) {
+        console.error("Erro ao registrar log:", err);
+    }
+   }
 
         // ÚNICO window.onload
       window.onload = async function() {

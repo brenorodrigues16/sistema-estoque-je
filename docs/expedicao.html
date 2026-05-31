@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-
     <script>
     const temaSalvo = localStorage.getItem('tema') || 'claro';
     document.documentElement.setAttribute('data-theme', temaSalvo);
@@ -11,7 +10,6 @@
     <title>J&E - Expedição</title>
     
     <script>
-        // Trava de Segurança Corrigida
         if (localStorage.getItem('logado') !== 'true') {
             window.location.href = 'login.html';
         }
@@ -22,108 +20,24 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
-        /* Ajustes para travar a rolagem da página principal */
-        html, body {
-            height: 100%;
-            margin: 0;
-            overflow: hidden; /* Trava a rolagem externa */
-        }
-
-        .main-container {
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
-        }
-
-        .content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .top-bar {
-            flex-shrink: 0; /* Impede o cabeçalho de achatar */
-        }
-
-        .expedicao-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            padding: 20px;
-            flex-grow: 1; /* Ocupa o restante da tela */
-            height: calc(100vh - 80px); /* Ajuste dinâmico conforme sua top-bar */
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-
-        .coluna-expedicao {
-            background: rgba(0, 0, 0, 0.03);
-            padding: 20px;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            height: 100%; /* Ocupa o total da grid */
-            overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-
-        .titulo-secao {
-            font-size: 1.1em;
-            color: #e67e22;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-
-        .scroll-lista {
-            flex-grow: 1;
-            overflow-y: auto; /* Rolagem apenas aqui dentro */
-            padding-right: 8px;
-        }
-
-        /* Estilização da Scrollbar para ficar discreta */
+        html, body { height: 100%; margin: 0; overflow: hidden; }
+        .main-container { height: 100vh; display: flex; overflow: hidden; }
+        .content { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        .top-bar { flex-shrink: 0; }
+        .expedicao-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; flex-grow: 1; height: calc(100vh - 80px); box-sizing: border-box; overflow: hidden; }
+        .coluna-expedicao { background: rgba(0, 0, 0, 0.03); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; height: 100%; overflow: hidden; border: 1px solid rgba(0,0,0,0.05); }
+        .titulo-secao { font-size: 1.1em; color: #e67e22; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+        .scroll-lista { flex-grow: 1; overflow-y: auto; padding-right: 8px; }
         .scroll-lista::-webkit-scrollbar { width: 6px; }
         .scroll-lista::-webkit-scrollbar-track { background: transparent; }
         .scroll-lista::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
         .scroll-lista::-webkit-scrollbar-thumb:hover { background: #ff9027; }
-
-        .card-pedido, .card-finalizado {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 5px solid #3498db;
-            transition: 0.2s;
-        }
-
-        .card-finalizado {
-            border-left: 5px solid #27ae60;
-            background: #f8fff9;
-        }
-
+        .card-pedido, .card-finalizado { background: white; padding: 15px; border-radius: 8px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #3498db; transition: 0.2s; }
+        .card-finalizado { border-left: 5px solid #27ae60; background: #f8fff9; }
         .info-txt { font-size: 0.9em; color: #555; line-height: 1.4; }
         .info-txt strong { color: #2c3e50; font-size: 1.1em; }
-
-        .btn-conferir {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-        }
+        .btn-conferir { background: #27ae60; color: white; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-conferir:hover { background: #2ecc71; transform: scale(1.05); }
-        
         .swal-label { display: block; margin-top: 15px; font-weight: bold; text-align: left; }
     </style>
 </head>
@@ -140,10 +54,10 @@
                     <li class="menu-item" onclick="window.location.href='producao.html'"><i class="fas fa-industry"></i> Produção</li>
                     <li class="menu-item" onclick="window.location.href='movimentacoes.html'"><i class="fas fa-exchange-alt"></i> Movimentações</li>
                     <li class="menu-item" onclick="window.location.href='perfil.html'"><i class="fas fa-user"></i> Perfil</li>
-                    <li class="menu-item active" onclick="window.location.href='expedicao.html'"><i class="fas fa-truck"></i> Expedição</li>
+                    <li class="menu-item active" onclick="window.location.href='expedicao.html'"><i class="fas fa-clipboard-list"></i> Expedição</li>
+                    <li class="menu-item" onclick="window.location.href='entrada_chapas.html'"><i class="fas fa-truck-loading"></i> Entrada de Chapas</li>
                 </ul>
             </nav>
-
             <div class="sidebar-footer">
                 <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 0 20px;">
                 <div class="user-info">
@@ -154,9 +68,7 @@
                     </div>
                 </div>
                 <div class="logout-container">
-                    <button onclick="fazerLogout()" class="btn-logout-red">
-                        <i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA
-                    </button>
+                    <button onclick="fazerLogout()" class="btn-logout-red"><i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA</button>
                 </div>
             </div>
         </aside>
@@ -172,7 +84,6 @@
                     <h2 class="titulo-secao"><i class="fas fa-clock"></i> Aguardando Conferência</h2>
                     <div id="lista-pedidos" class="scroll-lista"></div>
                 </div>
-
                 <div class="coluna-expedicao">
                     <h2 class="titulo-secao" style="color: #27ae60;"><i class="fas fa-check-circle"></i> Finalizados Hoje</h2>
                     <div id="lista-finalizados" class="scroll-lista"></div>
@@ -183,12 +94,12 @@
 
     <script>
         const API_URL = 'http://localhost:3000';
+        const usuarioLogado = localStorage.getItem('usuario') || 'Sistema';
 
         async function carregarTudo() {
             try {
                 const res = await fetch(`${API_URL}/pedidos-recentes`);
                 const todosOsPedidos = await res.json();
-
                 const containerPendentes = document.getElementById('lista-pedidos');
                 const containerFinalizados = document.getElementById('lista-finalizados');
 
@@ -216,36 +127,22 @@
                                 <strong>${f.cliente}</strong><br>
                                 Ref: ${f.referencia || 'S/ REF'}<br>
                                 <span>Conf: <b>${f.qtd_conferida || f.qtd_programada}</b> un</span><br>
-                                <small style="color:#27ae60">
-                                    <i class="fas fa-user-check"></i> Resp: ${f.responsavel || 'Não informado'}
-                                </small>
+                                <small style="color:#27ae60"><i class="fas fa-user-check"></i> Resp: ${f.responsavel || 'Sistema'}</small>
                             </div>
                         </div>
                     `).join('');
-    
-            } catch (err) {
-                console.error("Erro ao carregar:", err);
-            }
+            } catch (err) { console.error("Erro ao carregar:", err); }
         }
 
         async function confirmarChegada(id, qtdOriginal) {
             const { value: formValues } = await Swal.fire({
                 title: 'Conferência de Carga',
-                html:
-                    `<label class="swal-label">Quantidade Real Produzida</label>` +
-                    `<input id="swal-qtd" class="swal2-input" type="number" min="1" value="${qtdOriginal}">` +
-                    `<label class="swal-label">Responsável Conferente</label>` +
-                    `<input id="swal-resp" class="swal2-input" placeholder="Seu nome">`,
-                focusConfirm: false,
+                html: `<label class="swal-label">Quantidade Real Produzida</label>
+                       <input id="swal-qtd" class="swal2-input" type="number" min="1" value="${qtdOriginal}">`,
                 showCancelButton: true,
-                confirmButtonText: 'Finalizar e Enviar Estoque',
+                confirmButtonText: 'Finalizar e Enviar',
                 preConfirm: () => {
-                    const qtd = document.getElementById('swal-qtd').value;
-                    const resp = document.getElementById('swal-resp').value;
-                    if (!qtd || !resp) {
-                        Swal.showValidationMessage('Preencha a quantidade e o seu nome!');
-                    }
-                    return { qtd_conferida: parseInt(qtd), responsavel: resp }
+                    return { qtd_conferida: parseInt(document.getElementById('swal-qtd').value) }
                 }
             });
 
@@ -257,21 +154,15 @@
                         body: JSON.stringify({ 
                             id: id, 
                             qtd_conferida: formValues.qtd_conferida,
-                            responsavel: formValues.responsavel
+                            responsavel: usuarioLogado // <--- Automático
                         })
                     });
-
                     const resultado = await response.json();
-
                     if (resultado.success) {
-                        await Swal.fire('Sucesso!', 'Pedido conferido e estoque atualizado.', 'success');
+                        Swal.fire('Sucesso!', 'Pedido conferido.', 'success');
                         carregarTudo();
-                    } else {
-                        Swal.fire('Erro', resultado.message, 'error');
-                    }
-                } catch (err) {
-                     Swal.fire('Erro de Conexão', 'O servidor Node.js está desligado.', 'error');
-                }
+                    } else { Swal.fire('Erro', resultado.message, 'error'); }
+                } catch (err) { Swal.fire('Erro', 'Falha na conexão.', 'error'); }
             }
         }
 
@@ -294,33 +185,18 @@
         }
 
         window.onload = () => {
-            if (typeof carregarTudo === "function") {
-                carregarTudo();
+            carregarTudo();
+            const elData = document.getElementById('data-atual');
+            if (elData) elData.innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+            
+           const user = localStorage.getItem('usuario');
+            const cargo = localStorage.getItem('cargo');
+            if (user) {
+                document.querySelector('.username').innerText = user;
+                document.querySelector('.avatar').innerText = user.charAt(0).toUpperCase();
             }
-
-            const elementoData = document.getElementById('data-atual');
-            if (elementoData) {
-                elementoData.innerText = new Date().toLocaleDateString('pt-BR', { 
-                    weekday: 'long', 
-                    day: 'numeric', 
-                    month: 'long', 
-                    year: 'numeric' 
-                });
-            }
+            if (cargo) document.querySelector('.role').innerText = cargo;
         };
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const nomeUsuario = localStorage.getItem('usuario');
-            const cargoUsuario = localStorage.getItem('cargo');
-
-            const elementoNome = document.querySelector('.username');
-            const elementoCargo = document.querySelector('.role');
-            const elementoAvatar = document.querySelector('.avatar');
-
-            if (nomeUsuario && elementoNome) elementoNome.innerText = nomeUsuario;
-            if (cargoUsuario && elementoCargo) elementoCargo.innerText = cargoUsuario;
-            if (nomeUsuario && elementoAvatar) elementoAvatar.innerText = nomeUsuario.charAt(0).toUpperCase();
-        });
     </script>
 </body>
 </html>

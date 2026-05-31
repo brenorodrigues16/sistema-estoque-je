@@ -790,7 +790,7 @@ app.post('/api/caixas/editar', async (req, res) => {
 
     const { id, cliente, codigo, quantidade, data_fabricacao, responsavel } = req.body;
 
-
+    console.log("Recebendo edição:", req.body);
 
     try {
 
@@ -814,20 +814,17 @@ app.post('/api/caixas/editar', async (req, res) => {
 
         const values = [cliente, codigo, quantidade, data_fabricacao, responsavel, id];
 
-       
+       const result = await pool.query(query, values);
 
-        await pool.query(query, values);
+       if (result.rowCount === 0) {
+        return res.status(400).json({ success: false, message: "Caixa não encontrada"});
+       }
 
         res.json({ success: true });
-
     } catch (err) {
-
         logger("error", `Erro no servidor: ${err.message}`);
-
         res.status(500).json({ success: false, message: err.message });
-
     }
-
 }); // - FIM - //
 
 
@@ -945,81 +942,43 @@ app.put('/api/caixas/:id', async (req, res) => {
 }); // - FIM - //
 
 
-
-
-
-// - - PAGINA DE LOGIN - - //
-
+// - - PAGINA DE LOGIN (server.js) - - //
 app.post('/login', async (req, res) => {
-
     const { usuario, senha } = req.body;
-
     logger("info", `Tentativa de login: ${usuario}`);
 
-
-
     try {
+        const resultado = await pool.query('SELECT * FROM usuarios WHERE usuario = $1', [usuario]);
 
-        const resultado = await pool.query(
-
-            'SELECT * FROM usuarios WHERE usuario = $1 AND senha = $2',
-
-            [usuario, senha]
-
-        );
-
-
-
-        if (resultado.rows.length > 0) {
-
-            const user = resultado.rows[0];
-
-
-
-            // VERIFICAÇÃO DE STATUS: Se estiver PENDENTE, bloqueia o acesso
-
-            if (user.status === 'PENDENTE') {
-
-                return res.status(403).json({
-
-                    success: false,
-
-                    message: "Seu cadastro está em análise. Aguarde a liberação do administrador."
-
-                });
-
-            }
-
-
-
-            // Se o status for ATIVO, libera o login
-
-            res.json({
-
-                success: true,
-
-                nome: user.nome,
-
-                cargo: user.cargo
-
-            });
-
-        } else {
-
-            // Se não encontrar o usuário ou a senha estiver errada
-
-            res.status(401).json({ success: false, message: "Usuário ou senha incorretos!" });
-
+        if (resultado.rows.length === 0) {
+            return res.status(401).json({ success: false, message: "Usuário não encontrado!"});
         }
 
+        const user = resultado.rows[0];
+
+        // Compara as senhas como texto
+        if (String(user.senha).trim() !== String(senha).trim()) {
+            return res.status(401).json({ success: false, message: "Senha incorreta!" });
+        }
+
+        if (user.status !== 'ATIVO') {
+            return res.status(403).json({
+                success: false,
+                message: "Seu cadastro está em análise. Aguarde a liberação do administrador."
+            });
+        }
+
+        // Retorna o cargo usando a coluna 'carga' do seu banco
+        res.json({
+            success: true,
+            nome: user.nome,
+            cargo: user.cargo
+        });
+
     } catch (err) {
-
         logger("error", `Erro no login: ${err.message}`);
-
         res.status(500).json({ success: false, message: "Erro ao conectar ao banco de dados." });
-
     }
-
 });
 
 
@@ -1296,6 +1255,80 @@ app.get('/verificar-estoque', async (req, res) => {
     }
 }); // - FIM - //
 
+
+// - - ROTA PARA REGISTRAR MOVIMENTAÇÃO DE ESTOQUE (ENTRADA/SAÍDA) - - //
+app.post('/api/registrar-movimentacao', async (req, res) => {
+    const { tipo, produto, quantidade, usuario } = req.body;
+    try {
+        await pool.query(
+            'INSERT INTO movimentacoes (tipo, produto, quantidade, usuario) VALUES ($1, $2, $3, $4)',
+            [tipo, produto, quantidade, usuario]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Erro ao registrar movimentação:", err);
+        res.status(500).json({ error: 'Erro ao salvar movimento' });
+    }
+});// - FIM -//
+
+// - - ROTA PARA EXIBIR EM MOVIMENTAÇÕES - - //
+app.get('/api/movimentacoes', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM movimentacoes ORDER BY data DESC');
+        
+        res.json(result.rows);
+    } catch (err) {
+        console.error("ERRO DETALHADO NO SERVIDOR:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// - - ROTA PARA REGISTRAR ENTRADA DE CHAPAS E ATUALIZAR ESTOQUE - - //
+app.post('/api/registrar-entrada', async (req, res) => {
+
+    console.log("DADOS RECEBIDOS:", req.body); 
+    
+    const { onda, comprimento, largura, fornecedor, quantidade, usuario } = req.body;
+
+    try {
+        // Tentar encontrar se essa chapa já existe no estoque
+        const check = await pool.query(
+            'SELECT id, quantidade FROM chapas WHERE onda = $1 AND comprimento = $2 AND largura = $3 AND fornecedor = $4',
+            [onda, comprimento, largura, fornecedor]
+        );
+
+        if (check.rows.length > 0) {
+            // Se existe, soma a quantidade (Atualiza)
+            await pool.query(
+                'UPDATE chapas SET quantidade = quantidade + $1 WHERE id = $2',
+                [quantidade, check.rows[0].id]
+            );
+        } else {
+            // Se não existe, insere uma nova chapa
+            await pool.query(
+                'INSERT INTO chapas (onda, comprimento, largura, fornecedor, quantidade) VALUES ($1, $2, $3, $4, $5)',
+                [onda, comprimento, largura, fornecedor, quantidade]
+            );
+        }
+
+        // 2. Registra o histórico na nova tabela 'entrada_chapas' que você criou
+        await pool.query(
+            'INSERT INTO entrada_chapas (usuario, onda, comprimento, largura, fornecedor, quantidade) VALUES ($1, $2, $3, $4, $5, $6)',
+            [usuario, onda, comprimento, largura, fornecedor, quantidade]
+        );
+
+        // 3. Registra na tabela de movimentações para o histórico geral
+        await pool.query(
+            'INSERT INTO movimentacoes (tipo, descricao, usuario, data) VALUES ($1, $2, $3, NOW())',
+            ['Entrada', `Recebimento de ${quantidade} chapas ${onda} - ${fornecedor}`, usuario]
+        );
+
+        res.json({ success: true, message: "Entrada registrada com sucesso!" });
+    } catch (err) {
+        console.error("ERRO NO REGISTRO:", err);
+        res.status(500).json({ success: false, message: "Erro ao registrar no banco." });
+    }
+});
 
 app.listen(3000, () => {
     logger("info", "✅ Servidor J&E rodando na porta 3000 com prefixo public.");

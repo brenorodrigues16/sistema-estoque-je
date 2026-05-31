@@ -2,22 +2,16 @@
 <html lang="pt-BR">
 <head>
     <script>
-    const temaSalvo = localStorage.getItem('tema') || 'claro';
-    document.documentElement.setAttribute('data-theme', temaSalvo);
+        const temaSalvo = localStorage.getItem('tema') || 'claro';
+        document.documentElement.setAttribute('data-theme', temaSalvo);
     </script>
     
     <script>
+        // -- FORÇA LOGIN -- //
         if (localStorage.getItem('logado') !== 'true') {
             window.location.href = 'login.html';
         }
     </script>
-
-<script>
-    // - - FORCA LOGIN - - //
-    if (localStorage.getItem('logado') !== 'true') {
-        window.location.href = 'login.html'; 
-    }
-</script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,28 +49,30 @@
                         <i class="fas fa-user"></i> Perfil
                     </li>
                     <li class="menu-item" onclick="window.location.href='expedicao.html'">
-                        <i class="fas fa-truck"></i> Expedição
+                        <i class="fas fa-clipboard-list"></i> Expedição
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='entrada_chapas.html'">
+                        <i class="fas fa-truck-loading"></i> Entrada de Chapas
                     </li>
                 </ul>
             </nav>
-                    
-        <div class="sidebar-footer">
-        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 0 20px;">
-            <div class="user-info">
-            <div class="avatar">U</div>
-            <div>
-                <p class="username">Usuário</p>
-                <p class="role">administrador</p>
+                
+            <div class="sidebar-footer">
+                <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 0 20px;">
+                <div class="user-info">
+                    <div class="avatar">U</div>
+                    <div>
+                        <p class="username">Usuário</p>
+                        <p class="role">administrador</p>
+                    </div>
+                </div>
+
+                <div class="logout-container">
+                    <button onclick="fazerLogout()" class="btn-logout-red">
+                        <i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA
+                    </button>
+                </div>
             </div>
-        </div>
-
-        <div class="logout-container">
-            <button onclick="fazerLogout()" class="btn-logout-red">
-                <i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA
-            </button>
-        </div>
-    </div>
-
         </aside>
 
         <main class="content">
@@ -86,70 +82,66 @@
             </header>
 
             <section class="cards-grid">
-    <div class="card blue">
-        <i class="fas fa-layer-group"></i>
-        <div class="card-info">
-            <h3><span id="estoque-valor">0</span></h3>
-            <p>ESTOQUE TOTAL DE CHAPAS</p>
-        </div>
-    </div>
+                <div class="card blue">
+                    <i class="fas fa-layer-group"></i>
+                    <div class="card-info">
+                        <h3><span id="estoque-valor">0</span></h3>
+                        <p>ESTOQUE TOTAL DE CHAPAS</p>
+                    </div>
+                </div>
 
-    <div class="card black">
-        <i class="fas fa-truck"></i>
-        <div class="card-info">
-            <h3><span id="chapas-recebidas-valor">0</span></h3>
-            <p>ENTRADA DE CHAPAS HOJE</p>
-        </div>
-    </div>
+                <div class="card black">
+                    <i class="fas fa-truck"></i>
+                    <div class="card-info">
+                        <h3><span id="chapas-recebidas-valor">0</span></h3>
+                        <p>ENTRADA DE CHAPAS HOJE</p>
+                    </div>
+                </div>
 
-    <div class="card red" id="card-alerta-critico">
-        <i class="fas fa-exclamation-triangle"></i>
-        <div class="card-info">
-            <h3><span id="alertas-chapas-valor">0</span></h3>
-            <p>ALERTAS DE ESTOQUE DE CHAPAS BAIXO</p>
-        </div>
-    </div>
-</section>
+                <div class="card red" id="card-alerta-critico">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="card-info">
+                        <h3><span id="alertas-chapas-valor">0</span></h3>
+                        <p>ALERTAS DE ESTOQUE DE CHAPAS BAIXO</p>
+                    </div>
+                </div>
+            </section>
 
             <section class="cards-grid">
                 <div class="card blue">
                     <i class="fas fa-boxes"></i>
                     <div class="card-info">
-                    <h3><span id="producao-caixas-valor">0</span></h3>
-                    <p>ESTOQUE DE CAIXAS</p>
+                        <h3><span id="estoque-caixas-valor">0</span></h3>
+                        <p>ESTOQUE DE CAIXAS</p>
                     </div>
                 </div>
 
                 <div class="card green">
                     <i class="fas fa-industry"></i>
                     <div class="card-info">
-                         <h3><span id="alertas-caixas-valor">0</span></h3>
-                         <p>CAIXAS PRODUZIDAS HOJE</p>
+                        <h3><span id="producao-caixas-valor">0</span></h3>
+                        <p>CAIXAS PRODUZIDAS HOJE</p>
                     </div>
                 </div>
-           
-            <div class="card red" id="card-alerta critico">
-                <i class="fas fa-exclamation-triangle"></i>
-                <div class="card-info">
-                  <h3><span id="alertas-caixas-valor">0</span></h3>      
-                  <p>ALERTA DE ESTOQUE DE CAIXAS BAIXO</p>
+            
+                <div class="card red" id="card-alerta-critico">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="card-info">
+                        <h3><span id="alertas-caixas-valor">0</span></h3>      
+                        <p>ALERTA DE ESTOQUE DE CAIXAS BAIXO</p>
+                    </div>
                 </div>
-            </div>
             </section>
 
             <section class="stats-container" style="display: flex; gap: 20px; margin-top: 20px; flex-grow: 1; min-height: 0;">
-    
-               <div class="chart-placeholder" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); flex: 1; display: flex; flex-direction: column; min-height: 0;">
-                   <h4 style="margin-bottom: 20px;"><i class="fas fa-chart-line"></i> Estoque atual de chapas</h4>
-        
-                   <div id="container-progresso" style="overflow-y: auto; flex-grow: 1; padding-right: 5px; min-height: 0;"></div>
-        
-                   <canvas id="graficoEstoque" style="max-height: 250px; margin-top: 15px; width: 100% !important; height: auto !important;"></canvas>
+                <div class="chart-placeholder" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); flex: 1; display: flex; flex-direction: column; min-height: 0;">
+                    <h4 style="margin-bottom: 20px;"><i class="fas fa-chart-line"></i> Estoque atual de chapas</h4>
+                    <div id="container-progresso" style="overflow-y: auto; flex-grow: 1; padding-right: 5px; min-height: 0;"></div>
+                    <canvas id="graficoEstoque" style="max-height: 250px; margin-top: 15px; width: 100% !important; height: auto !important;"></canvas>
                 </div>
     
                 <div class="chart-placeholder" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); flex: 1; display: flex; flex-direction: column; min-height: 0;">
                     <h4 style="margin-bottom: 20px;"><i class="fas fa-bell"></i> Avisos Rápidos</h4>
-        
                     <div id="container-avisos" style="overflow-y: auto; flex-grow: 1; padding-right: 5px; min-height: 0;">
                         <p style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #666;">Carregando avisos...</p>
                     </div>
@@ -158,186 +150,156 @@
         </main>
     </div>
 
-        <script>
-    function atualizarRelogio() {
-        const elementoData = document.getElementById('data-atual');
-        const elementoHora = document.getElementById('hora-atualizacao');
-        const agora = new Date();
-        const opcoesData = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-        if (elementoData) elementoData.innerText = agora.toLocaleDateString('pt-BR', opcoesData);
-        if (elementoHora) elementoHora.innerText = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    }
+    <script>
+        function atualizarRelogio() {
+            const elementoData = document.getElementById('data-atual');
+            const agora = new Date();
+            const opcoesData = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            if (elementoData) elementoData.innerText = agora.toLocaleDateString('pt-BR', opcoesData);
+        }
 
-   
- let meuGrafico;
+        let meuGrafico;
 
-async function carregarDashboard() {
-    try {
-        const respostaStats = await fetch('http://localhost:3000/dashboard-stats');
-        const stats = await respostaStats.json();
+        async function carregarDashboard() {
+            try {
+                const respostaStats = await fetch('http://localhost:3000/dashboard-stats');
+                const stats = await respostaStats.json();
 
-        const elementos = {
-            'estoque-valor': `${Number(stats.estoqueChapas || 0).toLocaleString()} un`,
-            'chapas-recebidas-valor': `${Number(stats.chapasRecebidasHoje || 0).toLocaleString()} un`,
-            'alertas-chapas-valor': stats.alertasCriticosChapas || 0,
-            'producao-caixas-valor': `${Number(stats.producaoHoje || 0).toLocaleString()} un`,
-            'alertas-caixas-valor': stats.alertasCriticosCaixas || 0
-        };
+                const elementos = {
+                    'estoque-valor': `${Number(stats.estoqueChapas || 0).toLocaleString()} un`,
+                    'chapas-recebidas-valor': `${Number(stats.chapasRecebidasHoje || 0).toLocaleString()} un`,
+                    'alertas-chapas-valor': stats.alertasCriticosChapas || 0,
+                    'producao-caixas-valor': `${Number(stats.producaoHoje || 0).toLocaleString()} un`,
+                    'alertas-caixas-valor': stats.alertasCriticosCaixas || 0
+                };
 
-        Object.keys(elementos).forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.innerText = elementos[id];
-            }
-        });
+                Object.keys(elementos).forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.innerText = elementos[id];
+                });
 
-        const respostaChapas = await fetch('http://localhost:3000/dados');
-        const dadosChapas = await respostaChapas.json();
+                const respostaChapas = await fetch('http://localhost:3000/dados');
+                const dadosChapas = await respostaChapas.json();
 
-        const container = document.getElementById('container-progresso');
-        const containerAvisos = document.getElementById('container-avisos');
-        
-        if (container) container.innerHTML = '';
-        if (containerAvisos) containerAvisos.innerHTML = '';
+                const container = document.getElementById('container-progresso');
+                const containerAvisos = document.getElementById('container-avisos');
+                
+                if (container) container.innerHTML = '';
+                if (containerAvisos) containerAvisos.innerHTML = '';
 
-        const labelsGrafico = [];
-        const valoresGrafico = [];
+                const labelsGrafico = [];
+                const valoresGrafico = [];
 
-        if (dadosChapas.chapas && dadosChapas.chapas.length > 0) {
-            dadosChapas.chapas.forEach(item => {
-                const qtd = Number(item.quantidade) || 0;
-                labelsGrafico.push(item.onda);
-                valoresGrafico.push(qtd);
+                if (dadosChapas.chapas && dadosChapas.chapas.length > 0) {
+                    dadosChapas.chapas.forEach(item => {
+                        const qtd = Number(item.quantidade) || 0;
+                        labelsGrafico.push(item.onda);
+                        valoresGrafico.push(qtd);
 
-                let porcentagem = (qtd / 100000) * 100;
-                if (porcentagem > 100) porcentagem = 100;
+                        let porcentagem = (qtd / 100000) * 100;
+                        if (porcentagem > 100) porcentagem = 100;
 
-                if (container) {
-                    container.innerHTML += `
-                        <div class="progress-item" style="margin-bottom: 20px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <strong>${item.onda}</strong>
-                                <span>${qtd.toLocaleString()} un</span>
-                            </div>
-                            <div style="background: #eee; height: 8px; border-radius: 10px; width: 100%; overflow: hidden;">
-                                <div style="background: var(--accent-blue); width: ${porcentagem}%; height: 100%; transition: width 0.8s ease-in-out;"></div>
-                            </div>
-                        </div>`;
+                        if (container) {
+                            container.innerHTML += `
+                                <div class="progress-item" style="margin-bottom: 20px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <strong>${item.onda}</strong>
+                                        <span>${qtd.toLocaleString()} un</span>
+                                    </div>
+                                    <div style="background: #eee; height: 8px; border-radius: 10px; width: 100%; overflow: hidden;">
+                                        <div style="background: var(--accent-blue); width: ${porcentagem}%; height: 100%; transition: width 0.8s ease-in-out;"></div>
+                                    </div>
+                                </div>`;
+                        }
+
+                        if (qtd <= 500 && containerAvisos) {
+                            containerAvisos.innerHTML += `
+                                <p style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: var(--accent-red); font-weight: bold;">
+                                    • Estoque de ${item.onda} crítico: apenas ${qtd.toLocaleString()} un.
+                                </p>`;
+                        }
+                    });
+                    renderizarGrafico(labelsGrafico, valoresGrafico);
                 }
 
-                if (qtd <= 500 && containerAvisos) {
-                    containerAvisos.innerHTML += `
-                        <p style="padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: var(--accent-red); font-weight: bold;">
-                            • Estoque de ${item.onda} crítico: apenas ${qtd.toLocaleString()} un.
-                        </p>`;
+                if (containerAvisos && containerAvisos.innerHTML === '') {
+                    containerAvisos.innerHTML = '<p style="color: var(--accent-green);">• Todas as ondas com estoque saudável.</p>';
+                }
+
+                atualizarRelogio();
+            } catch (erro) {
+                console.error('Erro ao carregar dashboard:', erro);
+            }
+        }
+
+        function renderizarGrafico(labels, valores) {
+            const ctx = document.getElementById('graficoEstoque');
+            if (!ctx) return;
+            if (meuGrafico) meuGrafico.destroy();
+
+            meuGrafico = new Chart(ctx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#e67e22', '#9b59b6', '#1abc9c'],
+                        borderWidth: 2,
+                        borderColor: document.documentElement.getAttribute('data-theme') === 'dark' ? '#1e1e1e' : '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'bottom', 
+                            labels: { 
+                                color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#e0e0e0' : '#333', 
+                                font: { weight: 'bold' } 
+                            } 
+                        }
+                    },
+                    cutout: '70%'
                 }
             });
-
-            renderizarGrafico(labelsGrafico, valoresGrafico);
         }
 
-        if (containerAvisos && containerAvisos.innerHTML === '') {
-            containerAvisos.innerHTML = '<p style="color: var(--accent-green);">• Todas as ondas com estoque saudável.</p>';
-        }
-
-        if (typeof atualizarRelogio === "function") {
-            atualizarRelogio();
-        }
-
-    } catch (erro) {
-        console.error('Erro ao carregar dashboard:', erro);
-    }
-}
-
-function renderizarGrafico(labels, valores) {
-    const ctx = document.getElementById('graficoEstoque');
-    if (!ctx) return;
-
-    if (meuGrafico) {
-        meuGrafico.destroy();
-    }
-
-    meuGrafico = new Chart(ctx.getContext('2d'), {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: valores,
-                backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#e67e22', '#9b59b6', '#1abc9c'],
-                borderWidth: 2,
-                borderColor: document.documentElement.getAttribute('data-theme') === 'dark' ? '#1e1e1e' : '#ffffff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { 
-                    position: 'bottom', 
-                    labels: { 
-                        color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#e0e0e0' : '#333', 
-                        font: { weight: 'bold' } 
-                    } 
+        function fazerLogout() {
+            Swal.fire({
+                title: 'Deseja sair?',
+                text: "Sua sessão será encerrada.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, sair!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.clear(); 
+                    window.location.href = 'login.html'; 
                 }
-            },
-            cutout: '70%'
+            });
         }
-    });
-}
 
-    // - - CONFIGURACAO DE LOGIN E LOGOUT - - //
+        window.onload = () => {
+            carregarDashboard();
+            setInterval(atualizarRelogio, 60000);
+            setInterval(carregarDashboard, 300000); 
+        };
 
-    function fazerLogout() {
-    Swal.fire({
-        title: 'Deseja sair?',
-        text: "Sua sessão será encerrada.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#e74c3c',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Sim, sair!',
-        cancelButtonText: 'Cancelar'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            localStorage.clear(); 
-            window.location.href = 'login.html'; 
-        }
-    });
-}
+        window.addEventListener('DOMContentLoaded', () => {
+            const nomeUsuario = localStorage.getItem('usuario');
+            const cargoUsuario = localStorage.getItem('cargo');
+            const elementoNome = document.querySelector('.username');
+            const elementoCargo = document.querySelector('.role');
+            const elementoAvatar = document.querySelector('.avatar');
 
-    window.onload = () => {
-        carregarDashboard();
-        setInterval(atualizarRelogio, 60000);
-        // Dica: atualizar o dashboard a cada 5 min também é bom
-        setInterval(carregarDashboard, 300000); 
-    };
-
-window.addEventListener('DOMContentLoaded', () => {
-    // Busca os dados salvos no momento do login
-    const nomeUsuario = localStorage.getItem('usuario');
-    const cargoUsuario = localStorage.getItem('cargo');
-
-    // Seleciona os elementos pelas classes que você já tem no HTML
-    const elementoNome = document.querySelector('.username');
-    const elementoCargo = document.querySelector('.role');
-    const elementoAvatar = document.querySelector('.avatar');
-
-    if (nomeUsuario && elementoNome) {
-        elementoNome.innerText = nomeUsuario;
-    }
-
-    if (cargoUsuario && elementoCargo) {
-        elementoCargo.innerText = cargoUsuario;
-    }
-
-    // Bônus: Muda a letra do Avatar para a primeira letra do nome do usuário
-    if (nomeUsuario && elementoAvatar) {
-        elementoAvatar.innerText = nomeUsuario.charAt(0).toUpperCase();
-    }
-});
-
-    
-</script>
-    
+            if (nomeUsuario && elementoNome) elementoNome.innerText = nomeUsuario;
+            if (cargoUsuario && elementoCargo) elementoCargo.innerText = cargoUsuario;
+            if (nomeUsuario && elementoAvatar) elementoAvatar.innerText = nomeUsuario.charAt(0).toUpperCase();
+        });
+    </script>
 </body>
 </html>

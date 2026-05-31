@@ -611,3 +611,40 @@ body, html {
     overflow-y: auto; 
     background-color: #f4f7f6;
 }
+
+/* Organiza os campos lado a lado */
+.form-row {
+    display: flex;
+    flex-wrap: wrap; /* Quebra para baixo se a tela for pequena */
+    gap: 15px;      /* Espaço entre os campos */
+    margin-bottom: 20px;
+}
+
+.form-row input {
+    flex: 1;         /* Faz todos os inputs terem o mesmo tamanho */
+    min-width: 150px; /* Garante que não fiquem pequenos demais */
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+/* Estilo do Botão Verde Profissional */
+.btn-verde {
+    background-color: #27ae60; /* Verde sólido */
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+}
+
+.btn-verde:hover {
+    background-color: #219150; /* Verde mais escuro ao passar o mouse */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}

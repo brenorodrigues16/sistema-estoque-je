@@ -213,14 +213,12 @@
             reg.style.display = reg.style.display === 'none' ? 'block' : 'none';
         }
 
-        // LÓGICA DE LOGIN
-       // LÓGICA DE LOGIN
+      // LÓGICA DE LOGIN NO LOGIN
 document.getElementById('form-login').addEventListener('submit', async (e) => {
     e.preventDefault();
-    
-    // 1. CAPTURE OS VALORES DOS INPUTS AQUI
-    const usuario = document.getElementById('user').value;
-    const senha = document.getElementById('pass').value;
+
+    const usuario = document.getElementById('user').value.trim();
+    const senha = document.getElementById('pass').value.trim();
 
     const btn = e.target.querySelector('button');
     const btnOriginalText = btn.innerText;
@@ -231,34 +229,31 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
         const resposta = await fetch('http://localhost:3000/login', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            // Agora 'usuario' e 'senha' existem!
             body: JSON.stringify({ usuario, senha }) 
         });
-        // ... resto do código
 
-                const dados = await resposta.json();
+        const dados = await resposta.json();
 
-                if (resposta.ok) {
-                    localStorage.setItem('logado', 'true');
-                    localStorage.setItem('usuario', dados.nome);
-                    localStorage.setItem('cargo', dados.cargo);
-                    window.location.href = 'index.html';
-                } else {
-                    Swal.fire({
-                        icon: resposta.status === 403 ? 'info' : 'error',
-                        title: resposta.status === 403 ? 'Acesso em Análise' : 'Falha no Login',
-                        text: dados.message,
-                        confirmButtonColor: '#3498db'
-                    });
-                }
-                
-            } catch (error) {
-                Swal.fire('Erro', 'Não foi possível conectar ao servidor.', 'error');
-            } finally {
-                btn.innerText = btnOriginalText;
-                btn.disabled = false;
-            }
-        });
+        if (resposta.ok) {
+            localStorage.setItem('logado', 'true');
+            localStorage.setItem('usuario', dados.nome);
+            localStorage.setItem('cargo', dados.cargo);
+            window.location.href = 'index.html';
+        } else {
+            Swal.fire({
+                icon: resposta.status === 403 ? 'info' : 'error',
+                title: resposta.status === 403 ? 'Acesso em Análise' : 'Falha no Login',
+                text: dados.message,
+                confirmButtonColor: '#3498db'
+            });
+        }
+    } catch (error) {
+        Swal.fire('Erro', 'Não foi possível conectar ao servidor.', 'error');
+    } finally {
+        btn.innerText = btnOriginalText;
+        btn.disabled = false;
+    }
+});
 
         // LÓGICA DE REGISTRO
         document.getElementById('form-register').addEventListener('submit', async (e) => {

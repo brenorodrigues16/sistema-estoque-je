@@ -35,7 +35,8 @@
                     <li class="menu-item" onclick="window.location.href='producao.html'"><i class="fas fa-industry"></i> Produção</li>
                     <li class="menu-item" onclick="window.location.href='movimentacoes.html'"><i class="fas fa-exchange-alt"></i> Movimentações</li>
                     <li class="menu-item" onclick="window.location.href='perfil.html'"><i class="fas fa-user"></i> Perfil</li>
-                    <li class="menu-item" onclick="window.location.href='expedicao.html'"><i class="fas fa-truck"></i> Expedição</li>
+                    <li class="menu-item" onclick="window.location.href='expedicao.html'"><i class="fas fa-clipboard-list"></i> Expedição</li>
+                    <li class="menu-item" onclick="window.location.href='entrada_chapas.html'"><i class="fas fa-truck-loading"></i> Entrada de Chapas</li>
                 </ul>
             </nav>
             
@@ -93,6 +94,7 @@
 
     <script>
         const API_BASE = 'http://localhost:3000';
+        const usuarioLogado = localStorage.getItem('usuario') || 'Sistema';
 
         async function carregarChapas() {
             try {
@@ -107,8 +109,7 @@
                     const comp = chapa.comprimento ?? 0;
                     const larg = chapa.largura ?? 0;
                     const fornecedor = chapa.fornecedor || 'Não informado';
-                    const estoqueBaixo = chapa.quantidade <= 100; // Define o que é estoque baixo
-                    
+                    const estoqueBaixo = chapa.quantidade <= 100;
                     const classeQtd = estoqueBaixo ? 'qtd-baixa' : 'qtd-ok';
 
                     const linha = `
@@ -128,92 +129,64 @@
                         </tr>`;
                     tabelaCorpo.innerHTML += linha;
                 });
-            } catch (erro) {
-                console.error("Erro ao carregar tabela:", erro);
-            }
+            } catch (erro) { console.error("Erro ao carregar tabela:", erro); }
         }
 
         function filtrarTabela() {
             const textoBusca = document.getElementById('input-busca').value.toLowerCase();
             const linhas = document.querySelectorAll('#tabela-chapas tr');
-
             linhas.forEach(linha => {
                 const textoLinha = linha.innerText.toLowerCase();
                 linha.style.display = textoLinha.includes(textoBusca) ? "" : "none";
             });
         }
 
-       async function abrirAjuste(onda, qtdAtual, id, compAtual, largAtual, fornecedorAtual) {
-    try {
-        const respF = await fetch(`${API_BASE}/fornecedores`);
-        const fornecedores = await respF.json();
-        let opcoesHtml = fornecedores.map(f => 
-            `<option value="${f.nome}" ${f.nome === fornecedorAtual ? 'selected' : ''}>${f.nome}</option>`
-        ).join('');
+        async function abrirAjuste(onda, qtdAtual, id, compAtual, largAtual, fornecedorAtual) {
+            try {
+                const respF = await fetch(`${API_BASE}/fornecedores`);
+                const fornecedores = await respF.json();
+                let opcoesHtml = fornecedores.map(f => `<option value="${f.nome}" ${f.nome === fornecedorAtual ? 'selected' : ''}>${f.nome}</option>`).join('');
 
-        const { value: formValues } = await Swal.fire({
-            title: `Ajustar Chapa`,
-            html: `
-                <div class="swal-container-custom" style="display: flex; flex-direction: column; text-align: left;">
-                    <label class="swal-label">Tipo de Onda</label>
-                    <input id="edit-onda-input" class="swal2-input" type="text" 
-                           value="${onda.toUpperCase()}" 
-                           oninput="this.value = this.value.toUpperCase()">
+                const { value: formValues } = await Swal.fire({
+                    title: `Ajustar Chapa`,
+                    html: `
+                        <div class="swal-container-custom" style="display: flex; flex-direction: column; text-align: left;">
+                            <label class="swal-label">Tipo de Onda:</label>
+                            <input id="edit-onda-input" class="swal2-input" value="${onda.toUpperCase()}" oninput="this.value = this.value.toUpperCase()">
+                            <label class="swal-label">Quantidade em Estoque:</label>
+                            <input id="edit-qtd" class="swal2-input" type="number" value="${qtdAtual}">
+                            <label class="swal-label">Comprimento (mm):</label>
+                            <input id="edit-comp" class="swal2-input" type="number" value="${compAtual}">
+                            <label class="swal-label">Largura (mm):</label>
+                            <input id="edit-larg" class="swal2-input" type="number" value="${largAtual}">
+                            <label class="swal-label">Fornecedor:</label>
+                            <select id="edit-forn" class="swal2-input">${opcoesHtml}</select>
+                        </div>`,
+                    preConfirm: () => {
+                        return {
+                            onda: document.getElementById('edit-onda-input').value.trim().toUpperCase(),
+                            novaQuantidade: Number(document.getElementById('edit-qtd').value),
+                            novoComprimento: Number(document.getElementById('edit-comp').value),
+                            novaLargura: Number(document.getElementById('edit-larg').value),
+                            novoFornecedor: document.getElementById('edit-forn').value,
+                            responsavel: usuarioLogado
+                     }
+                   }
+                });
 
-                    <label class="swal-label">Quantidade em Estoque</label>
-                    <input id="edit-qtd" class="swal2-input" type="number" value="${qtdAtual}">
-                    
-                    <label class="swal-label">Comprimento (mm)</label>
-                    <input id="edit-comp" class="swal2-input" type="number" value="${compAtual}">
-                    
-                    <label class="swal-label">Largura (mm)</label>
-                    <input id="edit-larg" class="swal2-input" type="number" value="${largAtual}">
-                    
-                    <label class="swal-label">Fornecedor</label>
-                    <select id="edit-forn" class="swal2-input">
-                        ${opcoesHtml}
-                    </select>
-                </div>
-            `,
-            focusConfirm: false,
-            showCancelButton: true,
-            confirmButtonText: 'Salvar Alterações',
-            preConfirm: () => {
-                // DECLARANDO as variáveis corretamente para evitar o erro "is not defined"
-                const ondaInput = document.getElementById('edit-onda-input').value;
-                const qtdInput = document.getElementById('edit-qtd').value;
-                const compInput = document.getElementById('edit-comp').value;
-                const largInput = document.getElementById('edit-larg').value;
-                const fornInput = document.getElementById('edit-forn').value;
-
-                return {
-                    onda: ondaInput.trim().toUpperCase(), // Força maiúsculo aqui também
-                    novaQuantidade: Number(qtdInput),
-                    novoComprimento: Number(compInput),
-                    novaLargura: Number(largInput),
-                    novoFornecedor: fornInput
+                if (formValues) {
+                    const response = await fetch(`${API_BASE}/ajustar-estoque`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: id, ...formValues })
+                    });
+                    if (response.ok) {
+                        Swal.fire('Sucesso!', 'Dados atualizados.', 'success');
+                        carregarChapas();
+                    }
                 }
-            }
-        });
-
-        if (formValues) {
-            const response = await fetch(`${API_BASE}/ajustar-estoque`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: id, ...formValues })
-            });
-
-            if (response.ok) {
-                Swal.fire('Sucesso!', 'Dados atualizados.', 'success');
-                carregarChapas();
-            } else {
-                Swal.fire('Erro', 'O servidor não processou a alteração.', 'error');
-            }
+            } catch (err) { console.error("Erro:", err); }
         }
-    } catch (err) {
-        console.error("Erro:", err);
-    }
-}
 
         document.querySelector('.btn-add').onclick = async () => {
             try {
@@ -223,22 +196,20 @@
 
                 const { value: formValues } = await Swal.fire({
                     title: 'Nova Entrada de Chapa',
-                    html:
-                        '<input id="swal-onda" class="swal2-input" placeholder="Onda (ex: B, BC, C)">' +
-                        '<select id="swal-forn" class="swal2-input"><option value="" disabled selected>Escolha o Fornecedor</option>' + opcoesHtml + '</select>' +
-                        '<input id="swal-comp" class="swal2-input" type="number" placeholder="Comprimento (mm)">' +
-                        '<input id="swal-larg" class="swal2-input" type="number" placeholder="Largura (mm)">' +
-                        '<input id="swal-qtd" class="swal2-input" type="number" placeholder="Quantidade inicial">',
+                    html: `
+                        <input id="swal-onda" class="swal2-input" placeholder="Onda (ex: B, BC, C)">
+                        <select id="swal-forn" class="swal2-input"><option value="" disabled selected>Escolha o Fornecedor</option>${opcoesHtml}</select>
+                        <input id="swal-comp" class="swal2-input" type="number" placeholder="Comprimento (mm)">
+                        <input id="swal-larg" class="swal2-input" type="number" placeholder="Largura (mm)">
+                        <input id="swal-qtd" class="swal2-input" type="number" placeholder="Quantidade inicial">`,
                     preConfirm: () => {
-                        const forn = document.getElementById('swal-forn').value;
-                        const onda = document.getElementById('swal-onda').value;
-                        if (!forn || !onda) return Swal.showValidationMessage('Onda e Fornecedor são obrigatórios!');
                         return {
-                            onda: onda.toUpperCase().startsWith('ONDA') ? onda.toUpperCase() : 'ONDA ' + onda.toUpperCase(),
-                            fornecedor: forn,
+                            onda: document.getElementById('swal-onda').value.toUpperCase(),
+                            fornecedor: document.getElementById('swal-forn').value,
                             comprimento: Number(document.getElementById('swal-comp').value),
                             largura: Number(document.getElementById('swal-larg').value),
-                            quantidade: Number(document.getElementById('swal-qtd').value)
+                            quantidade: Number(document.getElementById('swal-qtd').value),
+                            responsavel: usuarioLogado
                         };
                     }
                 });
@@ -260,9 +231,13 @@
         function fazerLogout() {
             Swal.fire({
                 title: 'Deseja sair?',
+                text: "Sua sessão será encerrada.",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Sim, sair'
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, sair!',
+                cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {
                     localStorage.clear(); 
@@ -276,9 +251,7 @@
             const elData = document.getElementById('data-atual');
             if (elData) elData.innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
             document.getElementById('input-busca').addEventListener('input', filtrarTabela);
-        };
-
-        window.addEventListener('DOMContentLoaded', () => {
+            
             const user = localStorage.getItem('usuario');
             const cargo = localStorage.getItem('cargo');
             if (user) {
@@ -286,7 +259,7 @@
                 document.querySelector('.avatar').innerText = user.charAt(0).toUpperCase();
             }
             if (cargo) document.querySelector('.role').innerText = cargo;
-        });
+        };
     </script>
 </body>
 </html>

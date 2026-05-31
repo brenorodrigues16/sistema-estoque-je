@@ -48,7 +48,10 @@
                         <i class="fas fa-user"></i> Perfil
                     </li>
                     <li class="menu-item" onclick="window.location.href='expedicao.html'">
-                        <i class="fas fa-truck"></i> Expedição
+                        <i class="fas fa-clipboard-list"></i> Expedição
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='entrada_chapas.html'">
+                        <i class="fas fa-truck-loading"></i> Entrada de Chapas
                     </li>
                 </ul>
             </nav>
@@ -118,6 +121,7 @@
 
     <script>
         const API_BASE = 'http://localhost:3000/api';
+        const usuarioLogado = localStorage.getItem('usuario') || 'Sistema';
 
         async function carregarCaixas() {
             try {
@@ -128,7 +132,6 @@
 
                 caixas.forEach(caixa => {
                     const dataFormatada = caixa.data_fabricacao.split('T')[0].split('-').reverse().join('/');
-                    
                     const linha = `
                         <tr data-id="${caixa.id}">
                             <td><strong>${caixa.cliente.toUpperCase()}</strong></td>
@@ -139,7 +142,8 @@
                             <td>${dataFormatada}</td>
                             <td><strong>${caixa.responsavel}</strong></td>
                             <td style="text-align: center;">
-                                <button class="btn-ajuste" onclick="editarCaixa(${caixa.id}, '${caixa.cliente}', '${caixa.codigo}', ${caixa.quantidade}, '${caixa.data_fabricacao}', '${caixa.responsavel}')">
+                                <button class="btn-ajuste" 
+                                    onclick="editarCaixa(${caixa.id}, '${caixa.cliente}', '${caixa.codigo}', ${caixa.quantidade}, '${caixa.data_fabricacao}', '${caixa.responsavel}')">
                                     <i class="fas fa-edit"></i>
                                 </button>
                             </td>
@@ -153,102 +157,78 @@
             const { value: formValues } = await Swal.fire({
                 title: 'Registrar Nova Caixa',
                 html: `
-                    <label style="display:block; text-align:left; margin-left:40px;">Cliente:</label>
-                    <input id="swal-cliente" class="swal2-input">
-                    <label style="display:block; text-align:left; margin-left:40px;">Código:</label>
-                    <input id="swal-codigo" class="swal2-input">
-                    <label style="display:block; text-align:left; margin-left:40px;">Quantidade:</label>
-                    <input id="swal-qtd" class="swal2-input" type="number">
-                    <label style="display:block; text-align:left; margin-left:40px;">Data de Fabricação:</label>
+                 <div class="swal-container-custom" style="display: flex; flex-direction: column; text-align: left;">
+                    <label class="swal-label">Nome do cliente:</label>
+                    <input id="swal-cliente" class="swal2-input" placeholder="Cliente">
+                    <label class="swal-label">Código Referência:</label>
+                    <input id="swal-codigo" class="swal2-input" placeholder="Código">
+                    <label class="swal-label">Quantidade:</label>
+                    <input id="swal-qtd" class="swal2-input" type="number" placeholder="Quantidade">
+                    <label class="swal-label">Data de Fabricação:</label>
                     <input id="swal-data" class="swal2-input" type="date">
-                    <label style="display:block; text-align:left; margin-left:40px;">Responsável:</label>
-                    <input id="swal-responsavel" class="swal2-input">`,
-                focusConfirm: false,
-                showCancelButton: true,
-                confirmButtonText: 'Confirmar Registro',
-                confirmButtonColor: '#27ae60',
+                    <label class="swal-label">Responsável:</label>
+                    <input id="swal-responsavel" class="swal2-input" value="${usuarioLogado}">
+                    </div>`,
                 preConfirm: () => {
-                    const values = {
+                    return {
                         cliente: document.getElementById('swal-cliente').value,
                         codigo: document.getElementById('swal-codigo').value,
                         quantidade: document.getElementById('swal-qtd').value,
                         data_fabricacao: document.getElementById('swal-data').value,
-                        responsavel: document.getElementById('swal-responsavel').value
+                        responsavel: usuarioLogado // Enviando o usuário logado
                     };
-                    if (!values.cliente || !values.codigo || !values.quantidade || !values.data_fabricacao || !values.responsavel) {
-                        Swal.showValidationMessage('Preencha todos os campos!');
-                        return false;
-                    }
-                    return values;
                 }
             });
 
             if (formValues) {
-                try {
-                    const response = await fetch(`${API_BASE}/caixas`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formValues)
-                    });
-                    const resData = await response.json();
-                    if (resData.success) {
-                        Swal.fire('Sucesso!', 'Caixa registrada.', 'success');
-                        carregarCaixas();
-                    }
-                } catch (erro) { console.error(erro); }
+                await fetch(`${API_BASE}caixas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formValues)
+                });
+                carregarCaixas();
             }
         }
 
         async function editarCaixa(id, clienteAt, codigoAt, qtdAt, dataAt, respAt) {
             const { value: formValues } = await Swal.fire({
-                title: 'Ajustar Registro de Caixa',
+                title: 'Ajustar Registro',
                 html: `
-                    <label style="display:block; text-align:left; margin-left:40px;">Cliente:</label>
+                <div class="swal-container-custom" style="display: flex; flex-direction: column; text-align: left;">
+                    <label class="swal-label">Nome do cliente:</label>
                     <input id="edit-cliente" class="swal2-input" value="${clienteAt}">
-                    <label style="display:block; text-align:left; margin-left:40px;">Código:</label>
+                    <label class="swal-label">Código Referência:</label>
                     <input id="edit-codigo" class="swal2-input" value="${codigoAt}">
-                    <label style="display:block; text-align:left; margin-left:40px;">Quantidade:</label>
+                    <label class="swal-label">Quantidade:</label>
                     <input id="edit-qtd" class="swal2-input" type="number" value="${qtdAt}">
-                    <label style="display:block; text-align:left; margin-left:40px; font-weight:bold;">Confirmar Nova Data:</label>
+                    <label class="swal-label">Data de Fabricação:</label><strong style="color: var(--accent-red); font-size: 18px;">Atenção: É Necessário atualizar a data para SALVAR o ajuste!</strong>
                     <input id="edit-data" class="swal2-input" type="date">
-                    <label style="display:block; text-align:left; margin-left:40px;">Responsável:</label>
-                    <input id="edit-resp" class="swal2-input" value="${respAt}">`,
-                showCancelButton: true,
-                confirmButtonText: 'Salvar Alterações',
-                confirmButtonColor: '#27ae60',
+                    <label class="swal-label">Responsável:</label><strong style="color: var(--accent-red); font-size: 12px;">Aqui não é necessário atualizar, o sistema ja faz o registro do responsável</strong>
+                    <input id="edit-responsavel" class="swal2-input" value="${respAt}" readonly>
+                    </div>`,
                 preConfirm: () => {
-                    const novaData = document.getElementById('edit-data').value;
-                    if (!novaData) {
-                        Swal.showValidationMessage('Confirme a data do ajuste!');
-                        return false;
-                    }
                     return {
                         id,
                         cliente: document.getElementById('edit-cliente').value,
                         codigo: document.getElementById('edit-codigo').value,
                         quantidade: document.getElementById('edit-qtd').value,
-                        data_fabricacao: novaData,
-                        responsavel: document.getElementById('edit-resp').value
+                        data_fabricacao: document.getElementById('edit-data').value,
+                        responsavel: usuarioLogado // Registrando quem editou
                     }
                 }
             });
 
             if (formValues) {
-                try {
-                    const response = await fetch(`${API_BASE}/caixas/editar`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formValues)
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        Swal.fire({ icon: 'success', title: 'Atualizado!', timer: 1500, showConfirmButton: false });
-                        carregarCaixas(); 
-                    }
-                } catch (erro) { console.error(erro); }
+                await fetch(`${API_BASE}/caixas/editar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formValues)
+                });
+                carregarCaixas();
             }
         }
 
+        // ... (resto do seu código original de filtro, logout e contexto mantidos)
         function filtrarCaixas() {
             const textoBusca = document.getElementById('input-busca').value.toLowerCase();
             const linhas = document.querySelectorAll('#tabela-corpo-caixas tr');
@@ -256,10 +236,23 @@
                 linha.style.display = linha.innerText.toLowerCase().includes(textoBusca) ? "" : "none";
             });
         }
-
-        function fazerLogout() {
-            Swal.fire({ title: 'Deseja sair?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c', confirmButtonText: 'Sim, sair!' })
-            .then((result) => { if (result.isConfirmed) { localStorage.clear(); window.location.href = 'login.html'; } });
+        
+         function fazerLogout() {
+            Swal.fire({
+                title: 'Deseja sair?',
+                text: "Sua sessão será encerrada.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, sair!',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.clear(); 
+                    window.location.href = 'login.html'; 
+                }
+            });
         }
 
         window.onload = () => {
@@ -267,13 +260,13 @@
             document.getElementById('input-busca').addEventListener('input', filtrarCaixas);
             document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
             
-            const nomeUsuario = localStorage.getItem('usuario');
-            const cargoUsuario = localStorage.getItem('cargo');
-            if (nomeUsuario) {
-                document.querySelector('.username').innerText = nomeUsuario;
-                document.querySelector('.avatar').innerText = nomeUsuario.charAt(0).toUpperCase();
+           const user = localStorage.getItem('usuario');
+            const cargo = localStorage.getItem('cargo');
+            if (user) {
+                document.querySelector('.username').innerText = user;
+                document.querySelector('.avatar').innerText = user.charAt(0).toUpperCase();
             }
-            if (cargoUsuario) document.querySelector('.role').innerText = cargoUsuario;
+            if (cargo) document.querySelector('.role').innerText = cargo;
         };
 
         let itemSelecionadoId = null;
@@ -293,11 +286,10 @@
         async function executarAcaoContexto(acao) {
             if (!itemSelecionadoId) return;
             if (acao === 'excluir') {
-                const confirm = await Swal.fire({ title: 'Excluir?', text: 'Essa ação é irreversível!', icon: 'warning', showCancelButton: true, confirmButtonColor: '#e74c3c' });
+                const confirm = await Swal.fire({ title: 'Excluir?', icon: 'warning', showCancelButton: true });
                 if (confirm.isConfirmed) {
-                    const resp = await fetch(`${API_BASE}/caixas/${itemSelecionadoId}`, { method: 'DELETE' });
-                    const res = await resp.json();
-                    if (res.success) { carregarCaixas(); Swal.fire('Deletado!', '', 'success'); }
+                    await fetch(`${API_BASE}/caixas/${itemSelecionadoId}`, { method: 'DELETE' });
+                    carregarCaixas();
                 }
             }
         }

@@ -15,7 +15,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Estoque - Movimentações</title>
+    <title>Papelão Estoque - Movimentações</title>
     <link rel="stylesheet" href="dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -65,7 +65,10 @@
                         <i class="fas fa-user"></i> Perfil
                     </li>
                     <li class="menu-item" onclick="window.location.href='expedicao.html'">
-                        <i class="fas fa-truck"></i> Expedição
+                        <i class="fas fa-clipboard-list"></i> Expedição
+                    </li>
+                    <li class="menu-item" onclick="window.location.href='entrada_chapas.html'">
+                        <i class="fas fa-truck-loading"></i> Entrada de Chapas
                     </li>
                 </ul>
             </nav>
@@ -132,7 +135,7 @@
             corpoTabela.innerHTML = '<tr><td colspan="5" style="text-align:center;">Carregando...</td></tr>';
 
             try {
-                const resposta = await fetch('http://localhost:3000/movimentacoes');
+                const resposta = await fetch('http://localhost:3000/api/movimentacoes');
                 
                 if (!resposta.ok) throw new Error('Falha ao buscar movimentações');
                 
@@ -145,20 +148,20 @@
                 }
 
                 dados.forEach(mov => {
-                    // Formata a data (ex: 20/05/2026 14:30)
                     const dataFormatada = new Date(mov.data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
                     
-                    // Lógica de cores: verde para entrada, vermelho para saída/produção
                     const tipoMaiusculo = (mov.tipo || '').toUpperCase();
                     const corTipo = tipoMaiusculo.includes('ENTRADA') ? '#2ecc71' : '#e74c3c';
-                    
+                    const quantidade = Number(mov.quantidade).toLocaleString();
+                    const responsavel = `${mov.responsavel || 'Sistema'}`;
+
                     corpoTabela.innerHTML += `
                         <tr>
                             <td>${dataFormatada}</td>
                             <td><span style="color: ${corTipo}; font-weight: bold;">${tipoMaiusculo}</span></td>
-                            <td>${mov.nome_produto || mov.onda || 'N/A'}</td>
+                            <td>${quantidade}</td>
                             <td>${Number(mov.quantidade).toLocaleString()} un</td>
-                            <td>${mov.usuario || 'Sistema'}</td>
+                            <td>${responsavel}</td>
                         </tr>
                     `;
                 });

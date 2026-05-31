@@ -1,0 +1,68 @@
+[27/05/2026, 17:14:41] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[27/05/2026, 17:34:27] [INFO] Dados recebidos para ajuste: {"id":22,"onda":"ONDA B","novaQuantidade":9000,"novoComprimento":1200,"novaLargura":1200,"novoFornecedor":"Suzano","responsavel":"Teste E-mail"}
+[27/05/2026, 18:56:28] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[27/05/2026, 19:09:47] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[27/05/2026, 19:12:05] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[27/05/2026, 19:16:14] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[27/05/2026, 19:21:25] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[27/05/2026, 19:23:55] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[27/05/2026, 20:35:02] [ERROR] Erro no servidor: invalid input syntax for type date: ""
+[27/05/2026, 20:35:11] [ERROR] Erro no servidor: invalid input syntax for type date: ""
+[27/05/2026, 20:35:26] [INFO] Dados recebidos para ajuste: {"id":22,"onda":"ONDA B","novaQuantidade":8000,"novoComprimento":1200,"novaLargura":1200,"novoFornecedor":"Suzano","responsavel":"Teste E-mail"}
+[27/05/2026, 20:35:36] [ERROR] Erro no servidor: invalid input syntax for type date: ""
+[27/05/2026, 20:35:47] [ERROR] Erro no servidor: invalid input syntax for type date: ""
+[27/05/2026, 20:36:47] [ERROR] Erro no servidor: invalid input syntax for type date: ""
+[27/05/2026, 20:38:10] [ERROR] Erro no servidor: invalid input syntax for type date: ""
+[27/05/2026, 20:46:41] [INFO] Dados recebidos para ajuste: {"id":27,"onda":"","novaQuantidade":0,"novoComprimento":0,"novaLargura":0,"novoFornecedor":"Geral","responsavel":"Teste E-mail"}
+[27/05/2026, 20:46:56] [ERROR] Erro ao adicionar caixa: invalid input syntax for type integer: ""
+[27/05/2026, 20:47:00] [ERROR] Erro ao adicionar caixa: invalid input syntax for type integer: ""
+[27/05/2026, 20:47:03] [ERROR] Erro ao adicionar caixa: invalid input syntax for type integer: ""
+[27/05/2026, 20:49:06] [INFO] Dados recebidos para ajuste: {"id":24,"onda":"ONDA BC","novaQuantidade":1000,"novoComprimento":1400,"novaLargura":1500,"novoFornecedor":"Suzano","responsavel":"Teste E-mail"}
+[27/05/2026, 21:05:20] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[27/05/2026, 21:05:42] [ERROR] Erro no servidor: invalid input syntax for type date: ""
+[27/05/2026, 21:06:16] [ERROR] Erro no servidor: invalid input syntax for type date: ""
+[27/05/2026, 21:23:34] [ERROR] Erro no servidor: invalid input syntax for type date: ""
+[27/05/2026, 21:23:50] [ERROR] Erro no servidor: invalid input syntax for type date: ""
+[28/05/2026, 17:30:28] [INFO] Tentativa de login: Teste
+[28/05/2026, 17:30:38] [INFO] Tentativa de login: Teste
+[28/05/2026, 21:07:23] [INFO] Tentativa de login: Teste
+[28/05/2026, 21:07:43] [INFO] Tentativa de login: Breninho
+[28/05/2026, 21:07:49] [INFO] Tentativa de login: Breninho
+[29/05/2026, 00:23:11] [INFO] Tentativa de login: Teste
+[29/05/2026, 00:23:22] [INFO] Tentativa de login: Teste
+[29/05/2026, 00:23:33] [INFO] Tentativa de login: Teste
+[29/05/2026, 00:44:51] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[29/05/2026, 00:45:12] [INFO] Tentativa de login: Teste
+[29/05/2026, 00:45:25] [INFO] Tentativa de login: testi
+[29/05/2026, 00:48:27] [INFO] Tentativa de login: Teste
+[29/05/2026, 00:48:50] [INFO] Tentativa de login: Teste
+[29/05/2026, 00:49:09] [INFO] Tentativa de login: Teste
+[29/05/2026, 00:49:26] [INFO] Tentativa de login: Teste
+[29/05/2026, 00:50:18] [INFO] Tentativa de login: Breninho
+[29/05/2026, 00:50:28] [INFO] Tentativa de login: Breninho
+[29/05/2026, 00:50:50] [INFO] Tentativa de login: Breninho
+[29/05/2026, 00:52:32] [INFO] Tentativa de login: Breninho
+[29/05/2026, 00:52:42] [INFO] Tentativa de login: Breninho
+[29/05/2026, 01:00:40] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[29/05/2026, 01:01:02] [INFO] Tentativa de login: Breninho
+[29/05/2026, 01:01:11] [INFO] Tentativa de login: Breninho
+[29/05/2026, 01:01:27] [INFO] Tentativa de login: Breninho
+[29/05/2026, 01:02:11] [INFO] Tentativa de login: Teste
+[29/05/2026, 01:02:27] [INFO] Tentativa de login: Teste
+[29/05/2026, 01:02:35] [INFO] Tentativa de login: Teste
+[29/05/2026, 01:03:27] [INFO] Tentativa de login: Breninho
+[29/05/2026, 01:03:33] [INFO] Tentativa de login: Breninho
+[29/05/2026, 01:03:43] [INFO] Tentativa de login: Breninho
+[29/05/2026, 01:03:52] [INFO] Tentativa de login: Teste
+[29/05/2026, 01:11:42] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[29/05/2026, 01:11:56] [INFO] Tentativa de login: Breninho
+[29/05/2026, 01:12:08] [INFO] Tentativa de login: Breninho
+[29/05/2026, 01:12:34] [INFO] Tentativa de login: Breninho
+[29/05/2026, 01:13:37] [INFO] Tentativa de login: Teste
+[29/05/2026, 01:14:44] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[29/05/2026, 14:30:52] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[29/05/2026, 14:31:14] [INFO] Tentativa de login: Teste
+[29/05/2026, 14:32:18] [INFO] Tentativa de login: Teste
+[29/05/2026, 15:38:05] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[29/05/2026, 15:55:11] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
+[30/05/2026, 12:56:02] [INFO] ✅ Servidor J&E rodando na porta 3000 com prefixo public.
