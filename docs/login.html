@@ -226,7 +226,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
     btn.disabled = true;
 
     try {
-        const resposta = await fetch('http://localhost:3000/login', {
+        const resposta = await fetch('/api/login', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ usuario, senha }) 
@@ -259,7 +259,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
         document.getElementById('form-register').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
-                const resp = await fetch('http://localhost:3000/registrar', {
+                const resp = await fetch('/api/registrar', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ 

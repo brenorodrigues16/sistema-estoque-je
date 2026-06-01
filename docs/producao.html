@@ -204,12 +204,12 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:3000';
+        const API_URL = '/api/producao';
 
         // 1. Carrega os tipos de chapa do banco
         async function carregarTiposChapa() {
             try {
-                const urlCompleta = typeof API_URL !== 'undefined' ? `${API_URL}/tipos_onda` : 'http://localhost:3000/tipo_onda';
+                const urlCompleta = typeof API_URL !== 'undefined' ? `${API_URL}/tipos_onda` : '/api/tipo_onda';
                 console.log("Tentando buscar ondas em:", urlCompleta);
                 const res = await fetch(urlCompleta);
 
@@ -250,7 +250,7 @@
         // 2. Carrega estatísticas de hoje
         async function atualizarResumoHoje() {
             try {
-                const res = await fetch('http://localhost:3000/resumo-hoje'); 
+                const res = await fetch('/api/resumo-hoje'); 
                 const dados = await res.json();
                 
                 const elCaixas = document.getElementById('stat-caixas');
@@ -360,7 +360,7 @@
             }
 
             try {
-                const response = await fetch('http://localhost:3000/api/producao', {
+                const response = await fetch('/api/producao', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dados)
@@ -456,7 +456,7 @@
     async function registrarLog(tipo, produto, qtd) {
     const usuario = localStorage.getItem('usuario') || 'Desconhecido';
     try {
-        await fetch('http://localhost:3000/api/registrar-movimentacao', {
+        await fetch('/api/registrar-movimentacao', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ tipo, produto, quantidade: qtd, usuario })

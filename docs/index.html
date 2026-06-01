@@ -162,7 +162,7 @@
 
         async function carregarDashboard() {
             try {
-                const respostaStats = await fetch('http://localhost:3000/dashboard-stats');
+                const respostaStats = await fetch('/api/dashboard-stats');
                 const stats = await respostaStats.json();
 
                 const elementos = {
@@ -178,7 +178,7 @@
                     if (el) el.innerText = elementos[id];
                 });
 
-                const respostaChapas = await fetch('http://localhost:3000/dados');
+                const respostaChapas = await fetch('/api/dados');
                 const dadosChapas = await respostaChapas.json();
 
                 const container = document.getElementById('container-progresso');

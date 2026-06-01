@@ -135,7 +135,7 @@
             corpoTabela.innerHTML = '<tr><td colspan="5" style="text-align:center;">Carregando...</td></tr>';
 
             try {
-                const resposta = await fetch('http://localhost:3000/api/movimentacoes');
+                const resposta = await fetch('/api/movimentacoes');
                 
                 if (!resposta.ok) throw new Error('Falha ao buscar movimentações');
                 

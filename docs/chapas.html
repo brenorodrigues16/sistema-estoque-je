@@ -93,12 +93,12 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:3000';
+        const API_BASE = '/api/chapas';
         const usuarioLogado = localStorage.getItem('usuario') || 'Sistema';
 
         async function carregarChapas() {
             try {
-                const resp = await fetch(`${API_BASE}/api/chapas`);
+                const resp = await fetch(`${API_BASE}/chapas`);
                 if (!resp.ok) throw new Error('Erro ao buscar chapas');
                 const chapas = await resp.json();
                 const tabelaCorpo = document.getElementById('tabela-chapas');
