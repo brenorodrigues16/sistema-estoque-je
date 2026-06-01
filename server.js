@@ -1330,6 +1330,6 @@ app.post('/api/registrar-entrada', async (req, res) => {
     }
 });
 
-app.listen(3000, () => {
+app.listen(process.env.PORT || 3000, () => {
     logger("info", "✅ Servidor J&E rodando na porta 3000 com prefixo public.");
 });
