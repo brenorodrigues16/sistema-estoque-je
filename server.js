@@ -33,7 +33,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'docs')));
 
 // - - ROTA PRINCIPAL (PÁGINA INICIAL) - - //
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
     res.sendFile(path.join(__dirname, 'docs', 'index.html'));
 });
 
@@ -57,7 +57,7 @@ app.get('/api/teste-db', async (req, res)=>{
 
 
 
-app.get('/tipos-onda', async (req, res) => {
+app.get('/api/tipos-onda', async (req, res) => {
 
     try {
 
@@ -125,7 +125,7 @@ function logger(tipo, mensagem) {
 
 // - - ROTAS DO DASHBOARD - - //
 
-app.get('/dados', async (req, res) => {
+app.get('/api/dados', async (req, res) => {
 
     try {
 
@@ -169,7 +169,7 @@ app.get('/dados', async (req, res) => {
 
 
 
-app.get('/resumo-hoje', async (req, res) => {
+app.get('/api/resumo-hoje', async (req, res) => {
 
     try {
 
@@ -275,7 +275,7 @@ app.post('/api/chapas', async (req, res) => {
 
 
 
- app.post('/produzir', async (req, res) => {
+ app.post('/api/produzir', async (req, res) => {
 
 
 
@@ -355,7 +355,7 @@ app.post('/api/chapas', async (req, res) => {
 
 
 
-app.get('/pedidos-recentes', async (req, res) => {
+app.get('/api/pedidos-recentes', async (req, res) => {
 
     try {
 
@@ -387,7 +387,7 @@ app.get('/pedidos-recentes', async (req, res) => {
 
 
 
-app.post('/conferir-pedido', async (req, res) => {
+app.post('/api/conferir-pedido', async (req, res) => {
 
     const { id, qtd_conferida, responsavel } = req.body;
 
@@ -585,7 +585,7 @@ app.post('/api/chapas', async (req, res) => {
 
 // - - BOTAO DE AJUSTAR CHAPAS - - //
 
-app.post('/ajustar-estoque', async (req, res) => {
+app.post('/api/chapas/ajustar-estoque', async (req, res) => {
 
     const { id, onda, novaQuantidade, novoComprimento, novaLargura, novoFornecedor } = req.body;
 
@@ -669,7 +669,7 @@ app.post('/ajustar-estoque', async (req, res) => {
 
 // - - ROTA PARA FORNECEDORES - - //
 
-app.get('/fornecedores', async (req, res) => {
+app.get('/api/fornecedores', async (req, res) => {
 
     try {
 
@@ -948,7 +948,7 @@ app.put('/api/caixas/:id', async (req, res) => {
 
 
 // - - PAGINA DE LOGIN (server.js) - - //
-app.post('/login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { usuario, senha } = req.body;
     logger("info", `Tentativa de login: ${usuario}`);
 
@@ -990,7 +990,7 @@ app.post('/login', async (req, res) => {
 
 // - REGISTRO NOVO USUARIO -
 
-app.post('/registrar', async (req, res) => {
+app.post('/api/login/registrar', async (req, res) => {
 
     const { nome, usuario, senha } = req.body;
 
@@ -1044,7 +1044,7 @@ app.post('/registrar', async (req, res) => {
 
 // - - PAGINA DE CONFIGURACOES - - //
 
-app.post('/api/atualizar-perfil', async (req, res) => {
+app.post('/api/perfil/atualizar-perfil', async (req, res) => {
 
     const { id, email, senha, tema } = req.body;
 
@@ -1080,7 +1080,7 @@ app.post('/api/atualizar-perfil', async (req, res) => {
 
 // - - ROTA ESTATICAS DO DASHBOARD - - //
 
-app.get('/dashboard-stats', async (req, res) => {
+app.get('/api/dashboard-stats', async (req, res) => {
 
     try {
 
@@ -1160,7 +1160,7 @@ app.get('/dashboard-stats', async (req, res) => {
 
 // - - ROTA PARA EXIBIR LOGS EM TELA - - //
 
-app.get('/admin/logs', (req, res) => {
+app.get('/api/admin/logs', (req, res) => {
 
 
 
@@ -1237,7 +1237,7 @@ app.get('/admin/logs', (req, res) => {
 }); // - FIM - //
 
 // - -  ROTA PARA EXIBIR TIPOS DE ONDA - - //
-app.get('/tipos_onda', async (req, res) => {
+app.get('/api/tipos_onda', async (req, res) => {
     try {
         const result = await pool.query('SELECT DISTINCT onda FROM chapas');
         res.json(result.rows);
@@ -1247,7 +1247,7 @@ app.get('/tipos_onda', async (req, res) => {
     }
 });
 
-app.get('/verificar-estoque', async (req, res) => {
+app.get('/api/verificar-estoque', async (req, res) => {
     const { tipo, largura, comprimento } = req.query;
     try {
         const result = await pool.query(
