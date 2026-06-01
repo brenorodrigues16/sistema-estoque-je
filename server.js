@@ -30,11 +30,11 @@ app.use(cors());
 
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, 'documentos')));
+app.use(express.static(path.join(__dirname, 'docs')));
 
 // - - ROTA PRINCIPAL (PÁGINA INICIAL) - - //
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'documentos', 'index.html'));
+    res.sendFile(path.join(__dirname, 'docs', 'index.html'));
 });
 
 
