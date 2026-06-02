@@ -123,6 +123,7 @@
         </main>
     </div>
 
+    <script src="js/util.js"></script>
     <script>
         // Data Automática Superior
         const data = new Date();
@@ -167,7 +168,7 @@
                 });
             } catch (erro) {
                 corpoTabela.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Erro ao conectar com o banco de dados.</td></tr>';
-                console.error("Erro na tabela:", erro);
+                tratarErro('Erro ao carregar movimentações:', erro);
             }
         }
 

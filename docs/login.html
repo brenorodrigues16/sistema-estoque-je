@@ -205,6 +205,7 @@
         </div>
     </div>
 
+    <script src="js/util.js"></script>
     <script>
         function toggleForm() {
             const login = document.getElementById('login-box');
@@ -240,15 +241,14 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
             localStorage.setItem('cargo', dados.cargo);
             window.location.href = 'index.html';
         } else {
-            Swal.fire({
-                icon: resposta.status === 403 ? 'info' : 'error',
-                title: resposta.status === 403 ? 'Acesso em Análise' : 'Falha no Login',
-                text: dados.message,
-                confirmButtonColor: '#3498db'
-            });
+            tratarErro(
+                resposta.status === 403 ? 'Acesso em Análise' : 'Falha no Login',
+                dados.message,
+                resposta.status === 403 ? 'info' : 'error'
+            );
         }
     } catch (error) {
-        Swal.fire('Erro', 'Não foi possível conectar ao servidor.', 'error');
+        tratarErro('Erro', 'Não foi possível conectar ao servidor.', 'error');
     } finally {
         btn.innerText = btnOriginalText;
         btn.disabled = false;
@@ -270,16 +270,15 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
                 });
                 const dados = await resp.json();
                 
-                Swal.fire({
-                    title: resp.ok ? 'Sucesso!' : 'Erro',
-                    text: dados.message,
-                    icon: resp.ok ? 'success' : 'error',
-                    confirmButtonColor: '#27ae60'
-                }).then(() => { 
+                tratarErro(
+                    resp.ok ? 'Sucesso!' : 'Erro',
+                    dados.message,
+                    resp.ok ? 'success' : 'error'
+                ).then(() => { 
                     if(resp.ok) toggleForm(); 
                 });
             } catch (err) {
-                Swal.fire('Erro', 'Servidor offline.', 'error');
+                tratarErro('Erro', 'Servidor offline.', 'error');
             }
         });
     </script>

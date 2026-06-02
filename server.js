@@ -247,35 +247,61 @@ app.get('/api/dashboard-stats', async (req, res) => {
     } catch (error) { res.status(500).json({ error: "Erro" }); }
 });
 
+
+// --- SISTEMA DE CRIPTOGRAFIA DE SENHAS ---
+const bcrypt = require('bcrypt');
+const saltRounds = 10; 
+
+async function criptografarSenha(senhaPura) {
+    return await bcrypt.hash(senhaPura, saltRounds);
+}
+
 // --- SISTEMA DE LOGIN E PERFIL ---
 
 app.post('/api/login', async (req, res) => {
-    const { usuario, senha } = req.body;
+    const usuarioDigitado = req.body.usuario ? req.body.usuario.trim() : "";
+    const senhaDigitada = req.body.senha ? req.body.senha.trim() : "";
+
     try {
-        const result = await pool.query('SELECT * FROM usuarios WHERE usuario = $1', [usuario]);
-        if (result.rows.length === 0 || String(result.rows[0].senha).trim() !== String(senha).trim()) {
+        const result = await pool.query('SELECT * FROM usuarios WHERE usuario = $1', [usuarioDigitado]);
+        
+        if (result.rows.length === 0 || String(result.rows[0].senha).trim() !== senhaDigitada) {
             return res.status(401).json({ success: false, message: "Acesso negado" });
         }
+        
         if (result.rows[0].status !== 'ATIVO') return res.status(403).json({ success: false, message: "Pendente" });
+        
         res.json({ success: true, nome: result.rows[0].nome, cargo: result.rows[0].cargo });
-    } catch (err) { res.status(500).json({ success: false }); }
+    } catch (err) { 
+        console.error("Erro no login:", err); 
+        res.status(500).json({ success: false }); 
+    }
 });
 
 app.post('/api/login/registrar', async (req, res) => {
-    const { nome, usuario, senha } = req.body;
+
+    const { nome, usuario, senha, cargo } = req.body;
     try {
-        await pool.query('INSERT INTO usuarios (nome, usuario, senha, cargo, status) VALUES ($1, $2, $3, $4, $5)', [nome, usuario, senha, 'Operador', 'PENDENTE']);
+        const senhaHash = await criptografarSenha(senha);
+        await pool.query('INSERT INTO usuarios (nome, usuario, senha, cargo, status) VALUES ($1, $2, $3, $4, $5)', [nome, usuario, senhaHash, cargo, 'PENDENTE']);
         res.json({ success: true, message: "Enviado!" });
-    } catch (err) { res.status(500).json({ success: false }); }
+    } catch (err) {
+        console.error("Erro ao registrar usuário", err);
+        res.status(500).json({ success: false });
+    }
 });
 
 app.post('/api/perfil/atualizar-perfil', async (req, res) => {
     const { id, email, senha, tema } = req.body;
     try {
-        if (senha) await pool.query('UPDATE usuarios SET email = $1, tema = $2, senha = $3 WHERE id = $4', [email, tema, senha, id]);
-        else await pool.query('UPDATE usuarios SET email = $1, tema = $2 WHERE id = $3', [email, tema, id]);
+        if (senha) {
+            const senhaHash = await criptografarSenha(senha);
+            await pool.query('UPDATE usuarios SET email = $1, tema = $2, senha = $3 WHERE id = $4', [email, tema, senhaHash, id]);
+        } else {
+            await pool.query('UPDATE usuarios SET email = $1, tema = $2 WHERE id = $3', [email, tema, id]);
+        }
         res.sendStatus(200);
-    } catch (err) { res.sendStatus(500); }
+    } catch (err) { console.error("Erro ao atualizar perfil", err); res.status(500).json({ success: false }); }
 });
 
 // --- FORNECEDORES E MOVIMENTAÇÃO ---

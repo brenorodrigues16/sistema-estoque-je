@@ -118,54 +118,62 @@
 
       </main>
 
+      <script src="js/util.js"></script>
 <script>
 
-async function carregarEntradas() {
-    const resp = await fetch('/api/entrada-chapas-hoje');
+       async function carregarEntradas() {
+    try {
+        const resp = await fetch('/api/entrada-chapas-hoje');
 
-if (localStorage.getItem('cargo') !== 'Operador') {
-    document.getElementById('form-entrada').style.display = 'none';
-}
+        if (localStorage.getItem('cargo') !== 'Operador') {
+            document.getElementById('form-entrada').style.display = 'none';
+        }
 
-    const entradas = await resp.json();
-    const tbody = document.querySelector('#tabela-entradas tbody');
-    tbody.innerHTML = '';
-    
-    entradas.forEach(item => {
-        tbody.innerHTML += `<tr>
-            <td>${item.onda}</td>
-            <td>${item.comprimento}</td>
-            <td>${item.largura}</td>
-            <td>${item.fornecedor}</td>
-            <td>${item.quantidade}</td>
-        </tr>`;
-    });
+        const entradas = await resp.json();
+        const tbody = document.querySelector('#tabela-entradas tbody');
+        tbody.innerHTML = '';
+
+        entradas.forEach(item => {
+            tbody.innerHTML += `<tr>
+                <td>${item.onda}</td>
+                <td>${item.comprimento}</td>
+                <td>${item.largura}</td>
+                <td>${item.fornecedor}</td>
+                <td>${item.quantidade}</td>
+            </tr>`;
+        });
+    } catch (error) {
+        tratarErro('Erro ao carregar tabela de entradas do dia:', error);
+    }
 }
 
 document.getElementById('form-entrada').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const dados = {
-        onda: document.getElementById('onda').value,
-        comprimento: document.getElementById('comprimento').value,
-        largura: document.getElementById('largura').value,
-        fornecedor: document.getElementById('fornecedor').value,
-        quantidade: document.getElementById('quantidade').value,
-        usuario: localStorage.getItem('usuario')
-    };
+    try {
+        const dados = {
+            onda: document.getElementById('onda').value,
+            comprimento: document.getElementById('comprimento').value,
+            largura: document.getElementById('largura').value,
+            fornecedor: document.getElementById('fornecedor').value,
+            quantidade: document.getElementById('quantidade').value,
+            usuario: localStorage.getItem('usuario')
+        };
 
-    const resp = await fetch('/api/registrar-entrada', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(dados)
-    });
+        const resp = await fetch('/api/registrar-entrada', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(dados)
+        });
 
-    if ((await resp.json()).success) {
-        Swal.fire('Sucesso!', 'Chapas adicionadas ao estoque.', 'success');
-        document.getElementById('form-entrada').reset();
-        carregarEntradas();
+        if ((await resp.json()).success) {
+            Swal.fire('Sucesso!', 'Chapas adicionadas ao estoque.', 'success');
+            document.getElementById('form-entrada').reset();
+            carregarEntradas();
+        }
+    } catch (error) {
+        tratarErro('Erro ao registrar entrada de chapas:', error);
     }
 });
-
 
 
 

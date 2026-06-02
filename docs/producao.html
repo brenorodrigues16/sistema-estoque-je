@@ -203,6 +203,7 @@
         </main>
     </div>
 
+    <script src="js/util.js"></script>
     <script>
     const API_URL = '/api';
 
@@ -237,7 +238,7 @@
             });
             console.log("seletor de ondas preenchido com sucesso!");
         } catch (err) {
-            console.error("Erro ao carregar as ondas no HTML:", err);
+            tratarErro("Erro ao carregar as ondas no HTML:", err);
             const select = document.getElementById('tipo_onda');
             if(select) select.innerHTML = '<option value="">Erro ao carregar ondas</option>';
         }
@@ -257,7 +258,7 @@
             
             console.log("Resumo atualizado:", dados);
         } catch (err) { 
-            console.error("Erro ao buscar resumo:", err); 
+            tratarErro("Erro ao buscar resumo:", err); 
         }
     }
 
@@ -291,7 +292,7 @@
                 </div>
             `).join('');
         } catch (err) {
-            console.error("Erro no fetch:", err);
+            tratarErro("Erro ao carregar pedidos recentes:", err);
             container.innerHTML = '<div class="hist-item"><span>Erro ao carregar lista</span></div>';
         }
     }
@@ -353,7 +354,7 @@ async function calcularERevalidar() {
                 aviso.style.display = 'none';
                 btn.disabled = false;
             }
-        } catch (e) { console.error("Erro na validação de estoque:", e); }
+        } catch (e) { tratarErro("Erro na validação de estoque:", e); }
     } else {
         aviso.style.display = 'none';
     }
@@ -378,7 +379,7 @@ async function calcularERevalidar() {
 
         if (!payload.cliente || !payload.qtd_programada) {
             btn.disabled = false;
-            return Swal.fire('Erro', 'Preencha os campos principais!', 'error');
+            return tratarErro('Erro', 'Preencha os campos principais!', 'error');
         }
 
         try {
@@ -397,10 +398,10 @@ async function calcularERevalidar() {
                 atualizarResumoHoje();
                 carregarPedidosRecentes(); 
             } else {
-                Swal.fire('Erro', result.message, 'error');
+                tratarErro('Erro', result.message, 'error');
             }
         } catch (err) {
-            Swal.fire('Erro', 'Conexão falhou.', 'error');
+            tratarErro('Erro', 'Conexão falhou.', 'error');
         } finally {
             btn.disabled = false;
         }
@@ -443,7 +444,7 @@ async function calcularERevalidar() {
                 body: JSON.stringify({ tipo, produto, quantidade: qtd, usuario })
             });
         } catch (err) {
-            console.error("Erro ao registrar log:", err);
+            tratarErro("Erro ao registrar movimentação:", err);
         }
     }
 

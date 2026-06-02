@@ -119,6 +119,7 @@
         </ul>
     </div>
 
+    <script src="js/util.js"></script>
     <script>
         const API_BASE = '/api/caixas';
         const usuarioLogado = localStorage.getItem('usuario') || 'Sistema';
@@ -142,7 +143,7 @@
                             <td>${dataFormatada}</td>
                             <td><strong>${caixa.responsavel}</strong></td>
                             <td style="text-align: center;">
-                                <button class="btn-ajuste" 
+                                <button class="btn-edit-icon" 
                                     onclick="editarCaixa(${caixa.id}, '${caixa.cliente}', '${caixa.codigo}', ${caixa.quantidade}, '${caixa.data_fabricacao}', '${caixa.responsavel}')">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -150,7 +151,7 @@
                         </tr>`;
                     tabelaCorpo.innerHTML += linha;
                 });
-            } catch (erro) { console.error("Erro ao carregar:", erro); }
+            } catch (erro) { tratarErro(" Erro ao carregar tabela:", erro); }
         }
 
         async function novoRegistro() {
@@ -181,12 +182,14 @@
             });
 
             if (formValues) {
-                await fetch(`${API_BASE}caixas`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formValues)
-                });
-                carregarCaixas();
+                try {
+                    await fetch(`${API_BASE}caixas`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formValues)
+                    });
+                    carregarCaixas();
+                } catch (err) { tratarErro("Erro ao cadastrar caixa:", err); }
             }
         }
 
@@ -219,12 +222,14 @@
             });
 
             if (formValues) {
-                await fetch(`${API_BASE}/caixas/editar`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formValues)
-                });
-                carregarCaixas();
+                try {
+                    await fetch(`${API_BASE}/caixas/editar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formValues)
+                    });
+                    carregarCaixas();
+                } catch (err) { tratarErro("Erro ao ajustar caixa:", err); }
             }
         }
 

@@ -149,7 +149,8 @@
             </section>
         </main>
     </div>
-
+  
+    <script src="js/util.js"></script>
     <script>
         function atualizarRelogio() {
             const elementoData = document.getElementById('data-atual');
@@ -228,7 +229,7 @@
 
                 atualizarRelogio();
             } catch (erro) {
-                console.error('Erro ao carregar dashboard:', erro);
+                tratarErro('Erro ao carregar dashboard:', erro);
             }
         }
 

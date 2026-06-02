@@ -129,6 +129,7 @@
     </main>
 </div>
 
+<script src="js/util.js"></script>
 <script>
     // Mostrar/Esconder senha
     function verSenha(id) {
@@ -181,7 +182,7 @@
                 Swal.fire('Sucesso!', 'Configurações atualizadas!', 'success');
             }
         } catch (err) {
-            Swal.fire('Erro', 'Falha ao conectar com o servidor.', 'error');
+            tratarErro('Erro', 'Falha ao conectar com o servidor.', 'error');
         }
     });
 
