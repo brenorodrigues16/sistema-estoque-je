@@ -93,7 +93,7 @@
     </div>
 
     <script>
-        const API_BASE = '/api/chapas';
+        const API_BASE = '/api';
         const usuarioLogado = localStorage.getItem('usuario') || 'Sistema';
 
         async function carregarChapas() {
@@ -175,7 +175,7 @@
                 });
 
                 if (formValues) {
-                    const response = await fetch(`${API_BASE}/ajustar-estoque`, {
+                    const response = await fetch(`${API_BASE}/chapas/${id}/ajustar-estoque`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ id: id, ...formValues })

@@ -204,128 +204,143 @@
     </div>
 
     <script>
-        const API_URL = '/api/producao';
+    const API_URL = '/api';
 
-        // 1. Carrega os tipos de chapa do banco
-        async function carregarTiposChapa() {
-            try {
-                const urlCompleta = typeof API_URL !== 'undefined' ? `${API_URL}/tipos_onda` : '/api/tipo_onda';
-                console.log("Tentando buscar ondas em:", urlCompleta);
-                const res = await fetch(urlCompleta);
+    // 1. Carrega os tipos de chapa do banco
+    async function carregarTiposChapa() {
+        try {
+            // Chamando a rota  /api/tipos-onda
+            const urlCompleta = `${API_URL}/tipos-onda`;
+            console.log("Tentando buscar ondas em:", urlCompleta);
+            const res = await fetch(urlCompleta);
 
-                if (!res.ok) {
-                    throw new Error(`erro na resposta do servidor:${res.status}`);
-                }
+            if (!res.ok) throw new Error(`erro na resposta do servidor:${res.status}`);
 
-                const tipos = await res.json();
-                console.log("Dados recebidos do banco:", tipos);
+            const tipos = await res.json();
+            console.log("Dados recebidos do banco:", tipos);
 
-                const select = document.getElementById('tipo_onda');
-                if (!select) {
-                    console.error("Erro: Não encontrei o elemento <select id='tipo_onda'> na pagina.");
-                    return;
-                }
+            const select = document.getElementById('tipo_onda');
+            if (!select) return console.error("Erro: Não encontrei o elemento <select id='tipo_onda'> na pagina.");
 
-                select.innerHTML = '<option value="">Selecione a Onda</option>';
+            select.innerHTML = '<option value="">Selecione a Onda</option>';
 
-                if (tipos.length === 0) {
-                    select.innerHTML = '<option value="">Nenhuma chapa encontrada no banco</option>';
-                    return;
-                }
-
-                tipos.forEach(t => {
-                    const option = document.createElement('option');
-                    option.value = t.onda;
-                    option.textContent = t.onda;
-                    select.appendChild(option);
-                });
-
-                console.log("seletor de ondas preenchido com sucesso!");
-            } catch (err) {
-                console.error("Erro comppleto ao carregar as ondas no HTML:", err);
-                alert("Erro ao carregar ondas: " + err.message);
+            if (tipos.length === 0) {
+                select.innerHTML = '<option value="">Nenhuma chapa encontrada no banco</option>';
+                return;
             }
+
+            tipos.forEach(t => {
+                const option = document.createElement('option');
+                option.value = t.onda;
+                option.textContent = t.onda;
+                select.appendChild(option);
+            });
+            console.log("seletor de ondas preenchido com sucesso!");
+        } catch (err) {
+            console.error("Erro ao carregar as ondas no HTML:", err);
+            const select = document.getElementById('tipo_onda');
+            if(select) select.innerHTML = '<option value="">Erro ao carregar ondas</option>';
         }
+    }
 
-        // 2. Carrega estatísticas de hoje
-        async function atualizarResumoHoje() {
-            try {
-                const res = await fetch('/api/resumo-hoje'); 
-                const dados = await res.json();
-                
-                const elCaixas = document.getElementById('stat-caixas');
-                const elFila = document.getElementById('stat-fila');
+    // 2. Carrega estatísticas de hoje
+    async function atualizarResumoHoje() {
+        try {
+            const res = await fetch(`${API_URL}/resumo-hoje`); // /api/resumo-hoje
+            const dados = await res.json();
+            
+            const elCaixas = document.getElementById('stat-caixas');
+            const elFila = document.getElementById('stat-fila');
 
-                if(elCaixas) elCaixas.innerText = dados.total_caixas;
-                if(elFila) elFila.innerText = dados.fila_pedidos;
-                
-                console.log("Resumo atualizado:", dados);
-            } catch (err) { 
-                console.error("Erro ao buscar resumo:", err); 
+            if(elCaixas) elCaixas.innerText = dados.total_caixas;
+            if(elFila) elFila.innerText = dados.fila_pedidos;
+            
+            console.log("Resumo atualizado:", dados);
+        } catch (err) { 
+            console.error("Erro ao buscar resumo:", err); 
+        }
+    }
+
+    // 3. Carregar Log Lateral
+    async function carregarPedidosRecentes() {
+        const container = document.getElementById('lista-lancamentos');
+        if(!container) return;
+
+        try {
+            const res = await fetch(`${API_URL}/pedidos-recentes`); // /api/pedidos-recentes
+            if (!res.ok) throw new Error('Falha na resposta');
+            const dados = await res.json();
+            
+            if (dados.length === 0) {
+                container.innerHTML = '<div class="hist-item"><span>Nenhum lançamento pendente</span></div>';
+                return;
             }
-        }
 
-        // 3. Carregar Log Lateral
-        async function carregarPedidosRecentes() {
-            const container = document.getElementById('lista-lancamentos');
-            if(!container) return;
-
-            try {
-                const res = await fetch(`${API_URL}/pedidos-recentes`);
-                const dados = await res.json();
-                
-                if (dados.length === 0) {
-                    container.innerHTML = '<div class="hist-item"><span>Nenhum lançamento pendente</span></div>';
-                    return;
-                }
-
-                container.innerHTML = dados.map(item => `
-                    <div class="hist-item" style="border-left: 5px solid ${item.status === 'PENDENTE' ? '#e67e22' : '#2ecc71'}; padding: 10px; margin-bottom: 8px; background: rgba(255,255,255,0.05); border-radius: 4px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <strong style="color: #fff;"><i class="fas fa-user"></i> ${item.cliente}</strong>
-                            <span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #f1c40f;">${item.qtd_programada} un</span>
-                        </div>
-                        <div style="font-size: 12px; color: #aaa; margin-top: 5px;">
-                            <i class="fas fa-tag"></i> ${item.referencia || 'S/ Ref'}
-                        </div>
-                        <div style="font-size: 10px; margin-top: 5px; font-weight: bold; color: ${item.status === 'PENDENTE' ? '#e67e22' : '#2ecc71'}">
-                            ${item.status === 'PENDENTE' ? 'AGUARDANDO EXPEDIÇÃO' : 'FINALIZADO'}
-                        </div>
+            container.innerHTML = dados.map(item => `
+                <div class="hist-item" style="border-left: 5px solid ${item.status === 'PENDENTE' ? '#e67e22' : '#2ecc71'}; padding: 10px; margin-bottom: 8px; background: rgba(255,255,255,0.05); border-radius: 4px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong style="color: #fff;"><i class="fas fa-user"></i> ${item.cliente}</strong>
+                        <span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 12px; color: #f1c40f;">${item.qtd_programada} un</span>
                     </div>
-                `).join('');
-            } catch (err) {
-                console.error("Erro no fetch:", err);
-                container.innerHTML = '<div class="hist-item"><span>Erro ao carregar lista</span></div>';
-            }
+                    <div style="font-size: 12px; color: #aaa; margin-top: 5px;">
+                        <i class="fas fa-tag"></i> ${item.referencia || 'S/ Ref'}
+                    </div>
+                    <div style="font-size: 10px; margin-top: 5px; font-weight: bold; color: ${item.status === 'PENDENTE' ? '#e67e22' : '#2ecc71'}">
+                        ${item.status === 'PENDENTE' ? 'AGUARDANDO EXPEDIÇÃO' : 'FINALIZADO'}
+                    </div>
+                </div>
+            `).join('');
+        } catch (err) {
+            console.error("Erro no fetch:", err);
+            container.innerHTML = '<div class="hist-item"><span>Erro ao carregar lista</span></div>';
         }
+    }
 
-        // 4. Inteligência de Corte
-       async function calcularERevalidar() {
-    // 1. Coleta os valores
+    // 4. Inteligência de Corte 
+async function calcularERevalidar() {
+    // Medidas da Chapa
     const chapaLarg = parseFloat(document.getElementById('largura-chapa').value) || 0;
     const chapaComp = parseFloat(document.getElementById('comprimento-chapa').value) || 0;
+    
+    // Medidas da Caixa (Peça Total)
     const caixaLarg = parseFloat(document.getElementById('caixa-larg').value) || 0;
     const caixaComp = parseFloat(document.getElementById('caixa-comp').value) || 0;
+    
     const qtdDesejada = parseInt(document.getElementById('quantidade-desejada').value) || 0;
     const tipoOnda = document.getElementById('tipo_onda').value;
 
-    // 2. Calcula métricas visuais (sempre que possível)
     let totalPorChapa = 0, chapasNecessarias = 0;
+
     if (chapaLarg > 0 && chapaComp > 0 && caixaLarg > 0 && caixaComp > 0) {
-        totalPorChapa = Math.floor(chapaLarg / caixaLarg) * Math.floor(chapaComp / caixaComp);
+        
+        // 1. Calcula quantas cabem na largura e o que sobra
+        const pecasNaLargura = Math.floor(chapaLarg / caixaLarg);
+        const sobraLargura = chapaLarg % caixaLarg;
+
+        // 2. Calcula quantas cabem no comprimento e o que sobra
+        const pecasNoComprimento = Math.floor(chapaComp / caixaComp);
+        const sobraComprimento = chapaComp % caixaComp;
+
+        // 3. Lógica: Soma as quantidades (Largura + Comprimento)
+        totalPorChapa = pecasNaLargura + pecasNoComprimento;
+
+        // 4. Calcula quantas chapas para atingir a quantidade total desejada
         chapasNecessarias = totalPorChapa > 0 ? Math.ceil(qtdDesejada / totalPorChapa) : 0;
+
+        // Atualiza o HTML
         document.getElementById('calc-pecas').innerText = totalPorChapa;
         document.getElementById('calc-chapas').innerText = chapasNecessarias;
-        document.getElementById('calc-retalho').innerText = `${chapaLarg % caixaLarg}mm x ${chapaComp % caixaComp}mm`;
+        
+        // Exibe o retalho detalhado 
+        document.getElementById('calc-retalho').innerText = `Largura: ${sobraLargura}mm | Comp: ${sobraComprimento}mm`;
     }
 
-    // 3. O PULO DO GATO: Só faz o fetch se tudo estiver preenchido corretamente
+    // --- Parte da Verificação de Estoque 
     const aviso = document.getElementById('aviso-estoque');
     const btn = document.getElementById('btn-produzir');
     
-    if (tipoOnda && chapaLarg > 0 && chapaComp > 0 && chapasNecessarias > 0) {
+    if (tipoOnda && chapasNecessarias > 0) {
         try {
-            // Adicionamos cache ou verificação rápida aqui
             const res = await fetch(`${API_URL}/verificar-estoque?tipo=${tipoOnda}&largura=${chapaLarg}&comprimento=${chapaComp}`);
             const dados = await res.json();
             const estoqueDisp = dados.estoque || 0;
@@ -338,170 +353,125 @@
                 aviso.style.display = 'none';
                 btn.disabled = false;
             }
-        } catch (e) { 
-            console.error("Erro na validação de estoque:", e); 
-        }
+        } catch (e) { console.error("Erro na validação de estoque:", e); }
     } else {
-        // Se faltar algum dado, apenas esconde o aviso e libera o botão (ou bloqueia se preferir)
         aviso.style.display = 'none';
     }
 }
 
-        async function finalizarProducao() {
-            const dados = {
-                cliente: document.querySelector('input[placeholder="Nome do Cliente a produzir..."]').value,
-                referencia: document.querySelector('input[placeholder="Ex: CX 001"]').value,
-                tipoOnda: document.getElementById('tipo_onda').value,
-                quantidade: document.getElementById('quantidade-desejada').value
-            };
+    // 5. Event Listeners e Inicialização (Finalizar Produção)
+    document.getElementById('form-producao').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btn-produzir');
+        btn.disabled = true;
 
-            if (!dados.cliente || !dados.quantidade) {
-                return Swal.fire('Erro', 'Preencha os campos principais!', 'error');
-            }
+        const payload = {
+            cliente: document.getElementById('cliente').value || document.querySelector('input[placeholder="Nome do Cliente a produzir..."]').value,
+            referencia: document.getElementById('referencia').value || document.querySelector('input[placeholder="Ex: CX 001"]').value, 
+            tipo_onda: document.getElementById('tipo_onda').value,
+            largura_chapa: document.getElementById('largura-chapa').value, 
+            comprimento_chapa: document.getElementById('comprimento-chapa').value, 
+            qtd_chapas_necessarias: parseInt(document.getElementById('calc-chapas').innerText), 
+            qtd_programada: parseInt(document.getElementById('quantidade-desejada').value), 
+            medida: `${document.getElementById('caixa-comp').value}x${document.getElementById('caixa-larg').value}` 
+        };
 
-            try {
-                const response = await fetch('/api/producao', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(dados)
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    Swal.fire('Sucesso!', 'Produção enviada para o banco.', 'success');
-
-                 // AQUI VOCÊ REGISTRA O MOVIMENTO NO LOG
-                await registrarLog('PRODUCAO', payload.tipo_onda, payload.qtd_programada);
-    
-                 document.getElementById('form-producao').reset();
-                 atualizarResumoHoje();
-                 carregarPedidosRecentes();
-                 carregarMovimentacoes(); 
-
-                }
-            } catch (error) {
-                console.error("Erro ao conectar:", error);
-                Swal.fire('Erro de Conexão', 'O servidor está ligado?', 'error');
-            }
+        if (!payload.cliente || !payload.qtd_programada) {
+            btn.disabled = false;
+            return Swal.fire('Erro', 'Preencha os campos principais!', 'error');
         }
 
-        // 5. Event Listeners e Inicialização
-        document.getElementById('form-producao').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btn-produzir');
-            btn.disabled = true;
+        try {
+            // Rota produzir
+            const res = await fetch(`${API_URL}/produzir`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
 
-            const payload = {
-                cliente: document.getElementById('cliente').value,
-                referencia: document.getElementById('referencia').value, 
-                tipo_onda: document.getElementById('tipo_onda').value,
-                largura_chapa: document.getElementById('largura-chapa').value, 
-                comprimento_chapa: document.getElementById('comprimento-chapa').value, 
-                qtd_chapas_necessarias: parseInt(document.getElementById('calc-chapas').innerText), 
-                qtd_programada: parseInt(document.getElementById('quantidade-desejada').value), 
-                medida: `${document.getElementById('caixa-comp').value}x${document.getElementById('caixa-larg').value}` 
-            };
-
-            try {
-                const res = await fetch(`${API_URL}/produzir`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await res.json();
-
-                if (result.success) {
-                    Swal.fire('Sucesso!', 'Pedido enviado!', 'success');
-                    document.getElementById('form-producao').reset();
-                    atualizarResumoHoje();
-                    carregarPedidosRecentes(); 
-                } else {
-                    Swal.fire('Erro', result.message, 'error');
-                }
-            } catch (err) {
-                Swal.fire('Erro', 'Conexão falhou.', 'error');
-            } finally {
-                btn.disabled = false;
+            if (result.success) {
+                Swal.fire('Sucesso!', 'Pedido enviado!', 'success');
+                await registrarLog('PRODUÇÃO', payload.tipo_onda, payload.qtd_programada);
+                document.getElementById('form-producao').reset();
+                atualizarResumoHoje();
+                carregarPedidosRecentes(); 
+            } else {
+                Swal.fire('Erro', result.message, 'error');
             }
-        });
-
-       let timer;
-         document.querySelectorAll('input, select').forEach(el => {
-                el.addEventListener('input', () => {
-                  clearTimeout(timer);
-              timer = setTimeout(calcularERevalidar, 600); // Só calcula após o usuário parar de digitar por 600ms
-           });
+        } catch (err) {
+            Swal.fire('Erro', 'Conexão falhou.', 'error');
+        } finally {
+            btn.disabled = false;
+        }
     });
 
-        // - - CONFIGURACAO DE LOGIN E LOGOUT - - //
-        function fazerLogout() {
-            Swal.fire({
-                title: 'Deseja sair?',
-                text: "Sua sessão será encerrada.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#e74c3c',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sim, sair!',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    localStorage.clear(); 
-                    window.location.href = 'login.html'; 
-                }
-            });
-        }
+    let timer;
+    document.querySelectorAll('input, select').forEach(el => {
+        el.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(calcularERevalidar, 600); 
+        });
+    });
+
+    // - - CONFIGURACAO DE LOGIN E LOGOUT - - //
+    function fazerLogout() {
+        Swal.fire({
+            title: 'Deseja sair?',
+            text: "Sua sessão será encerrada.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e74c3c',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sim, sair!',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                localStorage.clear(); 
+                window.location.href = 'login.html'; 
+            }
+        });
+    }
 
     async function registrarLog(tipo, produto, qtd) {
-    const usuario = localStorage.getItem('usuario') || 'Desconhecido';
-    try {
-        await fetch('/api/registrar-movimentacao', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tipo, produto, quantidade: qtd, usuario })
-        });
-    } catch (err) {
-        console.error("Erro ao registrar log:", err);
+        const usuario = localStorage.getItem('usuario') || 'Desconhecido';
+        try {
+            // Rota corrigida: /api/registrar-movimentacao
+            await fetch(`${API_URL}/registrar-movimentacao`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tipo, produto, quantidade: qtd, usuario })
+            });
+        } catch (err) {
+            console.error("Erro ao registrar log:", err);
+        }
     }
-   }
 
-        // ÚNICO window.onload
-      window.onload = async function() {
-    console.log("Iniciando página...");
-    await carregarTiposChapa();
-    await atualizarResumoHoje();
-    await carregarPedidosRecentes();
+    // ÚNICO window.onload
+    window.onload = async function() {
+        console.log("Iniciando página...");
+        await carregarTiposChapa();
+        await atualizarResumoHoje();
+        await carregarPedidosRecentes();
 
-    const elementoData = document.getElementById('data-atual');
-    if (elementoData) {
-        elementoData.innerText = new Date().toLocaleDateString('pt-BR');
-    }
-};
+        const elementoData = document.getElementById('data-atual');
+        if (elementoData) {
+            elementoData.innerText = new Date().toLocaleDateString('pt-BR');
+        }
+    };
 
-        window.addEventListener('DOMContentLoaded', () => {
-            // Busca os dados salvos no momento do login
-            const nomeUsuario = localStorage.getItem('usuario');
-            const cargoUsuario = localStorage.getItem('cargo');
+    window.addEventListener('DOMContentLoaded', () => {
+        const nomeUsuario = localStorage.getItem('usuario');
+        const cargoUsuario = localStorage.getItem('cargo');
 
-            // Seleciona os elementos pelas classes que você já tem no HTML
-            const elementoNome = document.querySelector('.username');
-            const elementoCargo = document.querySelector('.role');
-            const elementoAvatar = document.querySelector('.avatar');
+        const elementoNome = document.querySelector('.username');
+        const elementoCargo = document.querySelector('.role');
+        const elementoAvatar = document.querySelector('.avatar');
 
-            if (nomeUsuario && elementoNome) {
-                elementoNome.innerText = nomeUsuario;
-            }
-
-            if (cargoUsuario && elementoCargo) {
-                elementoCargo.innerText = cargoUsuario;
-            }
-
-            // Bônus: Muda a letra do Avatar para a primeira letra do nome do usuário
-            if (nomeUsuario && elementoAvatar) {
-                elementoAvatar.innerText = nomeUsuario.charAt(0).toUpperCase();
-            }
-        });
-    </script>
+        if (nomeUsuario && elementoNome) elementoNome.innerText = nomeUsuario;
+        if (cargoUsuario && elementoCargo) elementoCargo.innerText = cargoUsuario;
+        if (nomeUsuario && elementoAvatar) elementoAvatar.innerText = nomeUsuario.charAt(0).toUpperCase();
+    });
+</script>
 </body>
 </html>
