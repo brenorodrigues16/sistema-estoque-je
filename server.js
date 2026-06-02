@@ -8,6 +8,8 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(express.static(__dirname));
+
 // Configuração do Banco de Dados
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -263,18 +265,31 @@ app.post('/api/login', async (req, res) => {
     const senhaDigitada = req.body.senha ? req.body.senha.trim() : "";
 
     try {
+        // 1. Busca o usuário
         const result = await pool.query('SELECT * FROM usuarios WHERE usuario = $1', [usuarioDigitado]);
         
-        if (result.rows.length === 0 || String(result.rows[0].senha).trim() !== senhaDigitada) {
-            return res.status(401).json({ success: false, message: "Acesso negado" });
+        if (result.rows.length === 0) {
+            return res.status(401).json({ success: false, message: "Usuário não encontrado" });
         }
-        
-        if (result.rows[0].status !== 'ATIVO') return res.status(403).json({ success: false, message: "Pendente" });
-        
-        res.json({ success: true, nome: result.rows[0].nome, cargo: result.rows[0].cargo });
-    } catch (err) { 
-        console.error("Erro no login:", err); 
-        res.status(500).json({ success: false }); 
+
+        const usuarioBanco = result.rows[0];
+
+        // 2. AQUI ESTÁ O SEGREDO: Usar o bcrypt.compare
+        const senhaCorreta = await bcrypt.compare(senhaDigitada, usuarioBanco.senha);
+
+        if (!senhaCorreta) {
+            return res.status(401).json({ success: false, message: "Senha incorreta" });
+        }
+
+        // 3. Verifica status
+        if (usuarioBanco.status !== 'ATIVO') {
+            return res.status(403).json({ success: false, message: "Pendente" });
+        }
+
+        res.json({ success: true, nome: usuarioBanco.nome, cargo: usuarioBanco.cargo });
+    } catch (err) {
+        console.error("Erro no login:", err);
+        res.status(500).json({ success: false, message: "Erro interno no servidor" });
     }
 });
 

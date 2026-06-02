@@ -205,7 +205,7 @@
         </div>
     </div>
 
-    <script src="js/util.js"></script>
+    <script src="util.js"></script>
     <script>
         function toggleForm() {
             const login = document.getElementById('login-box');
@@ -259,7 +259,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
         document.getElementById('form-register').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
-                const resp = await fetch('/api/registrar', {
+                const resp = await fetch('/api/login/registrar', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ 
