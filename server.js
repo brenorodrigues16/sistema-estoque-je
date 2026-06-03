@@ -295,17 +295,17 @@ app.post('/api/login', async (req, res) => {
 
 const nodemailer = require('nodemailer');
 
-// Configure o transporter uma vez, fora das rotas
-const nodemailer = require('nodemailer');
+let transporter = null;
 
-// Configuração do transporter usando as variáveis que você colocou no Render
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
+        }
+    });
+}
 
 app.post('/api/login/registrar', async (req, res) => {
     const { nome, usuario, senha, cargo } = req.body;
@@ -318,19 +318,21 @@ app.post('/api/login/registrar', async (req, res) => {
             [nome, usuario, senhaHash, cargo, 'PENDENTE']
         );
 
-        // 2. Tenta enviar o e-mail, mas não interrompe o fluxo se der erro
-        try {
-            await transporter.sendMail({
-                from: '"Sistema J&E" <' + process.env.EMAIL_USER + '>',
-                to: process.env.EMAIL_USER, // Envia para você mesmo
-                subject: '🚨 Novo Cadastro: Aguardando Aprovação',
-                text: `Novo usuário solicitado:\nNome: ${nome}\nUsuário: ${usuario}\nCargo: ${cargo}`
-            });
-        } catch (emailErr) {
-            console.error("Erro ao enviar e-mail de aviso (o usuário foi cadastrado mesmo assim):", emailErr);
+        if (transporter) {
+            try {
+                await transporter.sendMail({
+                    from: `"Sistema J&E" <${process.env.EMAIL_USER}>`,
+                    to: process.env.EMAIL_USER,
+                    subject: '🚨 Novo Cadastro: Aguardando Aprovação',
+                    text: `Novo usuário solicitado:\nNome: ${nome}\nUsuário: ${usuario}\nCargo: ${cargo}`
+                });
+            } catch (emailErr) {
+                console.error("Erro ao enviar e-mail de aviso (usuário salvo mesmo assim):", emailErr);
+            }
         }
 
         res.json({ success: true, message: "Cadastro enviado! Aguarde liberação." });
+        
     } catch (err) {
         console.error("Erro ao registrar usuário", err);
         res.status(500).json({ success: false, message: "Erro ao processar cadastro." });
