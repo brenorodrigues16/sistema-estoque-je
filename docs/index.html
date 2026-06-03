@@ -152,6 +152,24 @@
   
     <script src="util.js"></script>
     <script>
+
+
+        // Exemplo de como implementar no seu script do Dashboard (index.html)
+document.addEventListener('DOMContentLoaded', () => {
+    const cargoUsuario = localStorage.getItem('cargo');
+
+    // Supondo que você tenha um elemento no menu com id="menu-admin"
+    const menuAdmin = document.getElementById('menu-admin');
+
+    if (menuAdmin) {
+        if (cargoUsuario === 'Administrador') {
+            menuAdmin.style.display = 'block';
+        } else {
+            menuAdmin.style.display = 'none'; // Esconde para quem não é admin
+        }
+    }
+});        
+
         function atualizarRelogio() {
             const elementoData = document.getElementById('data-atual');
             const agora = new Date();

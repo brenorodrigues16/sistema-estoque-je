@@ -293,16 +293,45 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-app.post('/api/login/registrar', async (req, res) => {
+const nodemailer = require('nodemailer');
 
+// Configure o transporter uma vez, fora das rotas
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'breno.rodriguesdednow@gmail.com', // Coloque seu e-mail aqui
+        pass: 'suem-ivmo-ipyg-dipu' // Coloque sua Senha de App do Google aqui
+    }
+});
+
+app.post('/api/login/registrar', async (req, res) => {
     const { nome, usuario, senha, cargo } = req.body;
+    
     try {
         const senhaHash = await criptografarSenha(senha);
-        await pool.query('INSERT INTO usuarios (nome, usuario, senha, cargo, status) VALUES ($1, $2, $3, $4, $5)', [nome, usuario, senhaHash, cargo, 'PENDENTE']);
-        res.json({ success: true, message: "Enviado!" });
+        
+        await pool.query(
+            'INSERT INTO usuarios (nome, usuario, senha, cargo, status) VALUES ($1, $2, $3, $4, $5)', 
+            [nome, usuario, senhaHash, cargo, 'PENDENTE']
+        );
+
+        // 2. Envia o e-mail de aviso para VOCÊ
+        await transporter.sendMail({
+            from: '"Sistema de Fábrica" <breno.rodriguesdednow@gmail.com>',
+            to: 'breno.rodriguesdednow@gmail.com', // O seu e-mail que receberá o aviso
+            subject: '🚨 Novo Cadastro: Aguardando Aprovação',
+            text: `Um novo colaborador solicitou acesso:
+            Nome: ${nome}
+            Usuário: ${usuario}
+            Cargo Selecionado: ${cargo}
+            
+            Acesse o banco de dados para alterar o status de 'PENDENTE' para 'ATIVO'.`
+        });
+
+        res.json({ success: true, message: "Cadastro enviado! Aguarde a aprovação." });
     } catch (err) {
         console.error("Erro ao registrar usuário", err);
-        res.status(500).json({ success: false });
+        res.status(500).json({ success: false, message: "Erro ao processar cadastro." });
     }
 });
 
