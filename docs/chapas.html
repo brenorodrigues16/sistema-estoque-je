@@ -216,7 +216,7 @@
                 });
 
                 if (formValues) {
-                    const response = await fetch(`${API_BASE}/api/chapas`, {
+                    const response = await fetch(`${API_BASE}/chapas`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(formValues)
