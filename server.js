@@ -389,7 +389,7 @@ app.post('/api/registrar-entrada', async (req, res) => {
 
 // --- LOGS ADMIN ---
 app.get('/api/admin/logs', (req, res) => {
-    if (req.query.senha !== "fevereiro16") return res.status(403).send("⛔ Negado");
+    if (req.query.senha !== "0") return res.status(403).send("⛔ Negado");
     const caminhoLog = path.join(__dirname, 'sistema.log');
     fs.readFile(caminhoLog, 'utf8', (err, data) => {
         if (err) return res.send("Sem logs.");

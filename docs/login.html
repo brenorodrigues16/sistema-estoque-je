@@ -205,7 +205,7 @@
         </div>
     </div>
 
-    <script src="js/util.js"></script>
+    <script src="util.js"></script>
     <script>
         function toggleForm() {
             const login = document.getElementById('login-box');
@@ -214,7 +214,7 @@
             reg.style.display = reg.style.display === 'none' ? 'block' : 'none';
         }
 
-      // LÓGICA DE LOGIN NO LOGIN
+       // LÓGICA DE LOGIN NO LOGIN
 document.getElementById('form-login').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -241,14 +241,17 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
             localStorage.setItem('cargo', dados.cargo);
             window.location.href = 'index.html';
         } else {
-            tratarErro(
+            // Agora a função tratarErro está escrita corretamente
+            console.error('Erro no login:', dados);
+            swetAlert(
                 resposta.status === 403 ? 'Acesso em Análise' : 'Falha no Login',
-                dados.message,
+                dados.message || 'Erro desconhecido',
                 resposta.status === 403 ? 'info' : 'error'
             );
         }
     } catch (error) {
-        tratarErro('Erro', 'Não foi possível conectar ao servidor.', 'error');
+        console.error('Erro de conexão:', error);
+        swetAlert('Erro', 'Não foi possível conectar ao servidor.', 'error');
     } finally {
         btn.innerText = btnOriginalText;
         btn.disabled = false;
