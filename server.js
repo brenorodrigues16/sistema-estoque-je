@@ -407,62 +407,74 @@ app.get('/api/admin/logs', (req, res) => {
 
 // --- ROTAS DE SAÍDAS E ENTREGAS ---
 
-//  Buscar todas as saídas (GET)
-app.get('/api/saidas', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT * FROM saidas ORDER BY data_saida DESC');
-        res.json(result.rows);
-    } catch (err) { res.status(500).json({ error: err.message }); }
-});
 
-//  Finalizar chegada (POST)
-app.post('/api/finalizar_rota/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        await pool.query(
-            'UPDATE saidas SET data_chegada = NOW(), status = $1 WHERE id = $2', 
-            ['concluído', id]
-        );
-        res.json({ success: true });
-    } catch (err) {
-        console.error("Erro no servidor:", err);
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// Rota alternativa para registrar carga (com verificação de estoque)
+// 1. Rota para Registrar a Saída e reduzir estoque
 app.post('/api/registrar-carga', async (req, res) => {
-    const { caminhao, itens } = req.body; // itens é um array: [{codigo, qtd}, ...]
-    
+    const { caminhao, itens } = req.body;
     const client = await pool.connect();
+    
     try {
-        await client.query('BEGIN'); // Inicia transação
+        await client.query('BEGIN'); // Inicia a transação segura
 
         for (const item of itens) {
-            // 1. Verifica se tem estoque
+            // Buscamos o item no banco usando o código como TEXTO (sem converter para número)
+            console.log("Buscando código no banco:", item.codigo);
             const check = await client.query('SELECT quantidade FROM caixas WHERE codigo = $1', [item.codigo]);
             
-            if (check.rows.length === 0 || check.rows[0].quantidade < item.quantidade) {
-                throw new Error(`Estoque insuficiente para o código ${item.codigo}`);
+            if (check.rows.length === 0) {
+                throw new Error(`Código ${item.codigo} não encontrado no estoque.`);
             }
 
-            // 2. Reduz o estoque
+            const estoqueAtual = parseInt(check.rows[0].quantidade);
+            if (estoqueAtual < item.quantidade) {
+                throw new Error(`Estoque insuficiente para ${item.codigo}. Temos apenas ${estoqueAtual}.`);
+            }
+
+            // Reduz o estoque
             await client.query('UPDATE caixas SET quantidade = quantidade - $1 WHERE codigo = $2', [item.quantidade, item.codigo]);
         }
 
-        // 3. Salva a saída (pode salvar os itens como JSON na coluna carga)
-        await client.query('INSERT INTO saidas (caminhao, carga_json, status) VALUES ($1, $2, $3)', 
-            [caminhao, JSON.stringify(itens), 'pendente']);
+        // Insere na tabela de saídas
+        await client.query(
+            'INSERT INTO saidas (caminhao, carga_json, data_saida, status) VALUES ($1, $2, $3, $4)',
+            [caminhao, JSON.stringify(itens), new Date(), 'pendente']
+        );
 
         await client.query('COMMIT');
         res.json({ success: true });
+
     } catch (err) {
         await client.query('ROLLBACK');
+        console.error("Erro na API de saída:", err.message);
         res.status(400).json({ error: err.message });
     } finally {
         client.release();
     }
 });
+
+// 2. Rota para Listar as Saídas (usada na sua função carregarTabelaSaidas)
+app.get('/api/saidas', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM saidas ORDER BY id DESC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 3. Rota para Registrar Chegada (muda status para concluído)
+app.post('/api/finalizar_rota/:id', async (req, res) => {
+    try {
+        await pool.query(
+            'UPDATE saidas SET data_chegada = NOW(), status = $1 WHERE id = $2', 
+            ['concluído', req.params.id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 app.listen(PORT, () => {
     console.log(`Servidor J&E rodando na porta${PORT}`);

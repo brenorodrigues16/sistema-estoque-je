@@ -82,7 +82,7 @@
     <div class="form-row">
        <input type="text" id="in-caminhao" placeholder="Caminhão:" required>
         <input type="text" id="in-cliente" placeholder="Cliente:" required>
-        <input type="number" id="in-codigo" placeholder="Código da caixa:" required>
+        <input type="text" id="in-codigo" placeholder="Código da caixa:" required>
         <input type="number" id="in-qtd" placeholder="Quantidade:" required>
         <input type="datetime-local" id="in-data" placeholder="Data da saida:" required>
     </div>
@@ -163,26 +163,31 @@
         }
 
         const listaItensHtml = itens.length > 0 
-            ? itens.map(i => `<p>Cód: ${i.codigo || i.cod} | Qtd: ${i.quantidade || i.qtd}</p>`).join('')
+            ? itens.map(i => `<p><strong>cliente:</strong> ${i.cliente || i.cliente} <strong>| Código:</strong> ${i.codigo || i.cod} <strong>| Qtd:</strong> ${i.quantidade || i.qtd}</p>`).join('')
             : '<p>Sem itens</p>';
 
         const linha = `
         <tr>
             <td>${item.caminhao || '---'}</td>
             <td>
-                <div class="dropdown">
-                    <span style="cursor: pointer; color: blue;">Ver Carga (${itens.length})</span>
-                    <div class="dropdown-content">${listaItensHtml}</div>
+                <div class="hover-trigger">
+                    <span style="cursor: help; text-decoration: underline;">
+                        Ver Carga
+                    </span>
+                    <div class="hover-content">
+                        ${listaItensHtml}
+                    </div>
                 </div>
             </td>
             <td>${item.data_saida ? new Date(item.data_saida).toLocaleString() : '---'}</td>
             <td>${botaoChegada}</td>
             <td><span class="badge badge-${statusFormatado}">${item.status || 'Pendente'}</span></td>
         </tr>`;
+        
         tbody.innerHTML += linha;
     });
 }
-            
+
 
 let carrinhoCarga = [];
 
@@ -209,9 +214,10 @@ function adicionarItem() {
         <td>${item.cliente}</td>
         <td>${item.codigo}</td>
         <td>${item.quantidade}</td>
-        <td><button type="button" class="btn-vermelho" onclick="removerItem(${carrinhoCarga.length - 1})">X</button></td>
+        <td><button type="button" class="btn-vermelho" onclick="removerItem(${carrinhoCarga.length - 1})">remover</button></td>
     </tr>`;
-
+     
+    clienteInput.value = '';
     codigoInput.value = '';
     qtdInput.value = '';
 }

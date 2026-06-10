@@ -680,7 +680,7 @@ body, html {
 /* Container que permite o hover */
 .row-container { position: relative; }
 
-.hover-trigger { cursor: help; position: relative; }
+.hover-trigger {cursor:auto; position: relative; }
 
 .hover-content {
     display: none;
