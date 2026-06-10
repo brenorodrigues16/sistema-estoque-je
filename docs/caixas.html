@@ -53,6 +53,9 @@
                     <li class="menu-item" onclick="window.location.href='entrada_chapas.html'">
                         <i class="fas fa-truck-loading"></i> Entrada de Chapas
                     </li>
+                    <li class="menu-item" onclick="window.location.href='saidas.html'">
+                        <i class="fas fa-truck-moving"></i> Saídas/Entregas
+                    </li>
                 </ul>
             </nav>
 
@@ -73,7 +76,7 @@
             </div>
         </aside>
 
-        <main class="content">
+        <main class="content" style="display: flex; flex-direction: column;">
             <header class="top-bar">
                 <strong><span>ESTOQUE - CAIXAS</span></strong> 
                 <strong><span class="date-now" id="data-atual"></span></strong> 
@@ -89,11 +92,13 @@
                     <i class="fas fa-plus"></i> Registrar Nova Caixa
                 </button>
             </div>
-
-            <div class="tabela-container">
-                <h4 style="margin-bottom: 15px; color: var(--sidebar-color); display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-clipboard-list"></i> CONTROLE DE CAIXAS PRONTAS</h4>
-                <table id="table-container">
+             
+            <section class="table-container">
+                <div class="card-header">
+                   <h3><i class="fas fa-clipboard-list"></i> CONTROLE DE CAIXAS PRONTAS</h3>
+                </div>
+            <div class="table-responsive">
+                <table id="tabela-movimentacoes">
                     <thead>
                         <tr>
                             <th>CLIENTE</th>
@@ -104,9 +109,12 @@
                             <th style="text-align: center;">EDITAR</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-corpo-caixas"></tbody>
+                    <tbody id="tabela-corpo-caixas">
+                        <tr><td colspan="6" style="text-align: center;">Carregando dados...</td></tr>
+                    </tbody>
                 </table>
-            </div>
+              </div>
+            </section>
         </main>
     </div>
 
@@ -119,14 +127,16 @@
         </ul>
     </div>
 
-    <script src="js/util.js"></script>
+    <script src="util.js"></script>
     <script>
         const API_BASE = '/api/caixas';
         const usuarioLogado = localStorage.getItem('usuario') || 'Sistema';
 
         async function carregarCaixas() {
             try {
-                const resp = await fetch(`${API_BASE}`);
+                const resp = await fetch(API_BASE);
+                if(!resp.ok) throw new Error('Falha na resposta do servidor');
+
                 const caixas = await resp.json();
                 const tabelaCorpo = document.getElementById('tabela-corpo-caixas'); 
                 tabelaCorpo.innerHTML = '';
@@ -155,83 +165,103 @@
         }
 
         async function novoRegistro() {
-            const { value: formValues } = await Swal.fire({
-                title: 'Registrar Nova Caixa',
-                html: `
-                 <div class="swal-container-custom" style="display: flex; flex-direction: column; text-align: left;">
-                    <label class="swal-label">Nome do cliente:</label>
-                    <input id="swal-cliente" class="swal2-input" placeholder="Cliente">
-                    <label class="swal-label">Código Referência:</label>
-                    <input id="swal-codigo" class="swal2-input" placeholder="Código">
-                    <label class="swal-label">Quantidade:</label>
-                    <input id="swal-qtd" class="swal2-input" type="number" placeholder="Quantidade">
-                    <label class="swal-label">Data de Fabricação:</label>
-                    <input id="swal-data" class="swal2-input" type="date">
-                    <label class="swal-label">Responsável:</label>
-                    <input id="swal-responsavel" class="swal2-input" value="${usuarioLogado}">
-                    </div>`,
-                preConfirm: () => {
-                    return {
-                        cliente: document.getElementById('swal-cliente').value,
-                        codigo: document.getElementById('swal-codigo').value,
-                        quantidade: document.getElementById('swal-qtd').value,
-                        data_fabricacao: document.getElementById('swal-data').value,
-                        responsavel: usuarioLogado // Enviando o usuário logado
-                    };
-                }
+    // 1. Abre o modal e espera o usuário confirmar
+    const { value: formValues } = await Swal.fire({
+        title: 'Registrar Nova Caixa',
+        html: `
+            <div class="swal-container-custom" style="display: flex; flex-direction: column; text-align: left;">
+                <label class="swal-label">Nome do cliente:</label>
+                <input id="swal-cliente" class="swal2-input" placeholder="Cliente">
+                <label class="swal-label">Código Referência:</label>
+                <input id="swal-codigo" class="swal2-input" placeholder="Código">
+                <label class="swal-label">Quantidade:</label>
+                <input id="swal-qtd" class="swal2-input" type="number" placeholder="Quantidade">
+                <label class="swal-label">Data de Fabricação:</label>
+                <input id="swal-data" class="swal2-input" type="date">
+                <label class="swal-label">Responsável:</label>
+                <input id="swal-responsavel" class="swal2-input" value="${usuarioLogado}" readonly>
+            </div>`,
+        preConfirm: () => {
+            return {
+                cliente: document.getElementById('swal-cliente').value,
+                codigo: document.getElementById('swal-codigo').value,
+                quantidade: document.getElementById('swal-qtd').value,
+                data_fabricacao: document.getElementById('swal-data').value,
+                responsavel: usuarioLogado
+            };
+        }
+    });
+
+    // 2. Se o usuário confirmou e preencheu, faz o POST
+    if (formValues) {
+        try {
+            const response = await fetch('/api/caixas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formValues)
             });
 
-            if (formValues) {
-                try {
-                    await fetch(`${API_BASE}caixas`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formValues)
-                    });
-                    carregarCaixas();
-                } catch (err) { tratarErro("Erro ao cadastrar caixa:", err); }
-            }
-        }
+            if (!response.ok) throw new Error('Erro ao salvar no servidor');
 
-        async function editarCaixa(id, clienteAt, codigoAt, qtdAt, dataAt, respAt) {
-            const { value: formValues } = await Swal.fire({
-                title: 'Ajustar Registro',
-                html: `
-                <div class="swal-container-custom" style="display: flex; flex-direction: column; text-align: left;">
-                    <label class="swal-label">Nome do cliente:</label>
-                    <input id="edit-cliente" class="swal2-input" value="${clienteAt}">
-                    <label class="swal-label">Código Referência:</label>
-                    <input id="edit-codigo" class="swal2-input" value="${codigoAt}">
-                    <label class="swal-label">Quantidade:</label>
-                    <input id="edit-qtd" class="swal2-input" type="number" value="${qtdAt}">
-                    <label class="swal-label">Data de Fabricação:</label><strong style="color: var(--accent-red); font-size: 18px;">Atenção: É Necessário atualizar a data para SALVAR o ajuste!</strong>
-                    <input id="edit-data" class="swal2-input" type="date">
-                    <label class="swal-label">Responsável:</label><strong style="color: var(--accent-red); font-size: 12px;">Aqui não é necessário atualizar, o sistema ja faz o registro do responsável</strong>
-                    <input id="edit-responsavel" class="swal2-input" value="${respAt}" readonly>
-                    </div>`,
-                preConfirm: () => {
-                    return {
-                        id,
-                        cliente: document.getElementById('edit-cliente').value,
-                        codigo: document.getElementById('edit-codigo').value,
-                        quantidade: document.getElementById('edit-qtd').value,
-                        data_fabricacao: document.getElementById('edit-data').value,
-                        responsavel: usuarioLogado // Registrando quem editou
-                    }
-                }
+            // Recarrega a tabela após sucesso
+            carregarCaixas();
+            Swal.fire('Sucesso!', 'Caixa registrada com sucesso.', 'success');
+            
+        } catch (err) {
+            tratarErro("Erro ao cadastrar caixa:", err);
+        }
+    }
+}
+
+async function editarCaixa(id, clienteAt, codigoAt, qtdAt, dataAt, respAt) {
+    const { value: formValues } = await Swal.fire({
+        title: 'Ajustar Registro',
+        html: `
+            <div class="swal-container-custom" style="display: flex; flex-direction: column; text-align: left;">
+                <label class="swal-label">Nome do cliente:</label>
+                <input id="edit-cliente" class="swal2-input" value="${clienteAt}">
+                <label class="swal-label">Código Referência:</label>
+                <input id="edit-codigo" class="swal2-input" value="${codigoAt}">
+                <label class="swal-label">Quantidade:</label>
+                <input id="edit-qtd" class="swal2-input" type="number" value="${qtdAt}">
+                <label class="swal-label">Data de Fabricação:</label>
+                <strong style="color: var(--accent-red); font-size: 18px;">Atenção: É Necessário atualizar a data para SALVAR o ajuste!</strong>
+                <input id="edit-data" class="swal2-input" type="date">
+                <label class="swal-label">Responsável:</label>
+                <input id="edit-responsavel" class="swal2-input" value="${respAt}" readonly>
+            </div>`,
+        preConfirm: () => {
+            return {
+                id,
+                cliente: document.getElementById('edit-cliente').value,
+                codigo: document.getElementById('edit-codigo').value,
+                quantidade: document.getElementById('edit-qtd').value,
+                data_fabricacao: document.getElementById('edit-data').value,
+                responsavel: usuarioLogado 
+            };
+        }
+    });
+
+    if (formValues) {
+        try {
+            // O API_BASE já é '/api/caixas', então aqui usamos apenas '/editar'
+            // para formar a rota correta: '/api/caixas/editar'
+            const response = await fetch(`${API_BASE}/editar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formValues)
             });
 
-            if (formValues) {
-                try {
-                    await fetch(`${API_BASE}/caixas/editar`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formValues)
-                    });
-                    carregarCaixas();
-                } catch (err) { tratarErro("Erro ao ajustar caixa:", err); }
-            }
+            if (!response.ok) throw new Error('Falha ao atualizar o registro no servidor');
+
+            carregarCaixas();
+            Swal.fire('Sucesso!', 'Registro atualizado com sucesso.', 'success');
+
+        } catch (err) {
+            tratarErro("Erro ao ajustar caixa:", err);
         }
+    }
+}
 
         // ... (resto do seu código original de filtro, logout e contexto mantidos)
         function filtrarCaixas() {

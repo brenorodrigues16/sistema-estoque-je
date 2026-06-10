@@ -31,6 +31,11 @@ function logger(tipo, mensagem) {
     });
 }
 
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
+
 // --- ROTA PRINCIPAL ---
 app.get('/api', (req, res) => {
     res.sendFile(path.join(__dirname, 'docs', 'index.html'));
@@ -102,7 +107,7 @@ app.get('/api/tipos-onda', async (req, res) => {
     } catch (err) { res.status(500).json([]); }
 });
 
-// Busca tipos de onda (com underline - seu código tinha as duas versões)
+// Busca tipos de onda (com underline)
 app.get('/api/tipos_onda', async (req, res) => {
     try {
         const result = await pool.query('SELECT DISTINCT onda FROM chapas');
@@ -121,7 +126,7 @@ app.get('/api/verificar-estoque', async (req, res) => {
 
 // --- ROTAS DE PRODUÇÃO E PEDIDOS ---
 
-// Inicia produção e abate estoque de chapas
+// - - INICIA A PRODUCAO E (DIMINUI ESTOQUE DE CHAPAS {USADA}) - - //
 app.post('/api/produzir', async (req, res) => {
     const { cliente, referencia, tipo_onda, largura_chapa, comprimento_chapa, qtd_chapas_necessarias, qtd_programada, medida } = req.body;
     try {
@@ -137,7 +142,7 @@ app.post('/api/produzir', async (req, res) => {
     }
 });
 
-// Rota alternativa de produção (estava no seu código)
+// Rota alternativa de produção
 app.post('/api/producao', async (req, res) => {
     const { cliente, referencia, tipoOnda, quantidade } = req.body;
     try {
@@ -151,7 +156,7 @@ app.post('/api/producao', async (req, res) => {
 
 // --- ROTAS DE EXPEDIÇÃO E CONFERÊNCIA ---
 
-// Busca pedidos pendentes ou concluídos hoje
+// - - BUSCA PEDIDOS PENDENTES OU CONCLUIDOS = CARDS? - - //
 app.get('/api/pedidos-recentes', async (req, res) => {
     try {
         const query = `SELECT * FROM pedidos WHERE status = 'PENDENTE' OR (status = 'CONCLUÍDO' AND created_at::date = CURRENT_DATE) ORDER BY id DESC`;
@@ -160,7 +165,7 @@ app.get('/api/pedidos-recentes', async (req, res) => {
     } catch (error) { res.status(500).json({ error: error.message }); }
 });
 
-// Finaliza conferência do pedido e gera estoque de CAIXAS
+// - - CONFERENCIA E ENVIA PARA + CAIXAS - - // 
 app.post('/api/conferir-pedido', async (req, res) => {
     const { id, qtd_conferida, responsavel } = req.body;
     try {
@@ -178,20 +183,22 @@ app.post('/api/conferir-pedido', async (req, res) => {
 
 app.get('/api/caixas', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM caixas ORDER BY id DESC');
+        const result = await pool.query('SELECT * FROM caixas');
         res.json(result.rows);
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    } catch (err) {
+         res.status(500).json({ error: err.message });
+ }
 });
-
-app.post('/api/caixas', async (req, res) => {
+// - - REGISTRAR CAIXA - - //
+app.post('/api/registrar-caixa', async (req, res) => {
     const { cliente, codigo, quantidade, data_fabricacao, responsavel } = req.body;
     try {
         await pool.query("INSERT INTO caixas (cliente, codigo, quantidade, data_fabricacao, responsavel) VALUES ($1, $2, $3, $4, $5)", [cliente, codigo, quantidade, data_fabricacao, responsavel]);
         res.json({ success: true });
     } catch (err) { res.status(500).json({ success: false }); }
 });
-
-app.post('/api/caixas/ajustar-estoque', async (req, res) => {
+// - - AJUSTAR ESTOQUE DE CAIXAS - - // 
+app.post('/api/ajustar-estoque', async (req, res) => {
     const { id, mudanca } = req.body;
     try {
         await pool.query('UPDATE caixas SET quantidade = quantidade + $1 WHERE id = $2', [mudanca, id]);
@@ -268,20 +275,20 @@ app.post('/api/login', async (req, res) => {
         // 1. Busca o usuário
         const result = await pool.query('SELECT * FROM usuarios WHERE usuario = $1', [usuarioDigitado]);
         
+        const mensagemErro = "Usuário ou senha incorreto! Tente novamente.";
+
         if (result.rows.length === 0) {
-            return res.status(401).json({ success: false, message: "Usuário não encontrado" });
+            return res.status(401).json({ success: false, message: mensagemErro });
         }
 
         const usuarioBanco = result.rows[0];
 
-        // 2. AQUI ESTÁ O SEGREDO: Usar o bcrypt.compare
         const senhaCorreta = await bcrypt.compare(senhaDigitada, usuarioBanco.senha);
 
         if (!senhaCorreta) {
-            return res.status(401).json({ success: false, message: "Senha incorreta" });
+            return res.status(401).json({ success: false, message: mensagemErro });
         }
 
-        // 3. Verifica status
         if (usuarioBanco.status !== 'ATIVO') {
             return res.status(403).json({ success: false, message: "Pendente" });
         }
@@ -306,7 +313,7 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
         }
     });
 }
-
+// - - sistema de registro de usuario - - //
 app.post('/api/login/registrar', async (req, res) => {
     const { nome, usuario, senha, cargo } = req.body;
     try {
@@ -397,6 +404,66 @@ app.get('/api/admin/logs', (req, res) => {
     });
 });
 
+
+// --- ROTAS DE SAÍDAS E ENTREGAS ---
+
+//  Buscar todas as saídas (GET)
+app.get('/api/saidas', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM saidas ORDER BY data_saida DESC');
+        res.json(result.rows);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+//  Finalizar chegada (POST)
+app.post('/api/finalizar_rota/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        await pool.query(
+            'UPDATE saidas SET data_chegada = NOW(), status = $1 WHERE id = $2', 
+            ['concluído', id]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Erro no servidor:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Rota alternativa para registrar carga (com verificação de estoque)
+app.post('/api/registrar-carga', async (req, res) => {
+    const { caminhao, itens } = req.body; // itens é um array: [{codigo, qtd}, ...]
+    
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN'); // Inicia transação
+
+        for (const item of itens) {
+            // 1. Verifica se tem estoque
+            const check = await client.query('SELECT quantidade FROM caixas WHERE codigo = $1', [item.codigo]);
+            
+            if (check.rows.length === 0 || check.rows[0].quantidade < item.quantidade) {
+                throw new Error(`Estoque insuficiente para o código ${item.codigo}`);
+            }
+
+            // 2. Reduz o estoque
+            await client.query('UPDATE caixas SET quantidade = quantidade - $1 WHERE codigo = $2', [item.quantidade, item.codigo]);
+        }
+
+        // 3. Salva a saída (pode salvar os itens como JSON na coluna carga)
+        await client.query('INSERT INTO saidas (caminhao, carga_json, status) VALUES ($1, $2, $3)', 
+            [caminhao, JSON.stringify(itens), 'pendente']);
+
+        await client.query('COMMIT');
+        res.json({ success: true });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        res.status(400).json({ error: err.message });
+    } finally {
+        client.release();
+    }
+});
+
 app.listen(PORT, () => {
-    console.log(`[INFO] Servidor J&E rodando na porta ${PORT}`);
+    console.log(`Servidor J&E rodando na porta${PORT}`);
 });

@@ -214,7 +214,7 @@
             reg.style.display = reg.style.display === 'none' ? 'block' : 'none';
         }
 
-       // LÓGICA DE LOGIN NO LOGIN
+      // LÓGICA DE LOGIN
 document.getElementById('form-login').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -241,9 +241,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
             localStorage.setItem('cargo', dados.cargo);
             window.location.href = 'index.html';
         } else {
-            // Agora a função tratarErro está escrita corretamente
-            console.error('Erro no login:', dados);
-            swetAlert(
+            tratarErro(
                 resposta.status === 403 ? 'Acesso em Análise' : 'Falha no Login',
                 dados.message || 'Erro desconhecido',
                 resposta.status === 403 ? 'info' : 'error'
@@ -251,39 +249,42 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
         }
     } catch (error) {
         console.error('Erro de conexão:', error);
-        swetAlert('Erro', 'Não foi possível conectar ao servidor.', 'error');
+        tratarErro('Erro', 'Não foi possível conectar ao servidor.', 'error');
     } finally {
         btn.innerText = btnOriginalText;
         btn.disabled = false;
     }
 });
 
-        // LÓGICA DE REGISTRO
-        document.getElementById('form-register').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            try {
-                const resp = await fetch('/api/login/registrar', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ 
-                        nome: document.getElementById('reg-nome').value, 
-                        usuario: document.getElementById('reg-user').value, 
-                        senha: document.getElementById('reg-pass').value 
-                    })
-                });
-                const dados = await resp.json();
-                
-                tratarErro(
-                    resp.ok ? 'Sucesso!' : 'Erro',
-                    dados.message,
-                    resp.ok ? 'success' : 'error'
-                ).then(() => { 
-                    if(resp.ok) toggleForm(); 
-                });
-            } catch (err) {
-                tratarErro('Erro', 'Servidor offline.', 'error');
-            }
+// LÓGICA DE REGISTRO
+document.getElementById('form-register').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+        const resp = await fetch('/api/login/registrar', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ 
+                nome: document.getElementById('reg-nome').value, 
+                usuario: document.getElementById('reg-user').value, 
+                senha: document.getElementById('reg-pass').value,
+                cargo: 'OPERADOR' // Adicionado caso o banco exija este campo
+            })
         });
+        const dados = await resp.json();
+        
+        tratarErro(
+            resp.ok ? 'Sucesso!' : 'Erro',
+            dados.message,
+            resp.ok ? 'success' : 'error'
+        );
+        
+        // Se deu sucesso, fecha o form sem usar .then()
+        if(resp.ok) toggleForm();
+
+    } catch (err) {
+        tratarErro('Erro', 'Servidor offline.', 'error');
+    }
+});
     </script>
 </body>
 </html>

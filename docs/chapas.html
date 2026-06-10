@@ -37,6 +37,7 @@
                     <li class="menu-item" onclick="window.location.href='perfil.html'"><i class="fas fa-user"></i> Perfil</li>
                     <li class="menu-item" onclick="window.location.href='expedicao.html'"><i class="fas fa-clipboard-list"></i> Expedição</li>
                     <li class="menu-item" onclick="window.location.href='entrada_chapas.html'"><i class="fas fa-truck-loading"></i> Entrada de Chapas</li>
+                    <li class="menu-item" onclick="window.location.href='saidas.html'"><i class="fas fa-truck-moving"></i> Saídas/Entregas</li>
                 </ul>
             </nav>
             
@@ -69,14 +70,16 @@
                     <input type="text" id="input-busca" placeholder="Buscar chapa por onda ou fornecedor..." style="width: 100%; padding: 12px 15px 12px 45px; border-radius: 8px; border: 1px solid #ddd;">
                 </div>
                 <button class="btn-add" style="background-color: #27ae60; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-plus"></i> Nova Chapa
+                    <i class="fas fa-plus"></i> Registrar Nova Chapa
                 </button>
             </div>
 
-            <div class="tabela-container">
-                <h4 style="margin-bottom: 15px; color: var(--sidebar-color); display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-table"></i> LISTA DE MATERIAIS</h4>
-                <table id="table-container">
+            <section class="table-container">
+                <div class="table-responsive">
+                    <h3><i class="fas fa-table"></i> LISTA DE MATERIAIS</h3>
+                </div>
+            <div class="table-responsive">
+                <table id="tabela-movimentacoes">
                     <thead>
                         <tr>
                             <th>ONDA / FORNECEDOR</th>
@@ -86,13 +89,16 @@
                             <th style="text-align: center;">AÇÕES</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-chapas"></tbody>
+                    <tbody id="tabela-chapas">
+                        <tr><td colspan="5" style="text-align: center;">Carregando dados...</td></tr>
+                    </tbody>
                 </table>
             </div>
+            </section>
         </main>
     </div>
 
-    <script src="js/js/util.js"></script>
+    <script src="util.js"></script>
     <script>
         const API_BASE = '/api';
         const usuarioLogado = localStorage.getItem('usuario') || 'Sistema';
@@ -176,7 +182,7 @@
                 });
 
                 if (formValues) {
-                    const response = await fetch(`${API_BASE}/chapas/${id}/ajustar-estoque`, {
+                    const response = await fetch(`${API_BASE}/chapas/ajustar-estoque`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ id: id, ...formValues })
