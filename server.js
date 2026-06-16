@@ -394,6 +394,19 @@ app.post('/api/registrar-entrada', async (req, res) => {
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
+// --- BUSCAR ENTRADAS DO DIA ---
+app.get('/api/entrada-chapas-hoje', async (req, res) => {
+    try {
+        console.log("🔍 Buscando entradas...");
+        const result = await pool.query('SELECT * FROM entrada_chapas ORDER BY id DESC');
+        console.log("✅ Entradas encontradas:", result.rows.length);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("❌ ERRO CRÍTICO:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // --- LOGS ADMIN ---
 app.get('/api/admin/logs', (req, res) => {
     if (req.query.senha !== "0") return res.status(403).send("⛔ Negado");

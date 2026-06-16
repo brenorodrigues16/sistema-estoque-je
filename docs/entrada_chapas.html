@@ -84,7 +84,7 @@
                 <strong><span class="date-now" id="data-atual"></span></strong> 
             </header>
 
-            <form id="form-entrada" class="tabela-container" style="margin-bottom: 20px;">
+            <form id="form-entrada" class="form-entrada-fixo" style="margin-bottom: 20px;">
     <h2>Registrar Entrada de Chapas</h2>
     <br>
     
@@ -101,9 +101,10 @@
     </button>
 </form>
 
-    <div class="card-header">
-        <div class="tabela-container">
-    <h3>Entradas do Dia</h3>
+    <section class="table-container">
+                <div class="card-header">
+                   <h3><i class="fas fa-clipboard-list"></i> ENTRADA DE CHAPAS - HOJE</h3>
+                </div>
     <table id="tabela-entradas">
         <thead>
             <tr>
@@ -121,12 +122,16 @@
 
       </main>
 
-      <script src="js/util.js"></script>
+      <script src="util.js"></script>
 <script>
 
-       async function carregarEntradas() {
+    async function carregarEntradas() {
     try {
         const resp = await fetch('/api/entrada-chapas-hoje');
+
+        if (!resp.ok) {
+            throw new Error(`Erro ${resp.status}: ${resp.statusText}`);
+        }
 
         if (localStorage.getItem('cargo') !== 'Operador') {
             document.getElementById('form-entrada').style.display = 'none';
@@ -135,6 +140,18 @@
         const entradas = await resp.json();
         const tbody = document.querySelector('#tabela-entradas tbody');
         tbody.innerHTML = '';
+
+        // Validação: se não for array, converte
+        if (!Array.isArray(entradas)) {
+            console.error("Resposta não é array:", entradas);
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Erro ao carregar dados</td></tr>';
+            return;
+        }
+
+        if (entradas.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#888;">Nenhuma entrada registrada hoje</td></tr>';
+            return;
+        }
 
         entradas.forEach(item => {
             tbody.innerHTML += `<tr>
@@ -146,6 +163,7 @@
             </tr>`;
         });
     } catch (error) {
+        console.error("Erro detalhado:", error);
         tratarErro('Erro ao carregar tabela de entradas do dia:', error);
     }
 }

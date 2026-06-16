@@ -132,7 +132,7 @@
     </main>
 </div>
 
-<script src="js/util.js"></script>
+<script src="util.js"></script>
 <script>
     // Mostrar/Esconder senha
     function verSenha(id) {
@@ -166,7 +166,7 @@
         }
 
         try {
-            const resp = await fetch('/api/atualizar-perfil', {
+            const resp = await fetch('/api/perfil/atualizar-perfil', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({

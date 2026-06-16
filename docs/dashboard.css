@@ -224,16 +224,29 @@ th {
 
 td { padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
 
-
 .badge {
-    padding: 5px 12px;
+    padding: 8px 16px;
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: bold;
+    display: inline-block;
 }
-.badge-entrada { background: #e8f5e9; color: #2e7d32; }
-.badge-saida { background: #ffebee; color: #c62828; }
 
+/* Status Pendente - Laranja */
+.badge-pendente {
+    background: #fff3cd !important;
+    color: #856404 !important;
+    border: 2px solid #ffc107 !important;
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.3) !important;
+}
+
+/* Status Concluído - Verde */
+.badge-concluído {
+    background: #d4edda !important;
+    color: #155724 !important;
+    border: 2px solid #28a745 !important;
+    box-shadow: 0 0 8px rgba(40, 167, 69, 0.3) !important;
+}
 
 @media (max-width: 768px) {
     .main-container { flex-direction: column; }
@@ -697,3 +710,30 @@ body, html {
 }
 
 .hover-trigger:hover .hover-content {display: block;}
+
+.form-entrada-fixo {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.form-entrada-fixo h2 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.form-entrada-fixo .form-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.form-entrada-fixo input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}

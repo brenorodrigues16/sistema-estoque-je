@@ -148,7 +148,7 @@
         // Botão de ação
         const botaoChegada = (statusFormatado === 'pendente') 
             ? `<button class="btn-vermelho" onclick="finalizarRota(${item.id})">Registrar Chegada</button>` 
-            : 'Concluído';
+            : (item.data_chegada ? new Date(item.data_chegada).toLocaleString('pt-BR') : 'Concluído');
 
         // Tratamento da Carga (JSON)
         let itens = [];
@@ -191,12 +191,35 @@
 
 let carrinhoCarga = [];
 
+function removerItem(index){
+    carrinhoCarga.splice(index, 1);
+
+    const tbody = document.getElementById('lista-carrinho');
+    tbody.innerHTML = '';
+
+    carrinhoCarga.forEach((item, idx) => {
+        tbody.innerHTML += `<tr>
+            <td>${item.caminhao}</td>
+            <td>${item.cliente}</td>
+            <td>${item.codigo}</td>
+            <td>${item.quantidade}</td>
+            <td>
+                <button type="button" class="btn-vermelho" onclick="removerItem(${idx})">
+                    <i class="fas fa-trash"></i> remover
+                </button>
+            </td>
+        </tr>`;
+    });
+}
+
 function adicionarItem() {
+    const caminhaoInput = document.getElementById('in-caminhao');
     const clienteInput = document.getElementById('in-cliente');
     const codigoInput = document.getElementById('in-codigo');
     const qtdInput = document.getElementById('in-qtd');
 
     const item = {
+        caminhao: caminhaoInput.value,
         cliente: clienteInput.value,
         codigo: codigoInput.value,
         quantidade: parseInt(qtdInput.value)
@@ -211,12 +234,14 @@ function adicionarItem() {
     
     const tbody = document.getElementById('lista-carrinho');
     tbody.innerHTML += `<tr>
+        <td>${item.caminhao}</td>
         <td>${item.cliente}</td>
         <td>${item.codigo}</td>
         <td>${item.quantidade}</td>
         <td><button type="button" class="btn-vermelho" onclick="removerItem(${carrinhoCarga.length - 1})">remover</button></td>
     </tr>`;
      
+    caminhaoInput.value = '';
     clienteInput.value = '';
     codigoInput.value = '';
     qtdInput.value = '';
@@ -244,14 +269,24 @@ async function finalizarCarga() {
         document.getElementById('lista-carrinho').innerHTML = ''; // Limpa a tabela visual
         carregarTabelaSaidas(); // Recarrega os registros
      } else {
-        const erro = await response.text()
-        console.error("Erro do servidor:", erro);
-        Swal.fire('Erro', 'Verifique o console (f12) para detalhes do erro 400.', 'error');
-     }
+        const erroText = await response.text()
+        console.error("❌ ERRO NA CARGA:", erroText);
+
+        let mensagemErro = 'Erro ao registrar carga.';
+        try {
+            const erroJson = JSON.parse(erroText);
+            mensagemErro = erroJson.error || mensagemErro;
+            console.error("📋 Detalhes:", erroJson);
+        } catch (e) {
+            console.error("⚠️ Não conseguiu fazer parse do erro:", erroText);
+        }
+
+        swal.fire('Erro ao registrar', mensagemErro, 'error');
+    }
 }
 
 // Função para finalizar rota e registrar chegada (do caminhão)
-             async function finalizarRota(idSaida) {
+            async function finalizarRota(idSaida) {
     const confirm = await Swal.fire({
         title: 'Confirmar chegada?',
         icon: 'question',
@@ -260,12 +295,15 @@ async function finalizarCarga() {
     });
 
     if (confirm.isConfirmed) {
+        const dataChegada = new Date().toISOString();
+        
         // Forçamos o método POST e definimos o header
         const response = await fetch('/api/finalizar_rota/' + idSaida, { 
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify({ data_chegada: dataChegada })
         });
         
         if (response.ok) {
