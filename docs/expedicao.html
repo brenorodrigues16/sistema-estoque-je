@@ -137,7 +137,7 @@
         }
 
         async function confirmarChegada(id, qtdOriginal) {
-            const { value: formValues } = await tratarErro({
+            const { value: formValues } = await Swal.fire({
                 title: 'Conferência de Carga',
                 html: `<label class="swal-label">Quantidade Real Produzida</label>
                        <input id="swal-qtd" class="swal2-input" type="number" min="1" value="${qtdOriginal}">`,

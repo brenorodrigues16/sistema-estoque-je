@@ -212,7 +212,7 @@ function removerItem(index){
     });
 }
 
-function adicionarItem() {
+async function adicionarItem() {
     const caminhaoInput = document.getElementById('in-caminhao');
     const clienteInput = document.getElementById('in-cliente');
     const codigoInput = document.getElementById('in-codigo');
@@ -225,26 +225,65 @@ function adicionarItem() {
         quantidade: parseInt(qtdInput.value)
     };
 
+    //  VALIDAÇÃO BÁSICA
     if (!item.cliente || !item.codigo || isNaN(item.quantidade)) {
         Swal.fire('Atenção', 'Preencha cliente, código e quantidade corretamente!', 'warning');
         return;
     }
 
-    carrinhoCarga.push(item);
-    
-    const tbody = document.getElementById('lista-carrinho');
-    tbody.innerHTML += `<tr>
-        <td>${item.caminhao}</td>
-        <td>${item.cliente}</td>
-        <td>${item.codigo}</td>
-        <td>${item.quantidade}</td>
-        <td><button type="button" class="btn-vermelho" onclick="removerItem(${carrinhoCarga.length - 1})">remover</button></td>
-    </tr>`;
-     
-    caminhaoInput.value = '';
-    clienteInput.value = '';
-    codigoInput.value = '';
-    qtdInput.value = '';
+    //  VALIDAÇÃO DE QUANTIDADE
+    if (item.quantidade <= 0) {
+        Swal.fire('❌ Quantidade Inválida!', 
+            `A quantidade deve ser maior que 0!\n\nVocê digitou: ${item.quantidade}`, 
+            'error');
+        return;
+    }
+
+    //  VALIDAÇÃO DE DUPLICATA 
+    const jaExiste = carrinhoCarga.some(i =>
+        i.cliente.toLowerCase().trim() === item.cliente.toLowerCase().trim() &&
+        i.codigo.toLowerCase().trim() === item.codigo.toLowerCase().trim()
+    );
+
+    if (jaExiste) {
+        Swal.fire ('⚠️ Duplicata Detectada!', 
+            `A caixa "${item.codigo}" do cliente "${item.cliente}" já foi adicionada à carga!\n\nNão é permitido carregar a mesma caixa duas vezes.`, 
+            'warning');
+        return;
+    }
+
+    //  VALIDAÇÃO NO BANCO
+    try {
+        const respValidacao = await fetch(`/api/validar-caixa?cliente=${encodeURIComponent(item.cliente)}&codigo=${encodeURIComponent(item.codigo)}&quantidade=${item.quantidade}`);
+        const validacao = await respValidacao.json();
+
+        if (!validacao.success) {
+            Swal.fire('Erro na Validação', validacao.error, 'error');
+            return;
+        }
+
+        //  SE PASSOU NA VALIDAÇÃO, ADICIONA AO CARRINHO
+        carrinhoCarga.push(item);
+        
+        const tbody = document.getElementById('lista-carrinho');
+        tbody.innerHTML += `<tr>
+            <td>${item.caminhao}</td>
+            <td>${item.cliente}</td>
+            <td>${item.codigo}</td>
+            <td>${item.quantidade}</td>
+            <td><button type="button" class="btn-vermelho" onclick="removerItem(${carrinhoCarga.length - 1})">remover</button></td>
+        </tr>`;
+        
+        Swal.fire('Sucesso!', 'Item adicionado ao carrinho.', 'success');
+        
+        clienteInput.value = '';
+        codigoInput.value = '';
+        qtdInput.value = '';
+
+    } catch (err) {
+        Swal.fire('Erro', 'Problema ao validar com servidor', 'error');
+        console.error(err);
+    }
 }
 
 async function finalizarCarga() {

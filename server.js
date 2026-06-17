@@ -193,7 +193,12 @@ app.get('/api/caixas', async (req, res) => {
 app.post('/api/registrar-caixa', async (req, res) => {
     const { cliente, codigo, quantidade, data_fabricacao, responsavel } = req.body;
     try {
-        await pool.query("INSERT INTO caixas (cliente, codigo, quantidade, data_fabricacao, responsavel) VALUES ($1, $2, $3, $4, $5)", [cliente, codigo, quantidade, data_fabricacao, responsavel]);
+        // Sanitizar inputs
+        const clienteLimpo = sanitizarTextoCompleto(cliente);
+        const codigoLimpo = sanitizarInput(codigo);
+        const responsavelLimpo = sanitizarInput(responsavel);
+
+        await pool.query("INSERT INTO caixas (cliente, codigo, quantidade, data_fabricacao, responsavel) VALUES ($1, $2, $3, $4, $5)", [clienteLimpo, codigoLimpo, quantidade, data_fabricacao, responsavelLimpo]);
         res.json({ success: true });
     } catch (err) { res.status(500).json({ success: false }); }
 });
@@ -246,8 +251,10 @@ app.get('/api/dashboard-stats', async (req, res) => {
         const resProducaoHoje = await pool.query(`SELECT SUM(quantidade) as total FROM movimentacoes WHERE tipo = 'ENTRADA ESTOQUE' AND data::date = CURRENT_DATE`);
         const resAlertasChapas = await pool.query(`SELECT COUNT(*) as total FROM chapas WHERE quantidade <= 500`);
         const resAlertasCaixas = await pool.query(`SELECT COUNT(*) as total FROM caixas WHERE quantidade <= 100`);
+        const resEstoqueCaixas = await pool.query('SELECT SUM(quantidade) as total FROM caixas');
         res.json({
             estoqueChapas: resChapasTotal.rows[0].total || 0,
+            estoqueCaixas: resEstoqueCaixas.rows[0].total || 0,
             chapasRecebidasHoje: resChapasHoje.rows[0].total || 0,
             producaoHoje: resProducaoHoje.rows[0].total || 0,
             alertasCriticosChapas: resAlertasChapas.rows[0].total || 0,
@@ -255,6 +262,51 @@ app.get('/api/dashboard-stats', async (req, res) => {
         });
     } catch (error) { res.status(500).json({ error: "Erro" }); }
 });
+
+
+// --- SISTEMA DE PROTEÇÃO CONTRA BRUTE FORCE ---
+const loginAttempts = {}; // { usuario: { tentativas: 5, bloqueadoAte: timestamp } }
+
+function verificarBloqueio(usuario) {
+    if (!loginAttempts[usuario]) return { permitido: true };
+    
+    const agora = Date.now();
+    const dados = loginAttempts[usuario];
+    
+    // Se passou do tempo de bloqueio, libera
+    if (dados.bloqueadoAte && agora > dados.bloqueadoAte) {
+        delete loginAttempts[usuario];
+        return { permitido: true };
+    }
+    
+    // Se ainda está bloqueado
+    if (dados.bloqueadoAte && agora <= dados.bloqueadoAte) {
+        const minutos = Math.ceil((dados.bloqueadoAte - agora) / 1000 / 60);
+        return { 
+            permitido: false, 
+            mensagem: `Conta temporariamente bloqueada. Tente novamente em ${minutos} minuto(s).` 
+        };
+    }
+    
+    return { permitido: true };
+}
+
+function registrarTentativaFalha(usuario) {
+    if (!loginAttempts[usuario]) {
+        loginAttempts[usuario] = { tentativas: 0, bloqueadoAte: null };
+    }
+    
+    loginAttempts[usuario].tentativas++;
+    
+    // Bloqueia após 5 tentativas por 15 minutos
+    if (loginAttempts[usuario].tentativas >= 5) {
+        loginAttempts[usuario].bloqueadoAte = Date.now() + (15 * 60 * 1000); // 15 minutos
+    }
+}
+
+function limparTentativas(usuario) {
+    delete loginAttempts[usuario];
+}
 
 
 // --- SISTEMA DE CRIPTOGRAFIA DE SENHAS ---
@@ -272,12 +324,19 @@ app.post('/api/login', async (req, res) => {
     const senhaDigitada = req.body.senha ? req.body.senha.trim() : "";
 
     try {
-        // 1. Busca o usuário
+        //  VERIFICAR SE ESTÁ BLOQUEADO
+        const bloqueio = verificarBloqueio(usuarioDigitado);
+        if (!bloqueio.permitido) {
+            return res.status(429).json({ success: false, message: bloqueio.mensagem });
+        }
+        
+        //  Busca o usuário
         const result = await pool.query('SELECT * FROM usuarios WHERE usuario = $1', [usuarioDigitado]);
         
         const mensagemErro = "Usuário ou senha incorreto! Tente novamente.";
 
         if (result.rows.length === 0) {
+            registrarTentativaFalha(usuarioDigitado);  // ← ADICIONE ESTA LINHA
             return res.status(401).json({ success: false, message: mensagemErro });
         }
 
@@ -286,6 +345,7 @@ app.post('/api/login', async (req, res) => {
         const senhaCorreta = await bcrypt.compare(senhaDigitada, usuarioBanco.senha);
 
         if (!senhaCorreta) {
+            registrarTentativaFalha(usuarioDigitado);  // ← ADICIONE ESTA LINHA
             return res.status(401).json({ success: false, message: mensagemErro });
         }
 
@@ -293,12 +353,33 @@ app.post('/api/login', async (req, res) => {
             return res.status(403).json({ success: false, message: "Pendente" });
         }
 
+        // ✅ Login bem-sucedido - limpar tentativas
+        limparTentativas(usuarioDigitado);
         res.json({ success: true, nome: usuarioBanco.nome, cargo: usuarioBanco.cargo });
     } catch (err) {
         console.error("Erro no login:", err);
         res.status(500).json({ success: false, message: "Erro interno no servidor" });
     }
 });
+
+// --- SANITIZAÇÃO DE INPUTS (XSS Protection) ---
+function sanitizarInput(texto) {
+    if (!texto) return '';
+    
+    return texto
+        .replace(/[<>\"\']/g, '') // Remove caracteres perigosos
+        .trim()
+        .substring(0, 255); // Limita tamanho
+}
+
+function sanitizarTextoCompleto(texto) {
+    if (!texto) return '';
+    
+    return texto
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
+        .replace(/<[^>]*>/g, '') // Remove todas as tags HTML
+        .trim();
+}
 
 const nodemailer = require('nodemailer');
 
@@ -316,13 +397,18 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
 // - - sistema de registro de usuario - - //
 app.post('/api/login/registrar', async (req, res) => {
     const { nome, usuario, senha, cargo } = req.body;
+    
+    // Sanitizar inputs
+    const nomeLimpo = sanitizarTextoCompleto(nome);
+    const usuarioLimpo = sanitizarInput(usuario);
+    const cargoLimpo = sanitizarInput(cargo);
+
     try {
         const senhaHash = await criptografarSenha(senha);
         
-        // 1. Salva no banco de dados
         await pool.query(
             'INSERT INTO usuarios (nome, usuario, senha, cargo, status) VALUES ($1, $2, $3, $4, $5)', 
-            [nome, usuario, senhaHash, cargo, 'PENDENTE']
+            [nomeLimpo, usuarioLimpo, senhaHash, cargoLimpo, 'PENDENTE']
         );
 
         if (transporter) {
@@ -386,10 +472,16 @@ app.get('/api/movimentacoes', async (req, res) => {
 app.post('/api/registrar-entrada', async (req, res) => {
     const { onda, comprimento, largura, fornecedor, quantidade, usuario } = req.body;
     try {
-        const check = await pool.query('SELECT id FROM chapas WHERE onda = $1 AND comprimento = $2 AND largura = $3 AND fornecedor = $4', [onda, comprimento, largura, fornecedor]);
+        // Sanitizar inputs
+        const ondaLimpa = sanitizarInput(onda);
+        const fornecedorLimpo = sanitizarInput(fornecedor);
+        const usuarioLimpo = sanitizarInput(usuario);
+
+        const check = await pool.query('SELECT id FROM chapas WHERE onda = $1 AND comprimento = $2 AND largura = $3 AND fornecedor = $4', [ondaLimpa, comprimento, largura, fornecedorLimpo]);
         if (check.rows.length > 0) await pool.query('UPDATE chapas SET quantidade = quantidade + $1 WHERE id = $2', [quantidade, check.rows[0].id]);
-        else await pool.query('INSERT INTO chapas (onda, comprimento, largura, fornecedor, quantidade) VALUES ($1, $2, $3, $4, $5)', [onda, comprimento, largura, fornecedor, quantidade]);
-        await pool.query('INSERT INTO entrada_chapas (usuario, onda, comprimento, largura, fornecedor, quantidade) VALUES ($1, $2, $3, $4, $5, $6)', [usuario, onda, comprimento, largura, fornecedor, quantidade]);
+        else await pool.query('INSERT INTO chapas (onda, comprimento, largura, fornecedor, quantidade) VALUES ($1, $2, $3, $4, $5)', [ondaLimpa, comprimento, largura, fornecedorLimpo, quantidade]);
+        await pool.query('INSERT INTO entrada_chapas (usuario, onda, comprimento, largura, fornecedor, quantidade) VALUES ($1, $2, $3, $4, $5, $6)', [usuarioLimpo, ondaLimpa, comprimento, largura, fornecedorLimpo, quantidade]);
+        await pool.query('INSERT INTO movimentacoes (tipo, descricao, quantidade, responsavel, data) VALUES ($1, $2, $3, $4, NOW())', ['ENTRADA', `Entrada de ${ondaLimpa}`, quantidade, usuarioLimpo]);
         res.json({ success: true });
     } catch (err) { res.status(500).json({ success: false }); }
 });
@@ -472,6 +564,35 @@ app.get('/api/saidas', async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+});
+
+// --- VALIDAR CAIXA ANTES DE SAIR ---
+app.get('/api/validar-caixa', async (req, res) => {
+    const { cliente, codigo, quantidade } = req.query;
+    try {
+        const result = await pool.query(
+            'SELECT quantidade FROM caixas WHERE cliente = $1 AND codigo = $2',
+            [cliente, codigo]
+        );
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, error: '❌ Cliente/Código não encontrado no banco!' });
+        }
+        
+        const qtdDisponivel = parseInt(result.rows[0].quantidade);
+        const qtdSolicitada = parseInt(quantidade);
+        
+        if (qtdDisponivel < qtdSolicitada) {
+            return res.status(400).json({ 
+                success: false, 
+                error: `❌ Quantidade insuficiente! Disponível: ${qtdDisponivel} un. Solicitado: ${qtdSolicitada} un.` 
+            });
+        }
+        
+        res.json({ success: true, quantidadeDisponivel: qtdDisponivel });
+    } catch (err) {
+        res.status(500).json({ success: false, error: 'Erro ao validar' });
     }
 });
 

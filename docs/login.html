@@ -110,6 +110,57 @@
 
         input:focus + i { color: var(--primary); }
 
+        .password-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.password-group input {
+    width: 100%;
+    padding: 15px 45px 15px 45px;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s;
+    background: #fdfdfd;
+    box-sizing: border-box;
+}
+
+.password-group input:focus {
+    border-color: var(--primary);
+    background: #fff;
+    box-shadow: 0 0 15px rgba(255, 144, 39, 0.1);
+}
+
+.password-group i {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+    pointer-events: none;
+    transition: 0.3s;
+}
+
+.password-group i:first-child {
+    left: 15px;
+}
+
+.password-group i:last-child {
+    right: 15px;
+    cursor: pointer;
+    pointer-events: auto;
+    font-size: 0.95rem;
+}
+
+.password-group i:last-child:hover {
+    color: #666;
+}
+
+.password-group input:focus ~ i:first-child {
+    color: var(--primary);
+}
+
         button {
             width: 100%;
             padding: 16px;
@@ -165,9 +216,10 @@
                 <i class="fas fa-user"></i>
             </div>
             
-            <div class="input-group">
-                <input type="password" id="pass" placeholder="Sua senha" required>
+            <div class="password-group">
                 <i class="fas fa-lock"></i>
+                <input type="password" id="pass" placeholder="Sua senha" required>
+                <i class="fas fa-eye" id="btn-show-pass"></i>
             </div>
             
             <button type="submit">Entrar no Sistema</button>
@@ -185,20 +237,28 @@
         <h2>Cadastro de Colaborador</h2>
         
         <form id="form-register">
-            <div class="input-group">
-                <input type="text" id="reg-nome" placeholder="Nome Completo" required>
-                <i class="fas fa-id-card"></i>
-            </div>
-            <div class="input-group">
-                <input type="text" id="reg-user" placeholder="Usuário desejado" required>
-                <i class="fas fa-at"></i>
-            </div>
-            <div class="input-group">
-                <input type="password" id="reg-pass" placeholder="Crie uma senha" required>
-                <i class="fas fa-key"></i>
-            </div>
-            <button type="submit" class="btn-register">Enviar Solicitação</button>
-        </form>
+    <div class="input-group">
+        <input type="text" id="reg-nome" placeholder="Nome Completo" required>
+        <i class="fas fa-id-card"></i>
+    </div>
+    <div class="input-group">
+        <input type="text" id="reg-user" placeholder="Usuário desejado" required>
+        <i class="fas fa-at"></i>
+    </div>
+    <div class="input-group">
+        <input type="text" id="reg-cargo" placeholder="Seu cargo" required>
+        <i class="fas fa-briefcase"></i>
+    </div>
+    <div class="input-group">
+        <input type="password" id="reg-pass" placeholder="Crie uma senha" required>
+        <i class="fas fa-key"></i>
+    </div>
+    <div class="input-group">
+        <input type="password" id="reg-pass-confirm" placeholder="Confirmar senha" required>
+        <i class="fas fa-lock"></i>
+    </div>
+    <button type="submit" class="btn-register">Enviar Solicitação</button>
+</form>
         
         <div class="toggle" onclick="toggleForm()">
             Já tem conta? <span>Voltar ao login</span>
@@ -207,6 +267,54 @@
 
     <script src="util.js"></script>
     <script>
+
+
+// FUNCIONALIDADE: Hold to Show Password
+const passField = document.getElementById('pass');
+const lockIcon = document.querySelector('.password-group i:first-child');
+
+passField.addEventListener('focus', () => {
+    lockIcon.style.color = '#ff9027';
+});
+
+passField.addEventListener('blur', () => {
+    lockIcon.style.color = '#aaa';
+});
+
+const passInput = document.getElementById('pass');
+const eyeIcon = document.getElementById('btn-show-pass');
+
+eyeIcon.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    passInput.type = 'text';
+    eyeIcon.style.color = '#ff9027';
+});
+
+eyeIcon.addEventListener('mouseup', (e) => {
+    e.preventDefault();
+    passInput.type = 'password';
+    eyeIcon.style.color = '#aaa';
+});
+
+eyeIcon.addEventListener('mouseleave', () => {
+    passInput.type = 'password';
+    eyeIcon.style.color = '#aaa';
+});
+
+// Suporte mobile
+eyeIcon.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    passInput.type = 'text';
+    eyeIcon.style.color = '#ff9027';
+});
+
+eyeIcon.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    passInput.type = 'password';
+    eyeIcon.style.color = '#aaa';
+});
+
+
         function toggleForm() {
             const login = document.getElementById('login-box');
             const reg = document.getElementById('register-box');
@@ -259,6 +367,22 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
 // LÓGICA DE REGISTRO
 document.getElementById('form-register').addEventListener('submit', async (e) => {
     e.preventDefault();
+    
+    const senha = document.getElementById('reg-pass').value;
+    const senhaConfirm = document.getElementById('reg-pass-confirm').value;
+    
+    // Validar se as senhas batem
+    if (senha !== senhaConfirm) {
+        tratarErro('Erro', 'As senhas não coincidem!', 'error');
+        return;
+    }
+    
+    // Validar se a senha tem no mínimo 6 caracteres
+    if (senha.length < 6) {
+        tratarErro('Erro', 'A senha deve ter no mínimo 6 caracteres!', 'error');
+        return;
+    }
+    
     try {
         const resp = await fetch('/api/login/registrar', {
             method: 'POST',
@@ -267,7 +391,7 @@ document.getElementById('form-register').addEventListener('submit', async (e) =>
                 nome: document.getElementById('reg-nome').value, 
                 usuario: document.getElementById('reg-user').value, 
                 senha: document.getElementById('reg-pass').value,
-                cargo: 'OPERADOR' // Adicionado caso o banco exija este campo
+                cargo: document.getElementById('reg-cargo').value
             })
         });
         const dados = await resp.json();
@@ -278,13 +402,16 @@ document.getElementById('form-register').addEventListener('submit', async (e) =>
             resp.ok ? 'success' : 'error'
         );
         
-        // Se deu sucesso, fecha o form sem usar .then()
-        if(resp.ok) toggleForm();
+        if(resp.ok) {
+            document.getElementById('form-register').reset();
+            toggleForm();
+        }
 
     } catch (err) {
         tratarErro('Erro', 'Servidor offline.', 'error');
     }
 });
+
     </script>
 </body>
 </html>
