@@ -8,6 +8,23 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// --- SANITIZAÇÃO DE INPUTS (XSS Protection) ---
+function sanitizarInput(texto) {
+    if (!texto) return '';
+    return texto
+        .replace(/[<>\"\']/g, '')
+        .trim()
+        .substring(0, 255);
+}
+
+function sanitizarTextoCompleto(texto) {
+    if (!texto) return '';
+    return texto
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/<[^>]*>/g, '')
+        .trim();
+}
+
 app.use(express.static(__dirname));
 
 // Configuração do Banco de Dados
@@ -68,6 +85,9 @@ app.get('/api/chapas', async (req, res) => {
 app.post('/api/chapas', async (req, res) => {
     const { onda, fornecedor, comprimento, largura, quantidade } = req.body;
     try {
+        if (!onda || !fornecedor || !comprimento || !largura || !quantidade) {
+        return res.status(400).json({ success: false, message: 'Campos obrigatórios: onda, fornecedor, comprimento, largura, quantidade.' });
+    }
         await pool.query(
             'INSERT INTO chapas (onda, fornecedor, comprimento, largura, quantidade) VALUES ($1, $2, $3, $4, $5)',
             [onda, fornecedor, comprimento, largura, quantidade]
@@ -99,20 +119,13 @@ app.put('/api/chapas/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
-// Busca tipos de onda (com hífen)
+// Busca tipos de onda 
+// Busca tipos de onda
 app.get('/api/tipos-onda', async (req, res) => {
     try {
-        const result = await pool.query('SELECT DISTINCT onda FROM chapas');
+        const result = await pool.query('SELECT DISTINCT onda FROM chapas ORDER BY onda ASC');
         res.json(result.rows.map(row => ({ onda: row.onda })));
     } catch (err) { res.status(500).json([]); }
-});
-
-// Busca tipos de onda (com underline)
-app.get('/api/tipos_onda', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT DISTINCT onda FROM chapas');
-        res.json(result.rows);
-    } catch (err) { res.status(500).json({ error: 'Erro no servidor' }); }
 });
 
 // Verifica estoque de uma chapa específica
@@ -130,6 +143,9 @@ app.get('/api/verificar-estoque', async (req, res) => {
 app.post('/api/produzir', async (req, res) => {
     const { cliente, referencia, tipo_onda, largura_chapa, comprimento_chapa, qtd_chapas_necessarias, qtd_programada, medida } = req.body;
     try {
+        if (!cliente || !tipo_onda || !largura_chapa || !comprimento_chapa || !qtd_chapas_necessarias || !qtd_programada) {
+        return res.status(400).json({ success: false, message: 'Campos obrigatórios: cliente, tipo_onda, largura_chapa, comprimento_chapa, qtd_chapas_necessarias, qtd_programada.' });
+    }
         await pool.query('BEGIN');
         const updateEstoque = await pool.query(`UPDATE chapas SET quantidade = quantidade - $1 WHERE TRIM(UPPER(onda)) = TRIM(UPPER($2)) AND largura = $3 AND comprimento = $4`, [qtd_chapas_necessarias, tipo_onda, largura_chapa, comprimento_chapa]);
         if (updateEstoque.rowCount === 0) throw new Error("Estoque insuficiente");
@@ -145,13 +161,46 @@ app.post('/api/produzir', async (req, res) => {
 // Rota alternativa de produção
 app.post('/api/producao', async (req, res) => {
     const { cliente, referencia, tipoOnda, quantidade } = req.body;
+
+    if (!cliente || !tipoOnda || !quantidade) {
+        return res.status(400).json({ success: false, message: 'Campos obrigatórios: cliente, tipoOnda, quantidade.' });
+    }
+
     try {
         await pool.query('BEGIN');
-        await pool.query(`INSERT INTO pedidos (cliente, referencia, tipo_onda, qtd_programado, status) VALUES ($1, $2, $3, $4, 'CONCLUSÃO')`, [cliente, referencia, tipoOnda, quantidade]);
-        await pool.query('UPDATE chapas SET quantidade = quantidade - $1 WHERE nome = $2', [quantidade, tipoOnda]);
+
+        const estoqueAtual = await pool.query(
+            'SELECT quantidade FROM chapas WHERE nome = $1',
+            [tipoOnda]
+        );
+
+        if (estoqueAtual.rows.length === 0) {
+            await pool.query('ROLLBACK');
+            return res.status(400).json({ success: false, message: 'Tipo de onda não encontrado no estoque.' });
+        }
+
+        if (estoqueAtual.rows[0].quantidade < quantidade) {
+            await pool.query('ROLLBACK');
+            return res.status(400).json({ success: false, message: `Estoque insuficiente. Disponível: ${estoqueAtual.rows[0].quantidade}` });
+        }
+
+        await pool.query(
+            `INSERT INTO pedidos (cliente, referencia, tipo_onda, qtd_programado, status) VALUES ($1, $2, $3, $4, 'CONCLUSÃO')`,
+            [cliente, referencia, tipoOnda, quantidade]
+        );
+
+        await pool.query(
+            'UPDATE chapas SET quantidade = quantidade - $1 WHERE nome = $2',
+            [quantidade, tipoOnda]
+        );
+
         await pool.query('COMMIT');
         res.json({ success: true });
-    } catch (err) { await pool.query('ROLLBACK'); res.status(500).json({ success: false }); }
+
+    } catch (err) {
+        await pool.query('ROLLBACK');
+        res.status(500).json({ success: false, message: err.message });
+    }
 });
 
 // --- ROTAS DE EXPEDIÇÃO E CONFERÊNCIA ---
@@ -168,15 +217,43 @@ app.get('/api/pedidos-recentes', async (req, res) => {
 // - - CONFERENCIA E ENVIA PARA + CAIXAS - - // 
 app.post('/api/conferir-pedido', async (req, res) => {
     const { id, qtd_conferida, responsavel } = req.body;
+
+    if (!id || !qtd_conferida || !responsavel) {
+        return res.status(400).json({ success: false, message: 'Campos obrigatórios: id, qtd_conferida, responsavel.' });
+    }
+
     try {
         await pool.query('BEGIN');
-        const resPedido = await pool.query(`UPDATE pedidos SET status = 'CONCLUÍDO', qtd_conferida = $1, responsavel = $2 WHERE id = $3 RETURNING *`, [qtd_conferida, responsavel, id]);
+
+        const resPedido = await pool.query(
+            `UPDATE pedidos SET status = 'CONCLUÍDO', qtd_conferida = $1, responsavel = $2 WHERE id = $3 RETURNING *`,
+            [qtd_conferida, responsavel, id]
+        );
+
+        if (resPedido.rows.length === 0) {
+            await pool.query('ROLLBACK');
+            return res.status(404).json({ success: false, message: 'Pedido não encontrado.' });
+        }
+
         const pedido = resPedido.rows[0];
-        await pool.query(`INSERT INTO caixas (cliente, codigo, quantidade, data_fabricacao, responsavel) VALUES ($1, $2, $3, NOW(), $4) ON CONFLICT (cliente, codigo) DO UPDATE SET quantidade = caixas.quantidade + EXCLUDED.quantidade`, [pedido.cliente, pedido.referencia || 'S/ REF', qtd_conferida, responsavel]);
-        await pool.query(`INSERT INTO movimentacoes (tipo, descricao, quantidade, responsavel, data) VALUES ($1, $2, $3, $4, NOW())`, ['ENTRADA ESTOQUE', `Produção: ${pedido.referencia}`, qtd_conferida, responsavel]);
+
+        await pool.query(
+            `INSERT INTO caixas (cliente, codigo, quantidade, data_fabricacao, responsavel) VALUES ($1, $2, $3, NOW(), $4) ON CONFLICT (cliente, codigo) DO UPDATE SET quantidade = caixas.quantidade + EXCLUDED.quantidade`,
+            [pedido.cliente, pedido.referencia || 'S/ REF', qtd_conferida, responsavel]
+        );
+
+        await pool.query(
+            `INSERT INTO movimentacoes (tipo, descricao, quantidade, responsavel, data) VALUES ($1, $2, $3, $4, NOW())`,
+            ['ENTRADA ESTOQUE', `Produção: ${pedido.referencia}`, qtd_conferida, responsavel]
+        );
+
         await pool.query('COMMIT');
         res.json({ success: true });
-    } catch (error) { await pool.query('ROLLBACK'); res.status(500).json({ success: false }); }
+
+    } catch (error) {
+        await pool.query('ROLLBACK');
+        res.status(500).json({ success: false, message: error.message });
+    }
 });
 
 // --- ROTAS DE CAIXAS (PRODUTO ACABADO) ---
@@ -206,7 +283,13 @@ app.post('/api/registrar-caixa', async (req, res) => {
 app.post('/api/ajustar-estoque', async (req, res) => {
     const { id, mudanca } = req.body;
     try {
-        await pool.query('UPDATE caixas SET quantidade = quantidade + $1 WHERE id = $2', [mudanca, id]);
+        const result = await pool.query(
+            'UPDATE caixas SET quantidade = quantidade + $1 WHERE id = $2 AND (quantidade + $1) >= 0',
+            [mudanca, id]
+        );
+        if (result.rowCount === 0) {
+            return res.status(400).json({ success: false, message: 'Estoque insuficiente para esse ajuste.' });
+        }
         res.json({ success: true });
     } catch (err) { res.status(500).json({ success: false }); }
 });
@@ -221,9 +304,12 @@ app.post('/api/caixas/editar', async (req, res) => {
 
 app.delete('/api/caixas/:id', async (req, res) => {
     try {
-        await pool.query('DELETE FROM caixas WHERE id = $1', [req.params.id]);
+        const result = await pool.query('DELETE FROM caixas WHERE id = $1', [req.params.id]);
+        if (result.rowCount === 0) {
+            return res.status(404).json({ success: false, message: 'Caixa não encontrada.' });
+        }
         res.json({ success: true });
-    } catch (error) { res.status(500).json({ success: false }); }
+    } catch (error) { res.status(500).json({ success: false, message: error.message }); }
 });
 
 // --- ROTAS DE DASHBOARD E RELATÓRIOS ---
@@ -362,24 +448,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// --- SANITIZAÇÃO DE INPUTS (XSS Protection) ---
-function sanitizarInput(texto) {
-    if (!texto) return '';
-    
-    return texto
-        .replace(/[<>\"\']/g, '') // Remove caracteres perigosos
-        .trim()
-        .substring(0, 255); // Limita tamanho
-}
-
-function sanitizarTextoCompleto(texto) {
-    if (!texto) return '';
-    
-    return texto
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Remove scripts
-        .replace(/<[^>]*>/g, '') // Remove todas as tags HTML
-        .trim();
-}
 
 const nodemailer = require('nodemailer');
 
@@ -394,6 +462,7 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
         }
     });
 }
+
 // - - sistema de registro de usuario - - //
 app.post('/api/login/registrar', async (req, res) => {
     const { nome, usuario, senha, cargo } = req.body;
@@ -472,6 +541,9 @@ app.get('/api/movimentacoes', async (req, res) => {
 app.post('/api/registrar-entrada', async (req, res) => {
     const { onda, comprimento, largura, fornecedor, quantidade, usuario } = req.body;
     try {
+        if (!onda || !comprimento || !largura || !fornecedor || !quantidade || !usuario) {
+        return res.status(400).json({ success: false, message: 'Campos obrigatórios: onda, comprimento, largura, fornecedor, quantidade, usuario.' });
+    }
         // Sanitizar inputs
         const ondaLimpa = sanitizarInput(onda);
         const fornecedorLimpo = sanitizarInput(fornecedor);
@@ -501,7 +573,7 @@ app.get('/api/entrada-chapas-hoje', async (req, res) => {
 
 // --- LOGS ADMIN ---
 app.get('/api/admin/logs', (req, res) => {
-    if (req.query.senha !== "0") return res.status(403).send("⛔ Negado");
+    if (req.query.senha !== process.env.ADMIN_LOG_SENHA) return res.status(403).send("⛔ Negado");
     const caminhoLog = path.join(__dirname, 'sistema.log');
     fs.readFile(caminhoLog, 'utf8', (err, data) => {
         if (err) return res.send("Sem logs.");
