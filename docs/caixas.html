@@ -318,16 +318,66 @@ async function editarCaixa(id, clienteAt, codigoAt, qtdAt, dataAt, respAt) {
         });
         document.addEventListener('click', () => menu.style.display = 'none');
 
-        async function executarAcaoContexto(acao) {
-            if (!itemSelecionadoId) return;
-            if (acao === 'excluir') {
-                const confirm = await Swal.fire({ title: 'Excluir?', icon: 'warning', showCancelButton: true });
-                if (confirm.isConfirmed) {
-                    await fetch(`${API_BASE}/caixas/${itemSelecionadoId}`, { method: 'DELETE' });
-                    carregarCaixas();
-                }
+       async function executarAcaoContexto(acao) {
+    if (!itemSelecionadoId) return;
+
+    // Pega os dados da linha selecionada direto da tabela
+    const linha = document.querySelector(`#tabela-corpo-caixas tr[data-id="${itemSelecionadoId}"]`);
+    if (!linha) return;
+
+    const cells = linha.querySelectorAll('td');
+    const cliente = cells[0].innerText.trim();
+    const codigo = cells[1].innerText.trim();
+    const quantidade = parseInt(cells[2].innerText.trim());
+    const dataFab = cells[3].innerText.trim().split('/').reverse().join('-');
+    const responsavel = cells[4].innerText.trim();
+
+    if (acao === 'editar') {
+        editarCaixa(itemSelecionadoId, cliente, codigo, quantidade, dataFab, responsavel);
+    }
+
+    if (acao === 'excluir') {
+        const confirm = await Swal.fire({
+            title: 'Excluir registro?',
+            html: `Tem certeza que deseja excluir o registro da caixa de <strong>${cliente}</strong>?<br><br>
+                   <span style="color:#e74c3c;font-size:13px;">Você terá que adicionar novamente para ela existir no sistema.</span>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e74c3c',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sim, excluir!',
+            cancelButtonText: 'Cancelar'
+        });
+        if (confirm.isConfirmed) {
+            try {
+                const resp = await fetch(`/api/caixas/${itemSelecionadoId}`, { method: 'DELETE' });
+                const body = await resp.json();
+                if (!resp.ok || !body.success) throw new Error(body.message || 'Erro ao excluir');
+                carregarCaixas();
+                Swal.fire('Excluído!', 'O registro foi removido do sistema.', 'success');
+            } catch (err) {
+                tratarErro('Erro ao excluir caixa', err);
             }
         }
+    }
+
+    if (acao === 'detalhes') {
+        Swal.fire({
+            title: `Detalhes — ${cliente}`,
+            html: `
+                <div style="text-align:left;line-height:2;">
+                    <p><strong>Cliente:</strong> ${cliente}</p>
+                    <p><strong>Código:</strong> ${codigo}</p>
+                    <p><strong>Quantidade:</strong> ${quantidade} un</p>
+                    <p><strong>Fabricação:</strong> ${cells[3].innerText.trim()}</p>
+                    <p><strong>Responsável:</strong> ${responsavel}</p>
+                </div>`,
+            icon: 'info',
+            confirmButtonText: 'Fechar'
+        });
+    }
+}
+
     </script>
 </body>
 </html>

@@ -119,7 +119,6 @@ app.put('/api/chapas/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ success: false }); }
 });
 
-// Busca tipos de onda 
 // Busca tipos de onda
 app.get('/api/tipos-onda', async (req, res) => {
     try {
