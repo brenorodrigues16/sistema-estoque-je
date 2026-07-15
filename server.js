@@ -571,6 +571,56 @@ app.get('/api/entrada-chapas-hoje', async (req, res) => {
 });
 
 // --- LOGS ADMIN ---
+
+
+// --- ROTAS DE USUÁRIOS ---
+app.get('/api/usuarios', async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT id, nome, usuario, cargo, status FROM usuarios ORDER BY status ASC, nome ASC'
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/usuarios/status', async (req, res) => {
+    const { id, status } = req.body;
+    if (!id || !status) {
+        return res.status(400).json({ success: false, message: 'Campos obrigatórios: id, status.' });
+    }
+    const statusValidos = ['ATIVO', 'PENDENTE', 'BLOQUEADO'];
+    if (!statusValidos.includes(status)) {
+        return res.status(400).json({ success: false, message: 'Status inválido.' });
+    }
+    try {
+        const result = await pool.query(
+            'UPDATE usuarios SET status = $1 WHERE id = $2',
+            [status, id]
+        );
+        if (result.rowCount === 0) {
+            return res.status(404).json({ success: false, message: 'Usuário não encontrado.' });
+        }
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+app.delete('/api/chapas/:id', async (req, res) => {
+    try {
+        const result = await pool.query('DELETE FROM chapas WHERE id = $1', [req.params.id]);
+        if (result.rowCount === 0) {
+            return res.status(404).json({ success: false, message: 'Chapa não encontrada.' });
+        }
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+
 app.get('/api/admin/logs', (req, res) => {
     if (req.query.senha !== process.env.ADMIN_LOG_SENHA) return res.status(403).send("⛔ Negado");
     const caminhoLog = path.join(__dirname, 'sistema.log');

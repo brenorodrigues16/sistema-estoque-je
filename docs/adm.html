@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <script>
+        const temaSalvo = localStorage.getItem('tema') || 'claro';
+        document.documentElement.setAttribute('data-theme', temaSalvo);
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel ADM - J&E</title>
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .adm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; padding: 24px; }
+        .adm-card { background: var(--card-bg, white); border-radius: 14px; padding: 22px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+        [data-theme="dark"] .adm-card { background: #1e1e1e; }
+        .adm-card-titulo { font-size: 14px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 2px solid #f0f0f0; }
+        [data-theme="dark"] .adm-card-titulo { border-bottom-color: #333; }
+        .adm-card-titulo i { color: #2ecc71; }
+        .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13px; }
+        [data-theme="dark"] .stat-row { border-bottom-color: rgba(255,255,255,0.05); }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-valor { font-weight: 700; font-size: 16px; }
+        .usuario-card { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; border: 1px solid #f0f0f0; margin-bottom: 8px; }
+        [data-theme="dark"] .usuario-card { border-color: #2a2a2a; }
+        .usuario-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; }
+        .av-pendente { background: #fff3e0; color: #f39c12; }
+        .av-ativo { background: #e8f8f0; color: #27ae60; }
+        .av-bloqueado { background: #fdecea; color: #e74c3c; }
+        .usuario-info { flex: 1; }
+        .usuario-nome { font-weight: 600; font-size: 13px; }
+        .usuario-cargo { font-size: 11px; color: #999; }
+        .badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+        .b-pendente { background: rgba(243,156,18,0.15); color: #f39c12; }
+        .b-ativo { background: rgba(46,204,113,0.15); color: #27ae60; }
+        .b-bloqueado { background: rgba(231,76,60,0.15); color: #e74c3c; }
+        .acoes { display: flex; gap: 4px; }
+        .btn-a { padding: 4px 9px; border: none; border-radius: 5px; font-size: 11px; font-weight: 600; cursor: pointer; }
+        .btn-aprovar { background: rgba(46,204,113,0.15); color: #27ae60; }
+        .btn-bloquear { background: rgba(231,76,60,0.1); color: #e74c3c; }
+        .btn-ativar { background: rgba(52,152,219,0.1); color: #3498db; }
+        .log-linha { font-family: monospace; font-size: 11px; padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.04); color: var(--text, #333); }
+        [data-theme="dark"] .log-linha { color: #ccc; border-bottom-color: rgba(255,255,255,0.04); }
+        .log-error { color: #e74c3c !important; }
+        .log-info { color: #3498db !important; }
+        .empty { text-align: center; color: #bbb; padding: 20px; font-size: 13px; }
+        .btn-atualizar { background: #3498db; color: white; border: none; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; }
+        .alerta-card { background: rgba(231,76,60,0.07); border: 1px solid rgba(231,76,60,0.2); border-radius: 10px; padding: 14px; margin-bottom: 8px; }
+        .alerta-titulo { font-weight: 700; font-size: 13px; color: #e74c3c; margin-bottom: 4px; }
+        .alerta-desc { font-size: 12px; color: #888; }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <aside class="sidebar">
+        <div class="logo"><i class="fas fa-box-open"></i> J&E Embalagens LTDA</div>
+        <nav>
+            <ul>
+                <li class="menu-item" onclick="window.location.href='index.html'"><i class="fas fa-th-large"></i> Dashboard</li>
+                <li class="menu-item" onclick="window.location.href='chapas.html'"><i class="fas fa-layer-group"></i> Chapas</li>
+                <li class="menu-item" onclick="window.location.href='caixas.html'"><i class="fas fa-boxes"></i> Caixas Prontas</li>
+                <li class="menu-item" onclick="window.location.href='producao.html'"><i class="fas fa-industry"></i> Produção</li>
+                <li class="menu-item" onclick="window.location.href='movimentacoes.html'"><i class="fas fa-exchange-alt"></i> Movimentações</li>
+                <li class="menu-item" onclick="window.location.href='perfil.html'"><i class="fas fa-user"></i> Perfil</li>
+                <li class="menu-item" onclick="window.location.href='expedicao.html'"><i class="fas fa-clipboard-list"></i> Expedição</li>
+                <li class="menu-item" onclick="window.location.href='entrada_chapas.html'"><i class="fas fa-truck-loading"></i> Entrada de Chapas</li>
+                <li class="menu-item" onclick="window.location.href='saidas.html'"><i class="fas fa-truck-moving"></i> Saídas/Entregas</li>
+                <li class="menu-item active" onclick="window.location.href='adm.html'"><i class="fas fa-shield-alt"></i> Painel ADM</li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:0 20px;">
+            <div class="user-info">
+                <div class="avatar" id="avatar-sidebar">A</div>
+                <div>
+                    <p class="username" id="nome-sidebar">Admin</p>
+                    <p class="role">ADM</p>
+                </div>
+            </div>
+            <div class="logout-container">
+                <button onclick="fazerLogout()" class="btn-logout-red"><i class="fas fa-sign-out-alt"></i> SAIR DO SISTEMA</button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="content">
+        <header class="top-bar">
+            <strong>PAINEL DO ADMINISTRADOR</strong>
+            <strong id="data-atual"></strong>
+        </header>
+
+        <div class="adm-grid">
+
+            <!-- CARD: USUÁRIOS PENDENTES -->
+            <div class="adm-card">
+                <div class="adm-card-titulo"><i class="fas fa-user-clock"></i> Cadastros pendentes</div>
+                <div id="lista-pendentes"><div class="empty">Carregando...</div></div>
+            </div>
+
+            <!-- CARD: TODOS OS USUÁRIOS -->
+            <div class="adm-card">
+                <div class="adm-card-titulo"><i class="fas fa-users"></i> Todos os usuários</div>
+                <div id="lista-todos"><div class="empty">Carregando...</div></div>
+            </div>
+
+            <!-- CARD: ALERTAS DO SISTEMA -->
+            <div class="adm-card">
+                <div class="adm-card-titulo"><i class="fas fa-exclamation-triangle"></i> Alertas do sistema</div>
+                <div id="lista-alertas"><div class="empty">Carregando...</div></div>
+            </div>
+
+            <!-- CARD: ESTATÍSTICAS -->
+            <div class="adm-card">
+                <div class="adm-card-titulo"><i class="fas fa-chart-bar"></i> Visão geral</div>
+                <div id="stats-sistema"><div class="empty">Carregando...</div></div>
+            </div>
+
+            <!-- CARD: LOGS RECENTES -->
+            <div class="adm-card" style="grid-column: 1 / -1;">
+                <div class="adm-card-titulo" style="justify-content:space-between;">
+                    <span><i class="fas fa-terminal"></i> Logs recentes do sistema</span>
+                    <button class="btn-atualizar" onclick="carregarLogs()"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                </div>
+                <div id="lista-logs"><div class="empty">Carregando...</div></div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<script src="util.js"></script>
+<script>
+    // Bloqueia acesso se não for ADM
+    window.addEventListener('DOMContentLoaded', () => {
+        const cargo = (localStorage.getItem('cargo') || '').toUpperCase();
+        const logado = localStorage.getItem('logado');
+
+        if (logado !== 'true' || cargo !== 'ADM') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Acesso negado',
+                text: 'Esta página é exclusiva para administradores.',
+                confirmButtonColor: '#e74c3c'
+            }).then(() => window.location.href = 'index.html');
+            return;
+        }
+
+        const nome = localStorage.getItem('usuario') || 'Admin';
+        document.getElementById('nome-sidebar').innerText = nome;
+        document.getElementById('avatar-sidebar').innerText = nome.charAt(0).toUpperCase();
+        document.getElementById('data-atual').innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+        carregarUsuarios();
+        carregarAlertas();
+        carregarStats();
+        carregarLogs();
+    });
+
+    async function carregarUsuarios() {
+        try {
+            const res = await fetch('/api/usuarios');
+            const usuarios = await res.json();
+
+            const pendentes = usuarios.filter(u => u.status === 'PENDENTE');
+            const outros = usuarios.filter(u => u.status !== 'PENDENTE');
+
+            document.getElementById('lista-pendentes').innerHTML = pendentes.length === 0
+                ? '<div class="empty"><i class="fas fa-check-circle" style="color:#2ecc71"></i><br>Nenhum cadastro pendente!</div>'
+                : pendentes.map(u => cardUsuario(u)).join('');
+
+            document.getElementById('lista-todos').innerHTML = outros.length === 0
+                ? '<div class="empty">Nenhum usuário ativo.</div>'
+                : outros.map(u => cardUsuario(u)).join('');
+        } catch {
+            document.getElementById('lista-pendentes').innerHTML = '<div class="empty" style="color:#e74c3c;">Erro ao carregar.</div>';
+        }
+    }
+
+    function cardUsuario(u) {
+        const inicial = (u.nome || '?').charAt(0).toUpperCase();
+        const avClass = u.status === 'PENDENTE' ? 'av-pendente' : u.status === 'BLOQUEADO' ? 'av-bloqueado' : 'av-ativo';
+        const bClass = u.status === 'PENDENTE' ? 'b-pendente' : u.status === 'BLOQUEADO' ? 'b-bloqueado' : 'b-ativo';
+        let botoes = '';
+        if (u.status === 'PENDENTE') {
+            botoes = `<button class="btn-a btn-aprovar" onclick="alterarStatus(${u.id},'ATIVO')"><i class="fas fa-check"></i> Aprovar</button>
+                      <button class="btn-a btn-bloquear" onclick="alterarStatus(${u.id},'BLOQUEADO')"><i class="fas fa-ban"></i> Rejeitar</button>`;
+        } else if (u.status === 'ATIVO') {
+            botoes = `<button class="btn-a btn-bloquear" onclick="alterarStatus(${u.id},'BLOQUEADO')"><i class="fas fa-ban"></i> Bloquear</button>`;
+        } else {
+            botoes = `<button class="btn-a btn-ativar" onclick="alterarStatus(${u.id},'ATIVO')"><i class="fas fa-unlock"></i> Ativar</button>`;
+        }
+        return `<div class="usuario-card">
+            <div class="usuario-avatar ${avClass}">${inicial}</div>
+            <div class="usuario-info">
+                <div class="usuario-nome">${u.nome || '—'}</div>
+                <div class="usuario-cargo">${u.cargo || '—'} · @${u.usuario}</div>
+            </div>
+            <span class="badge ${bClass}">${u.status}</span>
+            <div class="acoes">${botoes}</div>
+        </div>`;
+    }
+
+    async function alterarStatus(id, novoStatus) {
+        const acao = novoStatus === 'ATIVO' ? 'aprovar/ativar' : 'bloquear';
+        const confirm = await Swal.fire({
+            title: 'Confirmar',
+            text: `Deseja ${acao} este usuário?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sim',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: novoStatus === 'ATIVO' ? '#2ecc71' : '#e74c3c'
+        });
+        if (!confirm.isConfirmed) return;
+        try {
+            const res = await fetch('/api/usuarios/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, status: novoStatus })
+            });
+            if (res.ok) {
+                Swal.fire({ icon: 'success', title: 'Atualizado!', timer: 1200, showConfirmButton: false });
+                carregarUsuarios();
+            } else {
+                Swal.fire('Erro', 'Não foi possível atualizar.', 'error');
+            }
+        } catch {
+            Swal.fire('Erro', 'Falha ao conectar com o servidor.', 'error');
+        }
+    }
+
+    async function carregarAlertas() {
+        try {
+            const res = await fetch('/api/dashboard-stats');
+            const stats = await res.json();
+            const alertas = [];
+
+            if (parseInt(stats.alertasCriticosChapas) > 0)
+                alertas.push({ titulo: `${stats.alertasCriticosChapas} tipo(s) de chapa com estoque baixo`, desc: 'Quantidade igual ou inferior a 500 unidades' });
+            if (parseInt(stats.alertasCriticosCaixas) > 0)
+                alertas.push({ titulo: `${stats.alertasCriticosCaixas} tipo(s) de caixa com estoque baixo`, desc: 'Quantidade igual ou inferior a 100 unidades' });
+
+            document.getElementById('lista-alertas').innerHTML = alertas.length === 0
+                ? '<div class="empty"><i class="fas fa-check-circle" style="color:#2ecc71"></i><br>Nenhum alerta crítico!</div>'
+                : alertas.map(a => `<div class="alerta-card"><div class="alerta-titulo"><i class="fas fa-exclamation-circle"></i> ${a.titulo}</div><div class="alerta-desc">${a.desc}</div></div>`).join('');
+        } catch {
+            document.getElementById('lista-alertas').innerHTML = '<div class="empty" style="color:#e74c3c;">Erro ao carregar alertas.</div>';
+        }
+    }
+
+    async function carregarStats() {
+        try {
+            const res = await fetch('/api/dashboard-stats');
+            const s = await res.json();
+            document.getElementById('stats-sistema').innerHTML = `
+                <div class="stat-row"><span>Chapas em estoque</span><span class="stat-valor">${Number(s.estoqueChapas).toLocaleString('pt-BR')} un</span></div>
+                <div class="stat-row"><span>Caixas em estoque</span><span class="stat-valor">${Number(s.estoqueCaixas).toLocaleString('pt-BR')} un</span></div>
+                <div class="stat-row"><span>Produção hoje</span><span class="stat-valor">${Number(s.producaoHoje || 0).toLocaleString('pt-BR')} un</span></div>
+                <div class="stat-row"><span>Chapas recebidas hoje</span><span class="stat-valor">${Number(s.chapasRecebidasHoje || 0).toLocaleString('pt-BR')} un</span></div>
+                <div class="stat-row"><span>Alertas críticos chapas</span><span class="stat-valor" style="color:#e74c3c;">${s.alertasCriticosChapas}</span></div>
+                <div class="stat-row"><span>Alertas críticos caixas</span><span class="stat-valor" style="color:#e74c3c;">${s.alertasCriticosCaixas}</span></div>`;
+        } catch {
+            document.getElementById('stats-sistema').innerHTML = '<div class="empty" style="color:#e74c3c;">Erro ao carregar stats.</div>';
+        }
+    }
+
+    async function carregarLogs() {
+        try {
+            const senha = process.env?.ADMIN_LOG_SENHA || '';
+            const res = await fetch(`/api/admin/logs?senha=${encodeURIComponent(localStorage.getItem('adminSenha') || '')}`);
+            if (res.status === 403) {
+                document.getElementById('lista-logs').innerHTML = '<div class="empty" style="color:#e74c3c;"><i class="fas fa-lock"></i> Configure a senha de logs no .env para visualizar aqui.</div>';
+                return;
+            }
+            const texto = await res.text();
+            const linhas = texto.replace(/<[^>]+>/g, '').trim().split('\n').filter(Boolean).slice(-30).reverse();
+            document.getElementById('lista-logs').innerHTML = linhas.map(linha => {
+                const classeLog = linha.includes('[ERROR]') ? 'log-error' : linha.includes('[INFO]') ? 'log-info' : '';
+                return `<div class="log-linha ${classeLog}">${linha}</div>`;
+            }).join('');
+        } catch {
+            document.getElementById('lista-logs').innerHTML = '<div class="empty" style="color:#e74c3c;">Erro ao carregar logs.</div>';
+        }
+    }
+
+    function fazerLogout() {
+        Swal.fire({
+            title: 'Deseja sair?', text: 'Sua sessão será encerrada.', icon: 'warning',
+            showCancelButton: true, confirmButtonColor: '#e74c3c', cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sim, sair!', cancelButtonText: 'Cancelar'
+        }).then(result => {
+            if (result.isConfirmed) { localStorage.clear(); window.location.href = 'login.html'; }
+        });
+    }
+</script>
+</body>
+</html>
